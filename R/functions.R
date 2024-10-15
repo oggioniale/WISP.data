@@ -1,0 +1,186 @@
+#' Get data of reflectance (level2) from WISP station
+#' @description `r lifecycle::badge("experimental")`
+#' This function obtains the data of reflectance from WISP station.
+#' @param version A `character`. It is the version of the API data. Default
+#' is "1.0"
+#' @param time_from A `character`. It is the time  
+#' @param time_to A `character`. It is the time
+#' @param station A `character`.  It is the name of the station.
+#' @param userid A `character`. It is the userid.
+#' @param pwd A `character`. It is the password.
+#' @return A tibble with measurement id, measurement date, instrument name,
+#' waterquality values of TSM, Chla and Kd as provided by instrument by default,
+#' and all the values of reflectance for each wevelength from 350 to 900 nm.
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @importFrom httr2 request req_url_query req_auth_basic req_perform
+#' @importFrom httr2 resp_body_string
+#' @importFrom tibble::as_tibble
+#' @importFrom dplyr slice mutate across starts_with rename_with
+#' @importFrom tidyr unnest_wider
+#' @importFrom lubridate as_datetime
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+#' ## Not run:
+#' # na data
+#' reflec_data <- wisp_get_reflectance_data(
+#'   time_from = "2024-09-01T09:00",
+#'   time_to = "2024-09-01T14:00",
+#'   station = "WISPstation012",
+#'   userid = "xxx",
+#'   pwd = "xxx"
+#' )
+#' 
+#' # with data
+#' reflec_data <- wisp_get_reflectance_data(
+#'   time_from = "2024-08-01T09:00",
+#'   time_to = "2024-08-01T14:00",
+#'   station = "WISPstation012",
+#'   userid = "xxx",
+#'   pwd = "xxx"
+#' )
+#' 
+#' }
+#' ## End (Not run)
+#' 
+### wisp_get_reflectance_data
+wisp_get_reflectance_data <- function(
+    version = "1.0",
+    time_from = NULL,
+    time_to = NULL,
+    station = NULL,
+    userid = NULL,
+    pwd = NULL
+) {
+  response <- httr2::request("https://wispcloud.waterinsight.nl/api/query") |> 
+    httr2::req_url_query(
+      SERVICE = "data",
+      VERSION = version,
+      REQUEST = "GetData",
+      INSTRUMENT = station,
+      TIME = paste(time_from, time_to, sep = ","),
+      INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,level2.reflectance"
+    ) |> 
+    httr2::req_auth_basic(userid, pwd) |>
+    httr2::req_perform(verbosity = 3)
+  
+    # the data is in Content-Type: text/plain format
+    spectral_data <- httr2::resp_body_string(response, encoding = "UTF-8")
+    
+    df <- read.table(text = spectral_data, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+    df$level2.reflectance <- gsub("\\[|\\]", "", df$level2.reflectance)
+    df$level2.reflectance <- strsplit(df$level2.reflectance, ",")
+    
+    if (df$measurement.id[2] == "-1") {
+      reflectance_data_tbl <- NULL
+      message("\n----\nThank you for your request, but the instrument does not acquire data on this date.\n----\n")
+    } else {
+      reflectance_data_tbl <- tibble::as_tibble(df) |>
+        dplyr::slice(-1) |>
+        tidyr::unnest_wider(
+          col = level2.reflectance,
+          names_sep = ("_")
+        ) |>
+        dplyr::mutate(
+          dplyr::across(
+            dplyr::starts_with("level2.reflectance_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
+          ),
+          dplyr::across(
+            dplyr::starts_with("waterquality."), ~ as.numeric(as.character(.))
+          ),
+          measurement.date = lubridate::as_datetime(measurement.date),
+          waterquality.tsm = units::set_units(waterquality.tsm, "g/m3"),
+          waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
+          waterquality.kd = units::set_units(waterquality.kd, "1/m"),
+        ) |>
+        dplyr::rename_with(
+          ~ stringr::str_c(
+            # 'level2.reflectance_nm_',
+            "nm_",
+            350:900
+          ),
+          dplyr::starts_with("level2.reflectance_")
+        )
+    }
+    reflectance_data_tbl
+}
+
+#' Quality check (QC) for WISP station reflectance data
+#' @description
+#' A short description...
+#' @description `r lifecycle::badge("experimental")`
+#' @param data A `tibble`. From wisp_get_reflectance_data() function.
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom package function
+#' @export
+#' @examples
+#' # example code
+#' qc_reflectance_data(data = reflectance_data)
+#' 
+### qc_reflectance_data
+qc_reflectance_data <- function(data) {
+  
+}
+
+#' Create a plot of reflectance data
+#' @description
+#' This function return a plotly of each spectral signature measured by a WISP
+#' station.
+#' @description `r lifecycle::badge("experimental")`
+#' @param data A `tibble`. From wisp_get_reflectance_data() function.
+#' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom dplyr mutate
+#' @importFrom plotly plot_ly layout
+#' @export
+#' @examples
+#' # example code
+#' plot_reflectance_data(data = reflec_data)
+#' 
+### plot_reflectance_data
+plot_reflectance_data <- function(data) {
+  data_2 <- data %>%
+    dplyr::select(measurement.date, starts_with("nm_"), waterquality.tsm, waterquality.chla, waterquality.kd) %>%
+    tidyr::pivot_longer(
+      cols = starts_with("nm_"),
+      names_to = "wavelength",
+      values_to = "Rrs"
+    ) %>%
+    # Converti il nome della lunghezza d'onda in formato numerico
+    dplyr::mutate(
+      wavelength = as.numeric(gsub("nm_", "", wavelength)),
+      measurement_info = as.factor(
+        paste0(
+          "Time: ", substr(measurement.date, 12, 20),
+          "\nTSM [g/m3]: ", waterquality.tsm,
+          "\nChla [mg/m3]: ", waterquality.chla,
+          "\nKd [1/m]: ", waterquality.kd
+        )
+      )  # Convertiamo in fattore per i colori
+    )
+
+  fig <- plotly::plot_ly(
+    data_2,
+    x = ~wavelength,
+    y = ~Rrs,
+    color = ~measurement_info,
+    type = 'scatter',
+    mode = 'lines'
+  ) |>
+    plotly::layout(
+      title = paste0(
+        "Aquired by: ",
+        data$instrument.name[1],
+        "\non the date: ",
+        substr(data$measurement.date[1], 1, 10)
+      ),
+      # plot_bgcolor = "#e5ecf6",
+      xaxis = list(title = 'Wevelength [nm]'), 
+      yaxis = list(title = 'Rrs [1/sr]'),
+      legend = list(title = list(text = '<b>Time of aquisition</b>'))
+    )
+  
+  fig
+}
