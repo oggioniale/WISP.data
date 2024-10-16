@@ -23,13 +23,13 @@
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' # na data
+#' # NA data
 #' reflec_data <- wisp_get_reflectance_data(
 #'   time_from = "2024-09-01T09:00",
 #'   time_to = "2024-09-01T14:00",
 #'   station = "WISPstation012",
-#'   userid = "xxx",
-#'   pwd = "xxx"
+#'   userid = userid,
+#'   pwd = pwd
 #' )
 #' 
 #' # with data
@@ -37,8 +37,8 @@
 #'   time_from = "2024-08-01T09:00",
 #'   time_to = "2024-08-01T14:00",
 #'   station = "WISPstation012",
-#'   userid = "xxx",
-#'   pwd = "xxx"
+#'   userid = userid,
+#'   pwd = pwd
 #' )
 #' 
 #' }
@@ -141,13 +141,13 @@ qc_reflectance_data <- function(data) {
 #' 
 ### plot_reflectance_data
 plot_reflectance_data <- function(data) {
-  data_2 <- data %>%
-    dplyr::select(measurement.date, starts_with("nm_"), waterquality.tsm, waterquality.chla, waterquality.kd) %>%
+  data_2 <- data |>
+    dplyr::select(measurement.date, starts_with("nm_"), waterquality.tsm, waterquality.chla, waterquality.kd) |>
     tidyr::pivot_longer(
       cols = starts_with("nm_"),
       names_to = "wavelength",
       values_to = "Rrs"
-    ) %>%
+    ) |>
     # Converti il nome della lunghezza d'onda in formato numerico
     dplyr::mutate(
       wavelength = as.numeric(gsub("nm_", "", wavelength)),
