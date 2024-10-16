@@ -117,7 +117,7 @@ wisp_get_reflectance_data <- function(
 #' @export
 #' @examples
 #' # example code
-#' qc_reflectance_data(data = reflectance_data)
+#' qc_reflectance_data(data = reflec_data)
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
