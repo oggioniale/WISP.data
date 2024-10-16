@@ -14,17 +14,19 @@
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @importFrom httr2 request req_url_query req_auth_basic req_perform
 #' @importFrom httr2 resp_body_string
-#' @importFrom tibble::as_tibble
+#' @importFrom tibble as_tibble
 #' @importFrom dplyr slice mutate across starts_with rename_with
 #' @importFrom tidyr unnest_wider
 #' @importFrom lubridate as_datetime
+#' @importFrom units set_units
+#' @importFrom stringr str_c
 #' @export
 #' @examples
 #' # example code
 #' \dontrun{
 #' ## Not run:
 #' # NA data
-#' reflec_data <- wisp_get_reflectance_data(
+#' reflec_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2024-09-01T09:00",
 #'   time_to = "2024-09-01T14:00",
 #'   station = "WISPstation012",
@@ -33,7 +35,7 @@
 #' )
 #' 
 #' # with data
-#' reflec_data <- wisp_get_reflectance_data(
+#' reflec_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2024-08-01T09:00",
 #'   time_to = "2024-08-01T14:00",
 #'   station = "WISPstation012",
@@ -113,11 +115,10 @@ wisp_get_reflectance_data <- function(
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom package function
 #' @export
 #' @examples
 #' # example code
-#' qc_reflectance_data(data = reflec_data)
+#' WISP.data::qc_reflectance_data(data = reflec_data)
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
@@ -132,17 +133,23 @@ qc_reflectance_data <- function(data) {
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate select
 #' @importFrom plotly plot_ly layout
+#' @importFrom tidyr pivot_longer
 #' @export
 #' @examples
 #' # example code
-#' plot_reflectance_data(data = reflec_data)
+#' WISP.data::plot_reflectance_data(data = reflec_data)
 #' 
 ### plot_reflectance_data
 plot_reflectance_data <- function(data) {
   data_2 <- data |>
-    dplyr::select(measurement.date, starts_with("nm_"), waterquality.tsm, waterquality.chla, waterquality.kd) |>
+    dplyr::select(
+      measurement.date, starts_with("nm_"),
+      waterquality.tsm,
+      waterquality.chla,
+      waterquality.kd
+    ) |>
     tidyr::pivot_longer(
       cols = starts_with("nm_"),
       names_to = "wavelength",

@@ -1,0 +1,21 @@
+Package: WISP.data
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Alessandro", "Oggioni", , "alessandro.oggioni@cnr.it", role = c("aut", "cre", "fnd"),
+           comment = c(ORCID = "0000-0002-7997-219X")),
+    person("Nicola", "Ghirardi", , "nicola.ghirardi@cnr.it", role = c("aut"),
+           comment = c(ORCID = "0000-0002-5006-9853"))
+    )
+Description: What the package does (one paragraph).
+License: `use_gpl3_license()`
+URL: https://github.com/oggioniale/WISP.data
+BugReports: https://github.com/oggioniale/WISP.data/issues
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+  R (>= 2.10)
+Suggests:
+  shiny
