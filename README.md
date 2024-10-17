@@ -1,2 +1,2 @@
 # WISP.data
-This repository to store R functions for downloading, QC and finally visualisation of data from WISP station.
+This repository is designed to store R functions for downloading, performing quality control (QC), and visualizing data from the WISP station.
