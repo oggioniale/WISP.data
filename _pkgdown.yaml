@@ -1,0 +1,20 @@
+title: ReLTER
+url: https://github.com/oggioniale/WISP.data
+template:
+  bootstrap: 5
+  params:
+    mathjax: true
+  includes:
+    in_header: |
+      <script defer data-domain="docs.ropensci.org/relter" src="https://plausible.io/js/plausible.js"></script>
+
+reference:
+  - title: All functions
+    contents:
+    - wisp_get_reflectance_data
+    - qc_reflectance_data
+    - plot_reflectance_data
+navbar:
+  structure:
+    left: [reference]
+    right: [github]

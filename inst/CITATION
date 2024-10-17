@@ -1,0 +1,15 @@
+citHeader("To cite the 'WISP.data' package in publications use:")
+
+year <- format(Sys.Date(), "%Y")
+
+citEntry(entry = "Misc",
+         title = "WISP.data",
+         author = personList(as.person("Alessandro Oggioni"),
+                             as.person("Nicola Ghirardi")),
+         year = year,
+         note = paste("R package version", "v0.0.0.9000"),
+         textVersion =
+         paste("Alessandro Oggioni & Nicola Ghirardi.",
+         " (2024). WISP.data (v0.0.0.9000).",
+         "Zenodo. https://doi.org/10.5281/zenodo.xxxxxx")
+         )

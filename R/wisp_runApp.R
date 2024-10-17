@@ -13,7 +13,7 @@
 wisp_runApp <- function(...) {
   require(shiny)
   source(file = "R/functions.R")
-  
+
   shinyApp(
     ui = fluidPage(
       titlePanel("Plot WISP station data of specific date from 7 AM to 7 PM"),
