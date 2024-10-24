@@ -42,6 +42,15 @@
 #'   userid = userid,
 #'   pwd = pwd
 #' )
+#'
+#' # no data for the station selected
+#' reflec_data <- WISP.data::wisp_get_reflectance_data(
+#'   time_from = "2019-06-20T09:00",
+#'   time_to = "2019-06-20T14:00",
+#'   station = "WISPstation012",
+#'   userid = userid,
+#'   pwd = pwd
+#' )
 #' 
 #' }
 #' ## End (Not run)
@@ -67,45 +76,77 @@ wisp_get_reflectance_data <- function(
     httr2::req_auth_basic(userid, pwd) |>
     httr2::req_perform(verbosity = 3)
   
+  # the data is in Content-Type: text/plain format
+  spectral_data <- httr2::resp_body_string(response, encoding = "UTF-8")
+  
+  df <- read.table(text = spectral_data, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+  df$level2.reflectance <- gsub("\\[|\\]", "", df$level2.reflectance)
+  df$level2.reflectance <- strsplit(df$level2.reflectance, ",")
+  
+  if (df$measurement.id[2] == "-1") {
+    # check if the exist data for other station in the same data provided
+    response_no_station <- httr2::request("https://wispcloud.waterinsight.nl/api/query") |> 
+      httr2::req_url_query(
+        SERVICE = "data",
+        VERSION = version,
+        REQUEST = "GetData",
+        TIME = paste(time_from, time_to, sep = ","),
+        INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,level2.reflectance"
+      ) |> 
+      httr2::req_auth_basic(userid, pwd) |>
+      httr2::req_perform(verbosity = 3)
+    
     # the data is in Content-Type: text/plain format
-    spectral_data <- httr2::resp_body_string(response, encoding = "UTF-8")
+    spectral_data_no_station <- httr2::resp_body_string(response_no_station, encoding = "UTF-8")
     
-    df <- read.table(text = spectral_data, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-    df$level2.reflectance <- gsub("\\[|\\]", "", df$level2.reflectance)
-    df$level2.reflectance <- strsplit(df$level2.reflectance, ",")
+    df_no_station <- read.table(text = spectral_data_no_station, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+    df_no_station$level2.reflectance <- gsub("\\[|\\]", "", df_no_station$level2.reflectance)
+    df_no_station$level2.reflectance <- strsplit(df_no_station$level2.reflectance, ",")
     
-    if (df$measurement.id[2] == "-1") {
+    if (df_no_station$measurement.id[2] == "-1") {
       reflectance_data_tbl <- NULL
       message("\n----\nThank you for your request, but the instrument does not acquire data on this date.\n----\n")
     } else {
-      reflectance_data_tbl <- tibble::as_tibble(df) |>
-        dplyr::slice(-1) |>
-        tidyr::unnest_wider(
-          col = level2.reflectance,
-          names_sep = ("_")
-        ) |>
-        dplyr::mutate(
-          dplyr::across(
-            dplyr::starts_with("level2.reflectance_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
-          ),
-          dplyr::across(
-            dplyr::starts_with("waterquality."), ~ as.numeric(as.character(.))
-          ),
-          measurement.date = lubridate::as_datetime(measurement.date),
-          waterquality.tsm = units::set_units(waterquality.tsm, "g/m3"),
-          waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
-          waterquality.kd = units::set_units(waterquality.kd, "1/m"),
-        ) |>
-        dplyr::rename_with(
-          ~ stringr::str_c(
-            # 'level2.reflectance_nm_',
-            "nm_",
-            350:900
-          ),
-          dplyr::starts_with("level2.reflectance_")
-        )
+      reflectance_data_tbl <- NULL
+      new_station <- df_no_station$instrument.name[2]
+      message(paste0(
+        "\n----\nThank you for your request. Data for the requested station is not available, but we know there is data for the same date from this station: ",
+        new_station,
+        ".\n",
+        "Maybe you're interested in these?\n\nResubmit the request by entering this value ",
+        new_station,
+        " in the 'station' parameter.\n----\n"
+      ))
     }
-    reflectance_data_tbl
+  } else {
+    reflectance_data_tbl <- tibble::as_tibble(df) |>
+      dplyr::slice(-1) |>
+      tidyr::unnest_wider(
+        col = level2.reflectance,
+        names_sep = ("_")
+      ) |>
+      dplyr::mutate(
+        dplyr::across(
+          dplyr::starts_with("level2.reflectance_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
+        ),
+        dplyr::across(
+          dplyr::starts_with("waterquality."), ~ as.numeric(as.character(.))
+        ),
+        measurement.date = lubridate::as_datetime(measurement.date),
+        waterquality.tsm = units::set_units(waterquality.tsm, "g/m3"),
+        waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
+        waterquality.kd = units::set_units(waterquality.kd, "1/m"),
+      ) |>
+      dplyr::rename_with(
+        ~ stringr::str_c(
+          # 'level2.reflectance_nm_',
+          "nm_",
+          350:900
+        ),
+        dplyr::starts_with("level2.reflectance_")
+      )
+  }
+  reflectance_data_tbl
 }
 
 #' Quality check (QC) for WISP station reflectance data
@@ -118,32 +159,31 @@ wisp_get_reflectance_data <- function(
 #' @export
 #' @examples
 #' # example code
-#' WISP.data::qc_reflectance_data(data = reflec_data)
+#' reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
-  
   # Removal lines with negative values below 750 nm
   colonne_nm_sotto_750 <- grep("^nm_([0-6][0-9]{2}|7[0-4][0-9])", colnames(data), value = TRUE)
   data[colonne_nm_sotto_750] <- lapply(data[colonne_nm_sotto_750], function(x) as.numeric(x))
-  reflec_data_filtrato <- data %>%
+  reflec_data_filtrato <- data |>
     dplyr::filter(dplyr::if_all(dplyr::all_of(colonne_nm_sotto_750), ~ . >= 0))
   
   # Removal lines with outliers in the NIR (840 nm > 700 nm)
   reflec_data_filtrato$nm_700 <- as.numeric(reflec_data_filtrato$nm_700)
   reflec_data_filtrato$nm_840 <- as.numeric(reflec_data_filtrato$nm_840)
-  reflec_data_filtrato <- reflec_data_filtrato %>%
+  reflec_data_filtrato <- reflec_data_filtrato |>
     dplyr::filter(nm_840 <= nm_700)
   
   # Removal lines with maximum peak greater than 0.06 (VALUTARE)
   colonne_nm <- grep("^nm_", colnames(reflec_data_filtrato), value = TRUE)
   reflec_data_filtrato[colonne_nm] <- lapply(reflec_data_filtrato[colonne_nm], function(x) as.numeric(x))
-  reflec_data_filtrato <- reflec_data_filtrato %>%
-    dplyr::rowwise() %>%
-    dplyr::filter(max(dplyr::c_across(dplyr::all_of(colonne_nm))) <= 0.06) %>%
+  reflec_data_filtrato <- reflec_data_filtrato |>
+    dplyr::rowwise() |>
+    dplyr::filter(max(dplyr::c_across(dplyr::all_of(colonne_nm))) <= 0.06) |>
     dplyr::ungroup()
   
-  reflec_data_filtrato <- reflec_data_filtrato %>%
+  reflec_data_filtrato <- reflec_data_filtrato |>
     dplyr::mutate(
       dplyr::across(
         dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
@@ -167,7 +207,7 @@ qc_reflectance_data <- function(data) {
 #' @export
 #' @examples
 #' # example code
-#' WISP.data::plot_reflectance_data(data = reflec_data)
+#' WISP.data::plot_reflectance_data(data = reflec_data_qc)
 #' 
 ### plot_reflectance_data
 plot_reflectance_data <- function(data) {
