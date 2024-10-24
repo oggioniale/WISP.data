@@ -44,7 +44,7 @@
 #' )
 #'
 #' # no data for the station selected
-#' reflec_data <- wisp_get_reflectance_data(
+#' reflec_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2019-06-20T14:00",
 #'   station = "WISPstation012",
@@ -53,7 +53,7 @@
 #' )
 #' 
 #' # The two dates are not consistent
-#' reflec_data <- wisp_get_reflectance_data(
+#' reflec_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2020-06-20T14:00",
 #'   station = "WISPstation012",
