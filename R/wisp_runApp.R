@@ -12,8 +12,6 @@
 ### wisp_runApp
 wisp_runApp <- function(...) {
   require(shiny)
-  source(file = "R/functions.R")
-
   shinyApp(
     ui = fluidPage(
       titlePanel("Plot WISP station data of specific date from 7 AM to 7 PM"),
@@ -40,10 +38,11 @@ wisp_runApp <- function(...) {
           pwd = pwd
         )
         # QC on the data
-        # WISP.data::qc_reflectance_data(data = ...)
-        if (!is.null(reflec_data)) {
+        reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
+        # Plot data 
+        if (!is.null(reflec_data_qc)) {
           # plot
-          WISP.data::plot_reflectance_data(data = reflec_data)
+          WISP.data::plot_reflectance_data(data = reflec_data_qc)
         }
       })
     }
