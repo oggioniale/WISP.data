@@ -69,7 +69,39 @@
       "name": "R",
       "version": ">= 2.10"
     },
+    "2": {
+      "@type": "SoftwareApplication",
+      "identifier": "lifecycle",
+      "name": "lifecycle",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=lifecycle"
+    },
     "SystemRequirements": null
   },
-  "fileSize": "25.16KB"
+  "fileSize": "48.374KB",
+  "citation": [
+    {
+      "@type": "CreativeWork",
+      "datePublished": "2025",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Alessandro",
+          "familyName": "Oggioni"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Nicola",
+          "familyName": "Ghirardi"
+        }
+      ],
+      "name": "WISP.data",
+      "description": "R package version v0.0.0.9000"
+    }
+  ]
 }

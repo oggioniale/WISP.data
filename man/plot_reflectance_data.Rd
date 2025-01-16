@@ -7,7 +7,8 @@
 plot_reflectance_data(data)
 }
 \arguments{
-\item{data}{A \code{tibble}. From wisp_get_reflectance_data() function.}
+\item{data}{A \code{tibble} obtained by any of the funtions provided by this
+package: wisp_get_reflectance_data(), or after QC and SR removal operations.}
 }
 \description{
 This function return a plotly of each spectral signature measured by a WISP
@@ -17,7 +18,11 @@ station.
 }
 \examples{
 # example code
-WISP.data::plot_reflectance_data(data = reflec_data)
+\dontrun{
+## Not run:
+WISP.data::plot_reflectance_data(data = reflec_data_sr)
+}
+## End (Not run)
 
 }
 \author{

@@ -16,6 +16,7 @@ This function run the Shiny App
 \examples{
 # example code
 WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
+
 }
 \author{
 Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}

@@ -5,10 +5,13 @@
 #' @param ... other params passed to `shiny::runApp`
 #' @import shiny
 #' @importFrom plotly plotlyOutput renderPlotly
+#' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
+#' @importFrom shiny dateInput
 #' @export
 #' @examples
 #' # example code
 #' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
+#' 
 ### wisp_runApp
 wisp_runApp <- function(...) {
   require(shiny)
@@ -39,10 +42,12 @@ wisp_runApp <- function(...) {
         )
         # QC on the data
         reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
+        # SR on the data
+        reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc) 
         # Plot data 
-        if (!is.null(reflec_data_qc)) {
+        if (!is.null(reflec_data_sr)) {
           # plot
-          WISP.data::plot_reflectance_data(data = reflec_data_qc)
+          WISP.data::plot_reflectance_data(data = reflec_data_sr)
         }
       })
     }

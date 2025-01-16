@@ -60,7 +60,6 @@
 #'   userid = userid,
 #'   pwd = pwd
 #' )
-#' 
 #' }
 #' ## End (Not run)
 #' 
@@ -170,7 +169,7 @@ wisp_get_reflectance_data <- function(
     }
   } else {
     reflectance_data_tbl <- NULL
-    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n----\n")
+    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal.\n----\n")
   }
   reflectance_data_tbl
 }
@@ -182,10 +181,17 @@ wisp_get_reflectance_data <- function(
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom dplyr filter if_all all_of rowwise ungroup mutate across
+#' @importFrom dplyr starts_with c_across
+#' @importFrom units set_units
 #' @export
 #' @examples
 #' # example code
+#' \dontrun{
+#' ## Not run:
 #' reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
+#' }
+#' ## End (Not run)
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
@@ -238,93 +244,72 @@ qc_reflectance_data <- function(data) {
       )
     )
   
-  reflec_data_filtrato
+  if (nrow(reflec_data_filtrato) == 0) {
+    reflec_data_filtrato = NULL
+    message("\n----\nThank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
+  } else {
+    reflec_data_filtrato
+  }
 }
 
-#' SUNGLINT removal (SR) for WISP station reflectance data (Jiang et al. (2020))
+#' SUNGLINT Removal (SR) for WISP station reflectance data (Jiang et al. (2020))
 #' @description
 #' A short description...
 #' @description `r lifecycle::badge("experimental")`
-#' @param data A `tibble`. From qc_reflectance_data() function.
+#' @param qc_data A `tibble` from qc_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' 
-### SR_reflectance_data
-
-## First step (RHW and est_md_750_780)
-calculate_RHW_and_est_md_750_780 <- function(reflec_data_filtrato) {
+#' @importFrom dplyr mutate select all_of across
+#' @importFrom units set_units
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+#' ## Not run:
+#' reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc) 
+#' }
+#' ## End (Not run)
+#'
+### sr_reflectance_data
+sr_reflectance_data <- function(qc_data) {
+  columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
+                          colnames(qc_data), value = TRUE)
+  columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
+  columns_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(qc_data), value = TRUE)
+  columns_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(qc_data), value = TRUE)
+  colonne_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
   
-  # Calculation of the median between 750 and 780 nm ("md_750_780")
-  colonne_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
-                          colnames(reflec_data_filtrato), value = TRUE)
-  md_750_780 <- reflec_data_filtrato |>
-    dplyr::mutate(md_750_780 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_750_780)), 1, median, na.rm = TRUE))
-  
-  # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
-  colonne_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(reflec_data_filtrato), value = TRUE)
-  md_780 <- md_750_780 |>
-    dplyr::mutate(md_780 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_780)), 1, median, na.rm = TRUE))
-  
-  colonne_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(reflec_data_filtrato), value = TRUE)
-  md_810 <- md_780 |>
-    dplyr::mutate(md_810 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_810)), 1, median, na.rm = TRUE))
-  
-  colonne_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(reflec_data_filtrato), value = TRUE)
-  md_840 <- md_810 |>
-    dplyr::mutate(md_840 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_840)), 1, median, na.rm = TRUE))
-  
-  # Calculation of "RHW"
-  md_840 <- md_840 |>
+  corrected_data <- qc_data |>
+    # Calculation of the median between 750 and 780 nm ("md_750_780")
     dplyr::mutate(
-      RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0))
-    )
-  
-  # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
-  md_840 <- md_840 |>
-    dplyr::mutate(
-      est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW
-    )
-  
-  # Print the new dataframe with new columns ("md_750_780", "md_780", "md_810", "md_840", "RHW", "est_md_750_780")
-  return(md_840)
-}
- 
-## Second step (correction of Rrs)
-correct_Rrs <- function(reflec_data_filtrato) {
-  
-  # Recall and assignment of Step 1
-  corrected_data <- calculate_RHW_and_est_md_750_780(reflec_data_filtrato)
-  
-  # Calculation of "delta" based on "RHW" value
-  corrected_data <- corrected_data |>
-    dplyr::mutate(
-      delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr")
-    )
-  
-  # Rrs correction based on "delta"
-  colonne_nm <- grep("^nm_", colnames(corrected_data), value = TRUE)
-  
-  corrected_data <- corrected_data |>
-    dplyr::mutate(
+      md_750_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_750_780)), 1, median, na.rm = TRUE),
+      # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
+      md_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_780)), 1, median, na.rm = TRUE),
+      md_810 = apply(dplyr::select(qc_data, dplyr::all_of(columns_810)), 1, median, na.rm = TRUE),
+      md_840 = apply(dplyr::select(qc_data, dplyr::all_of(columns_840)), 1, median, na.rm = TRUE),
+      # Calculation of "RHW"
+      RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0)),
+      # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
+      est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW,
+      # Calculation of "delta" based on "RHW" value
+      delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr"),
+      # Rrs correction based on "delta"
       dplyr::across(
         dplyr::all_of(colonne_nm), 
         ~ . - delta
       )
     )
   
-  # Dataframe return with corrected Rrs and "delta"
-  reflect_data_qc_SR <- corrected_data
-  
-  return(reflect_data_qc_SR)
+  return(corrected_data)
 }
-
 
 #' Create a plot of reflectance data
 #' @description
 #' This function return a plotly of each spectral signature measured by a WISP
 #' station.
 #' @description `r lifecycle::badge("experimental")`
-#' @param data A `tibble`. From wisp_get_reflectance_data() function.
+#' @param data A `tibble` obtained by any of the funtions provided by this
+#' package: wisp_get_reflectance_data(), or after QC and SR removal operations.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select
@@ -333,8 +318,12 @@ correct_Rrs <- function(reflec_data_filtrato) {
 #' @export
 #' @examples
 #' # example code
-#' WISP.data::plot_reflectance_data(data = reflec_data_qc)
-#' 
+#' \dontrun{
+#' ## Not run:
+#' WISP.data::plot_reflectance_data(data = reflec_data_sr)
+#' }
+#' ## End (Not run)
+#'
 ### plot_reflectance_data
 plot_reflectance_data <- function(data) {
   data_2 <- data |>
