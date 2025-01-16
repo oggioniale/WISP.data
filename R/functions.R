@@ -85,7 +85,7 @@ wisp_get_reflectance_data <- function(
         REQUEST = "GetData",
         INSTRUMENT = station,
         TIME = paste(time_from, time_to, sep = ","),
-        INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,level2.reflectance"
+        INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,level2.quality"
       ) |> 
       httr2::req_auth_basic(userid, pwd) |>
       httr2::req_perform(verbosity = 3)
@@ -105,7 +105,7 @@ wisp_get_reflectance_data <- function(
           VERSION = version,
           REQUEST = "GetData",
           TIME = paste(time_from, time_to, sep = ","),
-          INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,level2.reflectance"
+          INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,level2.quality"
         ) |> 
         httr2::req_auth_basic(userid, pwd) |>
         httr2::req_perform(verbosity = 3)
@@ -150,7 +150,15 @@ wisp_get_reflectance_data <- function(
           waterquality.tsm = units::set_units(waterquality.tsm, "g/m3"),
           waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
           waterquality.kd = units::set_units(waterquality.kd, "1/m"),
+          waterquality.cpc = units::set_units(waterquality.cpc, "mg/m3"),
+          
+          level2.quality = as.character(level2.quality) # Conversion without units of measurement
         ) |>
+       
+        dplyr::relocate(
+          level2.quality, .after = instrument.name # Rearrange columns
+        ) |>
+        
         dplyr::rename_with(
           ~ stringr::str_c(
             # 'level2.reflectance_nm_',
@@ -167,7 +175,7 @@ wisp_get_reflectance_data <- function(
   reflectance_data_tbl
 }
 
-#' Quality check (QC) for WISP station reflectance data
+#' Quality Check (QC) for WISP station reflectance data
 #' @description
 #' A short description...
 #' @description `r lifecycle::badge("experimental")`
@@ -181,6 +189,7 @@ wisp_get_reflectance_data <- function(
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
+ 
   # Removal lines with negative values below 750 nm
   colonne_nm_sotto_750 <- grep("^nm_([0-6][0-9]{2}|7[0-4][0-9])", colnames(data), value = TRUE)
   data[colonne_nm_sotto_750] <- lapply(data[colonne_nm_sotto_750], function(x) as.numeric(x))
@@ -193,13 +202,34 @@ qc_reflectance_data <- function(data) {
   reflec_data_filtrato <- reflec_data_filtrato |>
     dplyr::filter(nm_840 <= nm_700)
   
-  # Removal lines with maximum peak greater than 0.06 (VALUTARE)
+  # Removal lines with maximum peak greater than 0.05 (VALUTARE)
   colonne_nm <- grep("^nm_", colnames(reflec_data_filtrato), value = TRUE)
   reflec_data_filtrato[colonne_nm] <- lapply(reflec_data_filtrato[colonne_nm], function(x) as.numeric(x))
   reflec_data_filtrato <- reflec_data_filtrato |>
     dplyr::rowwise() |>
-    dplyr::filter(max(dplyr::c_across(dplyr::all_of(colonne_nm))) <= 0.06) |>
+    dplyr::filter(max(dplyr::c_across(dplyr::all_of(colonne_nm))) <= 0.05) |>
     dplyr::ungroup()
+  
+  # Removal lines with outliers in the Blue domain (350 nm > green; green > cyan)
+  reflec_data_filtrato <- reflec_data_filtrato |>
+    dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
+                      pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
+  
+  # Removal of lines similar to "decreasing logarithms" (check; 350-500nm; 95%; diff<0)
+  colonne_nm_range <- grep("^nm_(3[5-9][0-9]|4[0-9]{2}|500)$", colnames(reflec_data_filtrato), value = TRUE)
+  reflec_data_filtrato <- reflec_data_filtrato |>
+    dplyr::rowwise() |>
+    dplyr::filter({
+      valori <- dplyr::c_across(dplyr::all_of(colonne_nm_range))
+      diff_valori <- diff(valori)
+      percentuale_negativi <- mean(diff_valori < 0, na.rm = TRUE)
+      percentuale_negativi < 0.95
+    }) |>
+    dplyr::ungroup()
+  
+  # Removal of "invalid" lines (level2.quality)
+  reflec_data_filtrato <- reflec_data_filtrato |>
+    dplyr::filter(level2.quality != "invalid")
   
   reflec_data_filtrato <- reflec_data_filtrato |>
     dplyr::mutate(
@@ -210,6 +240,84 @@ qc_reflectance_data <- function(data) {
   
   reflec_data_filtrato
 }
+
+#' SUNGLINT removal (SR) for WISP station reflectance data (Jiang et al. (2020))
+#' @description
+#' A short description...
+#' @description `r lifecycle::badge("experimental")`
+#' @param data A `tibble`. From qc_reflectance_data() function.
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' 
+### SR_reflectance_data
+
+## First step (RHW and est_md_750_780)
+calculate_RHW_and_est_md_750_780 <- function(reflec_data_filtrato) {
+  
+  # Calculation of the median between 750 and 780 nm ("md_750_780")
+  colonne_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
+                          colnames(reflec_data_filtrato), value = TRUE)
+  md_750_780 <- reflec_data_filtrato |>
+    dplyr::mutate(md_750_780 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_750_780)), 1, median, na.rm = TRUE))
+  
+  # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
+  colonne_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(reflec_data_filtrato), value = TRUE)
+  md_780 <- md_750_780 |>
+    dplyr::mutate(md_780 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_780)), 1, median, na.rm = TRUE))
+  
+  colonne_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(reflec_data_filtrato), value = TRUE)
+  md_810 <- md_780 |>
+    dplyr::mutate(md_810 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_810)), 1, median, na.rm = TRUE))
+  
+  colonne_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(reflec_data_filtrato), value = TRUE)
+  md_840 <- md_810 |>
+    dplyr::mutate(md_840 = apply(dplyr::select(reflec_data_filtrato, dplyr::all_of(colonne_840)), 1, median, na.rm = TRUE))
+  
+  # Calculation of "RHW"
+  md_840 <- md_840 |>
+    dplyr::mutate(
+      RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0))
+    )
+  
+  # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
+  md_840 <- md_840 |>
+    dplyr::mutate(
+      est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW
+    )
+  
+  # Print the new dataframe with new columns ("md_750_780", "md_780", "md_810", "md_840", "RHW", "est_md_750_780")
+  return(md_840)
+}
+ 
+## Second step (correction of Rrs)
+correct_Rrs <- function(reflec_data_filtrato) {
+  
+  # Recall and assignment of Step 1
+  corrected_data <- calculate_RHW_and_est_md_750_780(reflec_data_filtrato)
+  
+  # Calculation of "delta" based on "RHW" value
+  corrected_data <- corrected_data |>
+    dplyr::mutate(
+      delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr")
+    )
+  
+  # Rrs correction based on "delta"
+  colonne_nm <- grep("^nm_", colnames(corrected_data), value = TRUE)
+  
+  corrected_data <- corrected_data |>
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::all_of(colonne_nm), 
+        ~ . - delta
+      )
+    )
+  
+  # Dataframe return with corrected Rrs and "delta"
+  reflect_data_qc_SR <- corrected_data
+  
+  return(reflect_data_qc_SR)
+}
+
 
 #' Create a plot of reflectance data
 #' @description
@@ -234,7 +342,8 @@ plot_reflectance_data <- function(data) {
       measurement.date, starts_with("nm_"),
       waterquality.tsm,
       waterquality.chla,
-      waterquality.kd
+      waterquality.kd,
+      waterquality.cpc
     ) |>
     tidyr::pivot_longer(
       cols = starts_with("nm_"),
@@ -249,7 +358,8 @@ plot_reflectance_data <- function(data) {
           "Time: ", substr(measurement.date, 12, 20),
           "\nTSM [g/m3]: ", waterquality.tsm,
           "\nChla [mg/m3]: ", waterquality.chla,
-          "\nKd [1/m]: ", waterquality.kd
+          "\nKd [1/m]: ", waterquality.kd,
+          "\ncpc [mg/m3]: ", waterquality.cpc
         )
       )  # Convert to factor for colours
     )
