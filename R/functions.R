@@ -26,7 +26,7 @@
 #' \dontrun{
 #' ## Not run:
 #' # NA data
-#' reflec_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2024-09-01T09:00",
 #'   time_to = "2024-09-01T14:00",
 #'   station = "WISPstation012",
@@ -35,7 +35,7 @@
 #' )
 #' 
 #' # with data
-#' reflec_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2024-08-01T09:00",
 #'   time_to = "2024-08-01T14:00",
 #'   station = "WISPstation012",
@@ -44,7 +44,7 @@
 #' )
 #'
 #' # no data for the station selected
-#' reflec_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2019-06-20T14:00",
 #'   station = "WISPstation012",
@@ -53,7 +53,7 @@
 #' )
 #' 
 #' # The two dates are not consistent
-#' reflec_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- WISP.data::wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2020-06-20T14:00",
 #'   station = "WISPstation012",
@@ -189,18 +189,18 @@ wisp_get_reflectance_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
+#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data)
 #' }
 #' ## End (Not run)
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
  
-  # Removal lines with negative values below 750 nm
-  columns_nm_below_750 <- grep("^nm_([0-6][0-9]{2}|7[0-4][0-9])", colnames(data), value = TRUE)
-  data[columns_nm_below_750] <- lapply(data[columns_nm_below_750], function(x) as.numeric(x))
+  # Removal lines with negative values below 845 nm
+  columns_nm_below_845 <- grep("^nm_([0-7][0-9]{2}|8[0-3][0-9]|84[0-4])", colnames(data), value = TRUE)
+  data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], function(x) as.numeric(x))
   reflectance_data_filtered <- data |>
-    dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_750), ~ . >= 0))
+    dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_845), ~ . >= 0))
   
   # Removal lines with outliers in the NIR (840 nm > 700 nm)
   reflectance_data_filtered$nm_700 <- as.numeric(reflectance_data_filtered$nm_700)
@@ -319,7 +319,7 @@ sr_reflectance_data <- function(qc_data) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' WISP.data::plot_reflectance_data(data = reflec_data_sr)
+#' WISP.data::plot_reflectance_data(data = reflect_data_sr)
 #' }
 #' ## End (Not run)
 #'
