@@ -1,6 +1,6 @@
-#' Get data of reflectance (level2) from WISP station
+#' Get data of reflectance (level2) from WISPstation
 #' @description `r lifecycle::badge("experimental")`
-#' This function obtains the data of reflectance from WISP station.
+#' This function obtains the data of reflectance from WISPstation.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
 #' @param time_from A `character`. It is the time  
@@ -174,9 +174,9 @@ wisp_get_reflectance_data <- function(
   reflectance_data_tbl
 }
 
-#' Quality Check (QC) for WISP station reflectance data
+#' Quality Check (QC) for WISPstation reflectance data
 #' @description
-#' A short description...
+#' This function removes all anomalous spectral signatures
 #' @description `r lifecycle::badge("experimental")`
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
@@ -197,64 +197,64 @@ wisp_get_reflectance_data <- function(
 qc_reflectance_data <- function(data) {
  
   # Removal lines with negative values below 750 nm
-  colonne_nm_sotto_750 <- grep("^nm_([0-6][0-9]{2}|7[0-4][0-9])", colnames(data), value = TRUE)
-  data[colonne_nm_sotto_750] <- lapply(data[colonne_nm_sotto_750], function(x) as.numeric(x))
-  reflec_data_filtrato <- data |>
-    dplyr::filter(dplyr::if_all(dplyr::all_of(colonne_nm_sotto_750), ~ . >= 0))
+  columns_nm_below_750 <- grep("^nm_([0-6][0-9]{2}|7[0-4][0-9])", colnames(data), value = TRUE)
+  data[columns_nm_below_750] <- lapply(data[columns_nm_below_750], function(x) as.numeric(x))
+  reflectance_data_filtered <- data |>
+    dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_750), ~ . >= 0))
   
   # Removal lines with outliers in the NIR (840 nm > 700 nm)
-  reflec_data_filtrato$nm_700 <- as.numeric(reflec_data_filtrato$nm_700)
-  reflec_data_filtrato$nm_840 <- as.numeric(reflec_data_filtrato$nm_840)
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  reflectance_data_filtered$nm_700 <- as.numeric(reflectance_data_filtered$nm_700)
+  reflectance_data_filtered$nm_840 <- as.numeric(reflectance_data_filtered$nm_840)
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::filter(nm_840 <= nm_700)
   
   # Removal lines with maximum peak greater than 0.05 (VALUTARE)
-  colonne_nm <- grep("^nm_", colnames(reflec_data_filtrato), value = TRUE)
-  reflec_data_filtrato[colonne_nm] <- lapply(reflec_data_filtrato[colonne_nm], function(x) as.numeric(x))
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
+  reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], function(x) as.numeric(x))
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::rowwise() |>
-    dplyr::filter(max(dplyr::c_across(dplyr::all_of(colonne_nm))) <= 0.05) |>
+    dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= 0.05) |>
     dplyr::ungroup()
   
   # Removal lines with outliers in the Blue domain (350 nm > green; green > cyan)
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
                       pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
   
   # Removal of lines similar to "decreasing logarithms" (check; 350-500nm; 95%; diff<0)
-  colonne_nm_range <- grep("^nm_(3[5-9][0-9]|4[0-9]{2}|500)$", colnames(reflec_data_filtrato), value = TRUE)
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  columns_nm_range <- grep("^nm_(3[5-9][0-9]|4[0-9]{2}|500)$", colnames(reflectance_data_filtered), value = TRUE)
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::rowwise() |>
     dplyr::filter({
-      valori <- dplyr::c_across(dplyr::all_of(colonne_nm_range))
+      valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
       diff_valori <- diff(valori)
-      percentuale_negativi <- mean(diff_valori < 0, na.rm = TRUE)
-      percentuale_negativi < 0.95
+      percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
+      percentage_negative < 0.95
     }) |>
     dplyr::ungroup()
   
   # Removal of "invalid" lines (level2.quality)
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::filter(level2.quality != "invalid")
   
-  reflec_data_filtrato <- reflec_data_filtrato |>
+  reflectance_data_filtered <- reflectance_data_filtered |>
     dplyr::mutate(
       dplyr::across(
         dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
       )
     )
   
-  if (nrow(reflec_data_filtrato) == 0) {
-    reflec_data_filtrato = NULL
+  if (nrow(reflectance_data_filtered) == 0) {
+    reflectance_data_filtered = NULL
     message("\n----\nThank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
   } else {
-    reflec_data_filtrato
+    reflectance_data_filtered
   }
 }
 
-#' SUNGLINT Removal (SR) for WISP station reflectance data (Jiang et al. (2020))
+#' SUNGLINT Removal (SR) for WISPstation reflectance data
 #' @description
-#' A short description...
+#' This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
 #' @description `r lifecycle::badge("experimental")`
 #' @param qc_data A `tibble` from qc_reflectance_data() function.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
@@ -266,7 +266,7 @@ qc_reflectance_data <- function(data) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc) 
+#' reflect_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflect_data_qc) 
 #' }
 #' ## End (Not run)
 #'
@@ -277,7 +277,7 @@ sr_reflectance_data <- function(qc_data) {
   columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
   columns_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(qc_data), value = TRUE)
   columns_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(qc_data), value = TRUE)
-  colonne_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
+  columns_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
   
   corrected_data <- qc_data |>
     # Calculation of the median between 750 and 780 nm ("md_750_780")
@@ -295,7 +295,7 @@ sr_reflectance_data <- function(qc_data) {
       delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr"),
       # Rrs correction based on "delta"
       dplyr::across(
-        dplyr::all_of(colonne_nm), 
+        dplyr::all_of(columns_nm), 
         ~ . - delta
       )
     )
@@ -305,10 +305,9 @@ sr_reflectance_data <- function(qc_data) {
 
 #' Create a plot of reflectance data
 #' @description
-#' This function return a plotly of each spectral signature measured by a WISP
-#' station.
+#' This function return a plotly of each spectral signature measured by a WISPstation.
 #' @description `r lifecycle::badge("experimental")`
-#' @param data A `tibble` obtained by any of the funtions provided by this
+#' @param data A `tibble` obtained by any of the functions provided by this
 #' package: wisp_get_reflectance_data(), or after QC and SR removal operations.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
