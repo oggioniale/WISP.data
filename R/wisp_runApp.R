@@ -7,7 +7,7 @@
 #' @importFrom plotly plotlyOutput renderPlotly
 #' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
 #' @importFrom shiny dateInput
-#' @export
+#' @keywords internal
 #' @examples
 #' # example code
 #' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)

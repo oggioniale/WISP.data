@@ -1,0 +1,37 @@
+---
+title: "Example of WISP.data functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example of WISP.data functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Alessandro Oggioni"
+---
+
+## Provide the account of your station
+```{r echo = T, results = 'hide', warning=FALSE}
+userid <- Sys.getenv("WISP_IREA_USERID")
+pwd <- Sys.getenv("WISP_IREA_PSW")
+```
+
+## Get data from the WISP station server for a specific date
+```{r echo = T, results = 'hide', warning=FALSE}
+reflec_data <- WISP.data::wisp_get_reflectance_data(
+  time_from = "2024-08-01T09:00",
+  time_to = "2024-08-01T14:00",
+  station = "WISPstation012",
+  userid = userid,
+  pwd = pwd
+)
+```
+
+## Quality Check (QC) and Sunglint Removal (SR) of the reflectance data
+```{r echo = T, results = 'hide', warning=FALSE}
+reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
+reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc)
+```
+
+## Plot the reflectance data
+```{r, warning=FALSE, out.width="100%"}
+WISP.data::plot_reflectance_data(data = reflec_data_sr)
+```

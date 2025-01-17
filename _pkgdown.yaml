@@ -1,4 +1,4 @@
-title: WISP
+title: WISP.data
 url: https://github.com/oggioniale/WISP.data
 template:
   bootstrap: 5
@@ -13,8 +13,9 @@ reference:
     contents:
     - wisp_get_reflectance_data
     - qc_reflectance_data
+    - sr_reflectance_data
     - plot_reflectance_data
 navbar:
   structure:
-    left: [reference]
+    left: [reference,articles]
     right: [github]
