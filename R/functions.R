@@ -174,7 +174,7 @@ wisp_get_reflectance_data <- function(
   reflectance_data_tbl
 }
 
-#' Quality Check (QC) for WISPstation reflectance data
+#' Quality Control (QC) for WISPstation reflectance data
 #' @description
 #' This function removes all anomalous spectral signatures
 #' @description `r lifecycle::badge("experimental")`
@@ -195,61 +195,81 @@ wisp_get_reflectance_data <- function(
 #' 
 ### qc_reflectance_data
 qc_reflectance_data <- function(data) {
- 
-  # Removal lines with negative values below 845 nm
+  initial_nrow <- nrow(data)
+  removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
+  
+  # QC1 -> Removal lines with negative values below 845 nm
   columns_nm_below_845 <- grep("^nm_([0-7][0-9]{2}|8[0-3][0-9]|84[0-4])", colnames(data), value = TRUE)
-  data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], function(x) as.numeric(x))
-  reflectance_data_filtered <- data |>
+  data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], as.numeric)
+  removed_QC1 <- data[rowSums(data[columns_nm_below_845] < 0, na.rm = TRUE) > 0, ]
+  removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- "QC1"
+  reflectance_data_filtered <- data |> 
     dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_845), ~ . >= 0))
   
-  # Removal lines with outliers in the NIR (840 nm > 700 nm)
+  # QC2 -> Removal lines with outliers in the NIR (840 nm > 700 nm)
   reflectance_data_filtered$nm_700 <- as.numeric(reflectance_data_filtered$nm_700)
   reflectance_data_filtered$nm_840 <- as.numeric(reflectance_data_filtered$nm_840)
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::filter(nm_840 <= nm_700)
+  removed_QC2 <- reflectance_data_filtered[reflectance_data_filtered$nm_840 > reflectance_data_filtered$nm_700, ]
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2", sep = " ")
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(nm_840 <= nm_700)
   
-  # Removal lines with maximum peak greater than 0.05 (VALUTARE)
+  # QC3 -> Removal lines with maximum peak greater than 0.05 (Trasimeno)
   columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
-  reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], function(x) as.numeric(x))
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::rowwise() |>
-    dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= 0.05) |>
-    dplyr::ungroup()
+  reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], as.numeric)
+  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > 0.05, ]
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= 0.05) |> dplyr::ungroup()
   
-  # Removal lines with outliers in the Blue domain (350 nm > green; green > cyan)
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
-                      pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
+  # QC4 -> Removal lines with outliers in the Blue domain
+  removed_QC4 <- reflectance_data_filtered[which(reflectance_data_filtered$nm_350 > pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) & 
+                                                   pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) > reflectance_data_filtered$nm_495), ]
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date], "QC4", sep = " ")
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
+                                                                              pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
   
-  # Removal of lines similar to "decreasing logarithms" (check; 350-500nm; 95%; diff<0)
+  # QC5 -> Removal of lines similar to "decreasing logarithms"
   columns_nm_range <- grep("^nm_(3[5-9][0-9]|4[0-9]{2}|500)$", colnames(reflectance_data_filtered), value = TRUE)
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::rowwise() |>
-    dplyr::filter({
-      valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
-      diff_valori <- diff(valori)
-      percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
-      percentage_negative < 0.95
-    }) |>
-    dplyr::ungroup()
+  removed_QC5 <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter({
+    valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
+    diff_valori <- diff(valori)
+    percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
+    percentage_negative >= 0.95
+  }) |> dplyr::ungroup()
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date], "QC5", sep = " ")
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter({
+    valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
+    diff_valori <- diff(valori)
+    percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
+    percentage_negative < 0.95
+  }) |> dplyr::ungroup()
   
-  # Removal of "invalid" lines (level2.quality)
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::filter(level2.quality != "invalid")
+  # QC6 -> Removal of "invalid" lines (level2.quality)
+  removed_QC6 <- reflectance_data_filtered[reflectance_data_filtered$level2.quality == "invalid", ]
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date], "QC6", sep = " ")
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(level2.quality != "invalid")
   
-  reflectance_data_filtered <- reflectance_data_filtered |>
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
-      )
-    )
+  final_nrow <- nrow(reflectance_data_filtered)
+  removed_count <- initial_nrow - final_nrow
+  removed_rows <- removed_rows[removed_rows$reason != "", ]
   
-  if (nrow(reflectance_data_filtered) == 0) {
-    reflectance_data_filtered = NULL
-    message("\n----\nThank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
-  } else {
-    reflectance_data_filtered
+  message("\n----\n", removed_count, " spectral signatures were removed during QC:\n")
+  for (i in seq_len(nrow(removed_rows))) {
+    message("The spectral signature of ", sub("\\..*", "", removed_rows$measurement.date[i]), " has been removed thanks to ", removed_rows$reason[i])
   }
+  message("----\n")
+  
+  if (final_nrow == 0) {
+    message("Thank you for your request, but the QC operation removed all the spectral signatures available on this date.")
+    return(NULL)
+  }
+  
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::mutate(
+    dplyr::across(
+      dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
+    )
+  )
+  
+  return(reflectance_data_filtered)
 }
 
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
