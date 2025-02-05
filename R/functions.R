@@ -84,7 +84,7 @@ wisp_get_reflectance_data <- function(
         REQUEST = "GetData",
         INSTRUMENT = station,
         TIME = paste(time_from, time_to, sep = ","),
-        INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,level2.quality"
+        INCLUDE = "measurement.id,measurement.date,instrument.name,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
       ) |> 
       httr2::req_auth_basic(userid, pwd) |>
       httr2::req_perform(verbosity = 3)
@@ -104,7 +104,7 @@ wisp_get_reflectance_data <- function(
           VERSION = version,
           REQUEST = "GetData",
           TIME = paste(time_from, time_to, sep = ","),
-          INCLUDE = "measurement.id,measurement.date,instrument.name,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,level2.quality"
+          INCLUDE = "measurement.id,measurement.date,instrument.name,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
         ) |> 
         httr2::req_auth_basic(userid, pwd) |>
         httr2::req_perform(verbosity = 3)
@@ -154,10 +154,6 @@ wisp_get_reflectance_data <- function(
           level2.quality = as.character(level2.quality) # Conversion without units of measurement
         ) |>
        
-        dplyr::relocate(
-          level2.quality, .after = instrument.name # Rearrange columns
-        ) |>
-        
         dplyr::rename_with(
           ~ stringr::str_c(
             # 'level2.reflectance_nm_',
@@ -334,6 +330,7 @@ sr_reflectance_data <- function(qc_data) {
 #' @importFrom dplyr mutate select
 #' @importFrom plotly plot_ly layout
 #' @importFrom tidyr pivot_longer
+#' @importFrom viridis viridis 
 #' @export
 #' @examples
 #' # example code
@@ -372,11 +369,16 @@ plot_reflectance_data <- function(data) {
       )  # Convert to factor for colours
     )
 
+  # Color palette selection
+  num_colors <- length(unique(data_2$measurement_info))
+  color_palette <- viridis(num_colors)
+  
   fig <- plotly::plot_ly(
     data_2,
     x = ~wavelength,
     y = ~Rrs,
     color = ~measurement_info,
+    colors = color_palette, # Assign custom color palette
     type = 'scatter',
     mode = 'lines'
   ) |>
