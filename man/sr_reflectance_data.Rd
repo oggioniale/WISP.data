@@ -2,23 +2,25 @@
 % Please edit documentation in R/functions.R
 \name{sr_reflectance_data}
 \alias{sr_reflectance_data}
-\title{SUNGLINT Removal (SR) for WISP station reflectance data (Jiang et al. (2020))}
+\title{SUNGLINT Removal (SR) for WISPstation reflectance data}
 \usage{
 sr_reflectance_data(qc_data)
 }
 \arguments{
 \item{qc_data}{A \code{tibble} from qc_reflectance_data() function.}
 }
+\value{
+A tibble with the spectral signatures after the SR operation.
+}
 \description{
-A short description...
-
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
 }
 \examples{
 # example code
 \dontrun{
 ## Not run:
-reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc) 
+reflect_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflect_data_qc) 
 }
 ## End (Not run)
 

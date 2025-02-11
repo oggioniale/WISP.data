@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{wisp_get_reflectance_data}
 \alias{wisp_get_reflectance_data}
-\title{Get data of reflectance (level2) from WISP station}
+\title{Get data of reflectance (level2) from WISPstation for a specific date}
 \usage{
 wisp_get_reflectance_data(
   version = "1.0",
@@ -17,31 +17,35 @@ wisp_get_reflectance_data(
 \item{version}{A \code{character}. It is the version of the API data. Default
 is "1.0"}
 
-\item{time_from}{A \code{character}. It is the time}
+\item{time_from}{A \code{character}. It is the date and time from which the data
+is requested.}
 
-\item{time_to}{A \code{character}. It is the time}
+\item{time_to}{A \code{character}. It is the date and time to which the data
+is requested.}
 
 \item{station}{A \code{character}.  It is the name of the station.}
 
-\item{userid}{A \code{character}. It is the userid.}
+\item{userid}{A \code{character}. It is the userid to access to the data service.}
 
-\item{pwd}{A \code{character}. It is the password.}
+\item{pwd}{A \code{character}. It is the password to access to the data service.}
 }
 \value{
 A tibble with measurement id, measurement date, instrument name,
 waterquality values of TSM, Chla and Kd as provided by instrument by default,
-and all the values of reflectance for each wevelength from 350 to 900 nm.
+all the values of reflectance for each wevelength from 350 to 900 nm, and
+also the label of ... (e.g. EdF, LuS, LuP) that means ... .
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function obtains the data of reflectance from WISP station.
+This function obtains the data of reflectance from WISPstation for a
+specific date.
 }
 \examples{
 # example code
 \dontrun{
 ## Not run:
 # NA data
-reflec_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- WISP.data::wisp_get_reflectance_data(
   time_from = "2024-09-01T09:00",
   time_to = "2024-09-01T14:00",
   station = "WISPstation012",
@@ -50,7 +54,7 @@ reflec_data <- WISP.data::wisp_get_reflectance_data(
 )
 
 # with data
-reflec_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- WISP.data::wisp_get_reflectance_data(
   time_from = "2024-08-01T09:00",
   time_to = "2024-08-01T14:00",
   station = "WISPstation012",
@@ -59,7 +63,7 @@ reflec_data <- WISP.data::wisp_get_reflectance_data(
 )
 
 # no data for the station selected
-reflec_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- WISP.data::wisp_get_reflectance_data(
   time_from = "2019-06-20T09:00",
   time_to = "2019-06-20T14:00",
   station = "WISPstation012",
@@ -68,7 +72,7 @@ reflec_data <- WISP.data::wisp_get_reflectance_data(
 )
 
 # The two dates are not consistent
-reflec_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- WISP.data::wisp_get_reflectance_data(
   time_from = "2019-06-20T09:00",
   time_to = "2020-06-20T14:00",
   station = "WISPstation012",
@@ -81,4 +85,6 @@ reflec_data <- WISP.data::wisp_get_reflectance_data(
 }
 \author{
 Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+
+Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
 }
