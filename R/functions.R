@@ -1,17 +1,22 @@
-#' Get data of reflectance (level2) from WISPstation
+#' Get data of reflectance (level2) from WISPstation for a specific date
 #' @description `r lifecycle::badge("experimental")`
-#' This function obtains the data of reflectance from WISPstation.
+#' This function obtains the data of reflectance from WISPstation for a
+#' specific date.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
-#' @param time_from A `character`. It is the time  
-#' @param time_to A `character`. It is the time
+#' @param time_from A `character`. It is the date and time from which the data
+#' is requested.
+#' @param time_to A `character`. It is the date and time to which the data
+#' is requested.
 #' @param station A `character`.  It is the name of the station.
-#' @param userid A `character`. It is the userid.
-#' @param pwd A `character`. It is the password.
+#' @param userid A `character`. It is the userid to access to the data service.
+#' @param pwd A `character`. It is the password to access to the data service.
 #' @return A tibble with measurement id, measurement date, instrument name,
 #' waterquality values of TSM, Chla and Kd as provided by instrument by default,
-#' and all the values of reflectance for each wevelength from 350 to 900 nm.
+#' all the values of reflectance for each wevelength from 350 to 900 nm, and
+#' also the label of ... (e.g. EdF, LuS, LuP) that means ... .
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom httr2 request req_url_query req_auth_basic req_perform
 #' @importFrom httr2 resp_body_string
 #' @importFrom tibble as_tibble
@@ -170,11 +175,82 @@ wisp_get_reflectance_data <- function(
   reflectance_data_tbl
 }
 
-#' Quality Control (QC) for WISPstation reflectance data
-#' @description
-#' This function removes all anomalous spectral signatures
+#' Get data of reflectance (level2) from WISPstation for a specific multiple dates
 #' @description `r lifecycle::badge("experimental")`
+#' This function obtains the data of reflectance from WISPstation for a
+#' multiple dates.
+#' @param version A `character`. It is the version of the API data. Default
+#' is "1.0"
+#' @param time_from A `character`. It is the date and time from which the data
+#' is requested.
+#' @param time_to A `character`. It is the date and time to which the data
+#' is requested.
+#' @param station A `character`.  It is the name of the station.
+#' @param userid A `character`. It is the userid to access to the data service.
+#' @param pwd A `character`. It is the password to access to the data service.
+#' @return A tibble with measurement id, measurement date, instrument name,
+#' waterquality values of TSM, Chla and Kd as provided by instrument by default,
+#' all the values of reflectance for each wevelength from 350 to 900 nm, and
+#' also the label of ... (e.g. EdF, LuS, LuP) that means ... .
+#' Default is 0.05.
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @importFrom dplyr bind_rows
+#' @examples
+#' # example code
+#' \dontrun{
+#' ## Not run:
+#' # NA data
+#' reflect_data_multiDates <- wisp_get_data_dates(
+#'   time_from = "2024-04-08T09:00",
+#'   time_to = "2024-04-10T14:00",
+#'   station = "WISPstation012",
+#'   userid = userid,
+#'   pwd = pwd
+#' )
+#' }
+#' ## End (Not run)
+#' 
+### wisp_get_data_dates
+wisp_get_data_dates <- function(
+    version = "1.0",
+    time_from = NULL,
+    time_to = NULL,
+    station = NULL,
+    userid = NULL,
+    pwd = NULL
+) {
+  from_time <- sub(".*T", "", time_from)
+  to_time <- sub(".*T", "", time_to)
+  data_multiDates <- lapply(
+    seq.Date(
+      from = as.Date(time_from),
+      to = as.Date(time_to),
+      by = "day"
+    ), function(date) {
+    wisp_get_reflectance_data(
+      version = version,
+      time_from = paste0(date, "T", from_time),
+      time_to = paste0(date, "T", to_time),
+      station = station,
+      userid = userid,
+      pwd = pwd
+    )
+  }) |>
+    dplyr::bind_rows()
+  return(a)
+}
+
+#' Quality Control (QC) for WISPstation reflectance data
+#' @description `r lifecycle::badge("experimental")`
+#' This function removes all anomalous spectral signatures
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
+#' @param maxPeak A `decimal`. Magnitude of the maximum value of the spectral
+#' signatures. We suggest to set the number of this parameter equal to: 0.03
+#' for clear and oligotrophyc water, 0.05 for mesotrophic - eutrophic water,
+#' and 0.08 for hypereutrophic and very turbid water.
+#' Default is 0.05.
+#' @return A tibble with the spectral signatures after the QC operation. Also
+#' with a message contains with ...
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr filter if_all all_of rowwise ungroup mutate across
@@ -185,12 +261,12 @@ wisp_get_reflectance_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data)
+#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, maxPeak = 0.07)
 #' }
 #' ## End (Not run)
 #' 
 ### qc_reflectance_data
-qc_reflectance_data <- function(data) {
+qc_reflectance_data <- function(data, maxPeak=0.05) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -198,7 +274,7 @@ qc_reflectance_data <- function(data) {
   columns_nm_below_845 <- grep("^nm_([0-7][0-9]{2}|8[0-3][0-9]|84[0-4])", colnames(data), value = TRUE)
   data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], as.numeric)
   removed_QC1 <- data[rowSums(data[columns_nm_below_845] < 0, na.rm = TRUE) > 0, ]
-  removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- "QC1"
+  removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- " QC1"
   reflectance_data_filtered <- data |> 
     dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_845), ~ . >= 0))
   
@@ -212,9 +288,9 @@ qc_reflectance_data <- function(data) {
   # QC3 -> Removal lines with maximum peak greater than 0.05 (Trasimeno)
   columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
   reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], as.numeric)
-  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > 0.05, ]
+  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > maxPeak, ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= 0.05) |> dplyr::ungroup()
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) |> dplyr::ungroup()
   
   # QC4 -> Removal lines with outliers in the Blue domain
   removed_QC4 <- reflectance_data_filtered[which(reflectance_data_filtered$nm_350 > pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) & 
@@ -250,7 +326,7 @@ qc_reflectance_data <- function(data) {
   
   message("\n----\n", removed_count, " spectral signatures were removed during QC:\n")
   for (i in seq_len(nrow(removed_rows))) {
-    message("The spectral signature of ", sub("\\..*", "", removed_rows$measurement.date[i]), " has been removed thanks to ", removed_rows$reason[i])
+    message("The spectral signature of ", sub("\\..*", "", removed_rows$measurement.date[i]), " has been removed thanks to", removed_rows$reason[i])
   }
   message("----\n")
   
@@ -269,10 +345,10 @@ qc_reflectance_data <- function(data) {
 }
 
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
-#' @description
-#' This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
 #' @description `r lifecycle::badge("experimental")`
+#' This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
 #' @param qc_data A `tibble` from qc_reflectance_data() function.
+#' @return A tibble with the spectral signatures after the SR operation.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select all_of across
@@ -320,11 +396,13 @@ sr_reflectance_data <- function(qc_data) {
 }
 
 #' Create a plot of reflectance data
-#' @description
-#' This function return a plotly of each spectral signature measured by a WISPstation.
 #' @description `r lifecycle::badge("experimental")`
+#' This function return a plotly of each spectral signature measured by a
+#' WISPstation.
 #' @param data A `tibble` obtained by any of the functions provided by this
 #' package: wisp_get_reflectance_data(), or after QC and SR removal operations.
+#' @return description A plotly object with the spectral signatures of the reflectance
+#' data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select
@@ -371,8 +449,28 @@ plot_reflectance_data <- function(data) {
 
   # Color palette selection
   num_colors <- length(unique(data_2$measurement_info))
-  color_palette <- viridis(num_colors)
-  
+  color_palette <- viridis::viridis(num_colors)
+  # select dates
+  length_dates <- length(data$measurement.date)
+  n_dates <- seq.Date(
+    from = as.Date(data$measurement.date[1]),
+    to = as.Date(data$measurement.date[length_dates]),
+    by = "day"
+  )
+  if (length(n_dates) > 1) {
+    dates_text <- paste0(
+      "\nfrom date: ",
+      n_dates[1],
+      "\nto date: ",
+      n_dates[length(n_dates)]
+    )
+  } else {
+    dates_text <- paste0(
+      "\non the date: ",
+      n_dates[1]
+    )
+  }
+  # plot
   fig <- plotly::plot_ly(
     data_2,
     x = ~wavelength,
@@ -386,8 +484,7 @@ plot_reflectance_data <- function(data) {
       title = paste0(
         "Aquired by: ",
         data$instrument.name[1],
-        "\non the date: ",
-        substr(data$measurement.date[1], 1, 10)
+        dates_text
       ),
       # plot_bgcolor = "#e5ecf6",
       xaxis = list(title = 'Wevelength [nm]'), 

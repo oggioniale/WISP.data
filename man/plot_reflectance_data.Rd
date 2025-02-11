@@ -7,20 +7,23 @@
 plot_reflectance_data(data)
 }
 \arguments{
-\item{data}{A \code{tibble} obtained by any of the funtions provided by this
+\item{data}{A \code{tibble} obtained by any of the functions provided by this
 package: wisp_get_reflectance_data(), or after QC and SR removal operations.}
 }
+\value{
+description A plotly object with the spectral signatures of the reflectance
+data.
+}
 \description{
-This function return a plotly of each spectral signature measured by a WISP
-station.
-
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+This function return a plotly of each spectral signature measured by a
+WISPstation.
 }
 \examples{
 # example code
 \dontrun{
 ## Not run:
-WISP.data::plot_reflectance_data(data = reflec_data_sr)
+WISP.data::plot_reflectance_data(data = reflect_data_sr)
 }
 ## End (Not run)
 
