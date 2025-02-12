@@ -12,9 +12,9 @@
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
 #' @return A tibble with measurement id, measurement date, instrument name,
-#' waterquality values of TSM, Chla and Kd as provided by instrument by default,
-#' all the values of reflectance for each wevelength from 350 to 900 nm, and
-#' also the label of ... (e.g. EdF, LuS, LuP) that means ... .
+#' level2_quality, set of sensor (irradiance and radiances),
+#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
+#' all the values of reflectance for each wevelength from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom httr2 request req_url_query req_auth_basic req_perform
@@ -170,7 +170,7 @@ wisp_get_reflectance_data <- function(
     }
   } else {
     reflectance_data_tbl <- NULL
-    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal.\n----\n")
+    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use: reflect_data <- wisp_get_reflectance_multi_data\n----\n")
   }
   reflectance_data_tbl
 }
@@ -189,10 +189,9 @@ wisp_get_reflectance_data <- function(
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
 #' @return A tibble with measurement id, measurement date, instrument name,
-#' waterquality values of TSM, Chla and Kd as provided by instrument by default,
-#' all the values of reflectance for each wevelength from 350 to 900 nm, and
-#' also the label of ... (e.g. EdF, LuS, LuP) that means ... .
-#' Default is 0.05.
+#' level2_quality, set of sensor (irradiance and radiances),
+#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
+#' all the values of reflectance for each wevelength from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @importFrom dplyr bind_rows
 #' @examples
@@ -200,7 +199,7 @@ wisp_get_reflectance_data <- function(
 #' \dontrun{
 #' ## Not run:
 #' # NA data
-#' reflect_data_multiDates <- wisp_get_data_dates(
+#' reflect_data <- wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
 #'   station = "WISPstation012",
@@ -210,8 +209,8 @@ wisp_get_reflectance_data <- function(
 #' }
 #' ## End (Not run)
 #' 
-### wisp_get_data_dates
-wisp_get_data_dates <- function(
+### wisp_get_reflectance_multi_data
+wisp_get_reflectance_multi_data <- function(
     version = "1.0",
     time_from = NULL,
     time_to = NULL,
@@ -237,20 +236,19 @@ wisp_get_data_dates <- function(
     )
   }) |>
     dplyr::bind_rows()
-  return(a)
+  return(data_multiDates)
 }
 
 #' Quality Control (QC) for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
-#' This function removes all anomalous spectral signatures
+#' This function removes all anomalous spectral signatures and explains the reason for each elimination
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
-#' @param maxPeak A `decimal`. Magnitude of the maximum value of the spectral
-#' signatures. We suggest to set the number of this parameter equal to: 0.03
-#' for clear and oligotrophyc water, 0.05 for mesotrophic - eutrophic water,
-#' and 0.08 for hypereutrophic and very turbid water.
-#' Default is 0.05.
-#' @return A tibble with the spectral signatures after the QC operation. Also
-#' with a message contains with ...
+#' @param MaxPeak A `decimal`. Maximum magnitude of the spectral signatures.
+#' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
+#' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
+#' #' Default is 0.05.
+#' @return A tibble with the spectral signatures that have passed QC operation. In addition,
+#' a message containing the reason behind the elimination of each anomalous spectral signature
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr filter if_all all_of rowwise ungroup mutate across
@@ -261,12 +259,12 @@ wisp_get_data_dates <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, maxPeak = 0.07)
+#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, MaxPeak = 0.05)
 #' }
 #' ## End (Not run)
 #' 
 ### qc_reflectance_data
-qc_reflectance_data <- function(data, maxPeak=0.05) {
+qc_reflectance_data <- function(data, MaxPeak=0.05) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -285,12 +283,12 @@ qc_reflectance_data <- function(data, maxPeak=0.05) {
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(nm_840 <= nm_700)
   
-  # QC3 -> Removal lines with maximum peak greater than 0.05 (Trasimeno)
+  # QC3 -> Removal lines with maximum peak greater than "MaxPeak"
   columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
   reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], as.numeric)
-  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > maxPeak, ]
+  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > MaxPeak, ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) |> dplyr::ungroup()
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= MaxPeak) |> dplyr::ungroup()
   
   # QC4 -> Removal lines with outliers in the Blue domain
   removed_QC4 <- reflectance_data_filtered[which(reflectance_data_filtered$nm_350 > pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) & 
@@ -450,6 +448,7 @@ plot_reflectance_data <- function(data) {
   # Color palette selection
   num_colors <- length(unique(data_2$measurement_info))
   color_palette <- viridis::viridis(num_colors)
+  
   # select dates
   length_dates <- length(data$measurement.date)
   n_dates <- seq.Date(
@@ -470,6 +469,7 @@ plot_reflectance_data <- function(data) {
       n_dates[1]
     )
   }
+  
   # plot
   fig <- plotly::plot_ly(
     data_2,
