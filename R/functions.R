@@ -259,12 +259,12 @@ wisp_get_reflectance_multi_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
+#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
 #' }
 #' ## End (Not run)
 #' 
-### qc_reflectance_data
-qc_reflectance_data <- function(data, maxPeak=0.05) {
+### wisp_qc_reflectance_data
+wisp_qc_reflectance_data <- function(data, maxPeak=0.05) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -345,7 +345,7 @@ qc_reflectance_data <- function(data, maxPeak=0.05) {
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
 #' This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
-#' @param qc_data A `tibble` from qc_reflectance_data() function.
+#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @return A tibble with the spectral signatures after the SR operation.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
@@ -356,12 +356,12 @@ qc_reflectance_data <- function(data, maxPeak=0.05) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflect_data_qc) 
+#' reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(qc_data = reflect_data_qc) 
 #' }
 #' ## End (Not run)
 #'
-### sr_reflectance_data
-sr_reflectance_data <- function(qc_data) {
+### wisp_sr_reflectance_data
+wisp_sr_reflectance_data <- function(qc_data) {
   columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
                           colnames(qc_data), value = TRUE)
   columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
@@ -404,6 +404,7 @@ sr_reflectance_data <- function(qc_data) {
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select
+#' @importFrom plotly subplot
 #' @importFrom plotly plot_ly layout
 #' @importFrom tidyr pivot_longer
 #' @importFrom viridis viridis 
@@ -412,12 +413,12 @@ sr_reflectance_data <- function(qc_data) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' WISP.data::plot_reflectance_data(data = reflect_data_sr)
+#' WISP.data::wisp_plot_reflectance_data(data = reflect_data_sr)
 #' }
 #' ## End (Not run)
 #'
-### plot_reflectance_data
-plot_reflectance_data <- function(data) {
+### wisp_plot_reflectance_data
+wisp_plot_reflectance_data <- function(data) {
   data_2 <- data |>
     dplyr::select(
       measurement.date, starts_with("nm_"),
