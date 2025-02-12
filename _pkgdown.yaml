@@ -11,8 +11,8 @@ template:
 reference:
   - title: All functions
     contents:
+    - wisp_get_reflectance_multi_data
     - wisp_get_reflectance_data
-    - wisp_get_data_dates
     - qc_reflectance_data
     - sr_reflectance_data
     - plot_reflectance_data

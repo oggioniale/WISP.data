@@ -40,6 +40,9 @@
     <loc>https://github.com/oggioniale/WISP.data/reference/wisp_get_reflectance_data.html</loc>
   </url>
   <url>
+    <loc>https://github.com/oggioniale/WISP.data/reference/wisp_get_reflectance_multi_data.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/oggioniale/WISP.data/reference/wisp_runApp.html</loc>
   </url>
 </urlset>
