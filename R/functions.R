@@ -11,7 +11,7 @@
 #' @param station A `character`.  It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
-#' @return A tibble with measurement id, measurement date, instrument name,
+#' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 #' all the values of reflectance for each wevelength from 350 to 900 nm.
@@ -188,7 +188,7 @@ wisp_get_reflectance_data <- function(
 #' @param station A `character`.  It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
-#' @return A tibble with measurement id, measurement date, instrument name,
+#' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 #' all the values of reflectance for each wevelength from 350 to 900 nm.
@@ -247,7 +247,7 @@ wisp_get_reflectance_multi_data <- function(
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' #' Default is 0.05.
-#' @return A tibble with the spectral signatures that have passed QC operation. In addition,
+#' @return A `tibble` with the spectral signatures that have passed QC operation. In addition,
 #' a message containing the reason behind the elimination of each anomalous spectral signature
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}

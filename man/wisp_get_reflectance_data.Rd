@@ -31,9 +31,9 @@ is requested.}
 }
 \value{
 A tibble with measurement id, measurement date, instrument name,
-waterquality values of TSM, Chla and Kd as provided by instrument by default,
-all the values of reflectance for each wevelength from 350 to 900 nm, and
-also the label of ... (e.g. EdF, LuS, LuP) that means ... .
+level2_quality, set of sensor (irradiance and radiances),
+waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
+all the values of reflectance for each wevelength from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
