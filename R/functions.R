@@ -243,7 +243,7 @@ wisp_get_reflectance_multi_data <- function(
 #' @description `r lifecycle::badge("experimental")`
 #' This function removes all anomalous spectral signatures and explains the reason for each elimination
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
-#' @param MaxPeak A `decimal`. Maximum magnitude of the spectral signatures.
+#' @param maxPeak A `decimal`. Maximum magnitude of the spectral signatures.
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' #' Default is 0.05.
@@ -259,12 +259,12 @@ wisp_get_reflectance_multi_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, MaxPeak = 0.05)
+#' reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
 #' }
 #' ## End (Not run)
 #' 
 ### qc_reflectance_data
-qc_reflectance_data <- function(data, MaxPeak=0.05) {
+qc_reflectance_data <- function(data, maxPeak=0.05) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -283,12 +283,12 @@ qc_reflectance_data <- function(data, MaxPeak=0.05) {
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(nm_840 <= nm_700)
   
-  # QC3 -> Removal lines with maximum peak greater than "MaxPeak"
+  # QC3 -> Removal lines with maximum peak greater than "maxPeak"
   columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
   reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], as.numeric)
-  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > MaxPeak, ]
+  removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > maxPeak, ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= MaxPeak) |> dplyr::ungroup()
+  reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) |> dplyr::ungroup()
   
   # QC4 -> Removal lines with outliers in the Blue domain
   removed_QC4 <- reflectance_data_filtered[which(reflectance_data_filtered$nm_350 > pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) & 

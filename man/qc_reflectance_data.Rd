@@ -4,18 +4,18 @@
 \alias{qc_reflectance_data}
 \title{Quality Control (QC) for WISPstation reflectance data}
 \usage{
-qc_reflectance_data(data, MaxPeak = 0.05)
+qc_reflectance_data(data, maxPeak = 0.05)
 }
 \arguments{
 \item{data}{A \code{tibble}. From wisp_get_reflectance_data() function.}
 
-\item{MaxPeak}{A \code{decimal}. Maximum magnitude of the spectral signatures.
+\item{maxPeak}{A \code{decimal}. Maximum magnitude of the spectral signatures.
 We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' Default is 0.05.}
 }
 \value{
-A tibble with the spectral signatures that have passed QC operation. In addition,
+A \code{tibble} with the spectral signatures that have passed QC operation. In addition,
 a message containing the reason behind the elimination of each anomalous spectral signature
 }
 \description{
@@ -26,7 +26,7 @@ This function removes all anomalous spectral signatures and explains the reason 
 # example code
 \dontrun{
 ## Not run:
-reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, MaxPeak = 0.05)
+reflect_data_qc <- WISP.data::qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
 }
 ## End (Not run)
 

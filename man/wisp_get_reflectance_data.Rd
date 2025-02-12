@@ -30,7 +30,7 @@ is requested.}
 \item{pwd}{A \code{character}. It is the password to access to the data service.}
 }
 \value{
-A tibble with measurement id, measurement date, instrument name,
+A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
 waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 all the values of reflectance for each wevelength from 350 to 900 nm.
