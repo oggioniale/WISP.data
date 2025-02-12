@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{wisp_get_reflectance_multi_data}
 \alias{wisp_get_reflectance_multi_data}
-\title{Get data of reflectance (level2) from WISPstation for a specific multiple dates}
+\title{Get data of reflectance (level2) from WISPstation for a multiple dates}
 \usage{
 wisp_get_reflectance_multi_data(
   version = "1.0",

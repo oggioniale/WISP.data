@@ -11,11 +11,11 @@ template:
 reference:
   - title: All functions
     contents:
-    - wisp_get_reflectance_multi_data
     - wisp_get_reflectance_data
-    - qc_reflectance_data
-    - sr_reflectance_data
-    - plot_reflectance_data
+    - wisp_get_reflectance_multi_data
+    - wisp_qc_reflectance_data
+    - wisp_sr_reflectance_data
+    - wisp_plot_reflectance_data
 navbar:
   structure:
     left: [reference,articles]

@@ -175,7 +175,7 @@ wisp_get_reflectance_data <- function(
   reflectance_data_tbl
 }
 
-#' Get data of reflectance (level2) from WISPstation for a specific multiple dates
+#' Get data of reflectance (level2) from WISPstation for a multiple dates
 #' @description `r lifecycle::badge("experimental")`
 #' This function obtains the data of reflectance from WISPstation for a
 #' multiple dates.
@@ -194,6 +194,7 @@ wisp_get_reflectance_data <- function(
 #' all the values of reflectance for each wevelength from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @importFrom dplyr bind_rows
+#' @export
 #' @examples
 #' # example code
 #' \dontrun{
@@ -272,7 +273,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak=0.05) {
   columns_nm_below_845 <- grep("^nm_([0-7][0-9]{2}|8[0-3][0-9]|84[0-4])", colnames(data), value = TRUE)
   data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], as.numeric)
   removed_QC1 <- data[rowSums(data[columns_nm_below_845] < 0, na.rm = TRUE) > 0, ]
-  removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- " QC1"
+  removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- " QC1. It removes lines where the values are negative and below 845 nm."
   reflectance_data_filtered <- data |> 
     dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_845), ~ . >= 0))
   
@@ -280,20 +281,20 @@ wisp_qc_reflectance_data <- function(data, maxPeak=0.05) {
   reflectance_data_filtered$nm_700 <- as.numeric(reflectance_data_filtered$nm_700)
   reflectance_data_filtered$nm_840 <- as.numeric(reflectance_data_filtered$nm_840)
   removed_QC2 <- reflectance_data_filtered[reflectance_data_filtered$nm_840 > reflectance_data_filtered$nm_700, ]
-  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2", sep = " ")
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2. It removes lines with outliers in the NIR (840 nm > 700 nm).", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(nm_840 <= nm_700)
   
   # QC3 -> Removal lines with maximum peak greater than "maxPeak"
   columns_nm <- grep("^nm_", colnames(reflectance_data_filtered), value = TRUE)
   reflectance_data_filtered[columns_nm] <- lapply(reflectance_data_filtered[columns_nm], as.numeric)
   removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > maxPeak, ]
-  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3. It removes lines with maximum peak greater than 'maxPeak'", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) |> dplyr::ungroup()
   
   # QC4 -> Removal lines with outliers in the Blue domain
   removed_QC4 <- reflectance_data_filtered[which(reflectance_data_filtered$nm_350 > pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) & 
                                                    pmax(reflectance_data_filtered$nm_555, reflectance_data_filtered$nm_560, reflectance_data_filtered$nm_565, reflectance_data_filtered$nm_570, reflectance_data_filtered$nm_575) > reflectance_data_filtered$nm_495), ]
-  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date], "QC4", sep = " ")
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date], "QC4. It removes lines with outliers in the Blue domain", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
                                                                               pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
   
@@ -305,7 +306,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak=0.05) {
     percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
     percentage_negative >= 0.95
   }) |> dplyr::ungroup()
-  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date], "QC5", sep = " ")
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date], "QC5. It removes lines similar to 'decreasing logarithms'", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::rowwise() |> dplyr::filter({
     valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
     diff_valori <- diff(valori)
@@ -315,7 +316,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak=0.05) {
   
   # QC6 -> Removal of "invalid" lines (level2.quality)
   removed_QC6 <- reflectance_data_filtered[reflectance_data_filtered$level2.quality == "invalid", ]
-  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date], "QC6", sep = " ")
+  removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date] <- paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date], "QC6. It removes lines of 'invalid' lines", sep = " ")
   reflectance_data_filtered <- reflectance_data_filtered |> dplyr::filter(level2.quality != "invalid")
   
   final_nrow <- nrow(reflectance_data_filtered)

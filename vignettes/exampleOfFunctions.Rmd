@@ -14,11 +14,14 @@ userid <- Sys.getenv("WISP_IREA_USERID")
 pwd <- Sys.getenv("WISP_IREA_PSW")
 ```
 
-## Get data from the WISP station server for a specific date
+## Get data from the WISP station server for a multiple dates
+
+If you want to download the data for a single date, consider using the function `wisp_get_reflectance_data()` instead.
+
 ```{r echo = T, results = 'hide', warning=FALSE}
-reflec_data <- WISP.data::wisp_get_reflectance_data(
-  time_from = "2024-08-01T09:00",
-  time_to = "2024-08-01T14:00",
+reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
+  time_from = "2024-04-08T09:00",
+  time_to = "2024-04-10T14:00",
   station = "WISPstation012",
   userid = userid,
   pwd = pwd
@@ -27,11 +30,16 @@ reflec_data <- WISP.data::wisp_get_reflectance_data(
 
 ## Quality Check (QC) and Sunglint Removal (SR) of the reflectance data
 ```{r echo = T, results = 'hide', warning=FALSE}
-reflec_data_qc <- WISP.data::qc_reflectance_data(data = reflec_data)
-reflec_data_sr <- WISP.data::sr_reflectance_data(qc_data = reflec_data_qc)
+reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+  data = reflect_data,
+  maxPeak = 0.05
+)
+reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
+  qc_data = reflect_data_qc
+)
 ```
 
 ## Plot the reflectance data
 ```{r, warning=FALSE, out.width="100%"}
-WISP.data::plot_reflectance_data(data = reflec_data_sr)
+WISP.data::wisp_plot_reflectance_data(data = reflect_data_sr)
 ```
