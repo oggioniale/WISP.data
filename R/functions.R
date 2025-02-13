@@ -17,14 +17,12 @@
 #' all the values of reflectance for each wevelength from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom httr2 request req_url_query req_auth_basic req_perform
-#' @importFrom httr2 resp_body_string
+#' @importFrom httr2 request req_url_query req_auth_basic req_perform resp_body_string
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr slice mutate across starts_with rename_with
+#' @importFrom dplyr slice mutate across rename_with
 #' @importFrom tidyr unnest_wider
 #' @importFrom lubridate as_datetime
 #' @importFrom units set_units
-#' @importFrom stringr str_c
 #' @export
 #' @examples
 #' # example code
@@ -190,8 +188,9 @@ wisp_get_reflectance_data <- function(
 #' @param pwd A `character`. It is the password to access to the data service.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
-#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
-#' all the values of reflectance for each wevelength from 350 to 900 nm.
+#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
+#' default, all the values of reflectance for each wevelength from 350 to 900
+#' nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @importFrom dplyr bind_rows
 #' @export
@@ -200,7 +199,7 @@ wisp_get_reflectance_data <- function(
 #' \dontrun{
 #' ## Not run:
 #' # NA data
-#' reflect_data <- wisp_get_reflectance_multi_data(
+#' reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
 #'   station = "WISPstation012",
@@ -274,7 +273,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
   data[columns_nm_below_845] <- lapply(data[columns_nm_below_845], as.numeric)
   removed_QC1 <- data[rowSums(data[columns_nm_below_845] < 0, na.rm = TRUE) > 0, ]
   removed_rows$reason[data$measurement.date %in% removed_QC1$measurement.date] <- " QC1"
-  reflectance_data_filtered <- data %>% 
+  reflectance_data_filtered <- data |> 
     dplyr::filter(dplyr::if_all(dplyr::all_of(columns_nm_below_845), ~ . >= 0))
   
   # QC2 -> Removal lines with outliers in the NIR (840 nm > 700 nm)
@@ -283,7 +282,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
   removed_QC2 <- reflectance_data_filtered[reflectance_data_filtered$nm_840 > reflectance_data_filtered$nm_700, ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date] <- 
     paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC2$measurement.date], "QC2", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
     dplyr::filter(nm_840 <= nm_700)
   
   # QC3 -> Removal lines with maximum peak greater than "maxPeak"
@@ -292,9 +291,9 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
   removed_QC3 <- reflectance_data_filtered[apply(reflectance_data_filtered[columns_nm], 1, max) > maxPeak, ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date] <- 
     paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
-    dplyr::rowwise() %>% 
-    dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
+    dplyr::rowwise() |> 
+    dplyr::filter(max(dplyr::c_across(dplyr::all_of(columns_nm))) <= maxPeak) |> 
     dplyr::ungroup()
   
   # QC4 -> Removal lines with outliers in the Blue domain
@@ -312,38 +311,38 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
   ), ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date] <- 
     paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC4$measurement.date], "QC4", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
     dplyr::filter(!(nm_350 > pmax(nm_555, nm_560, nm_565, nm_570, nm_575) & 
                       pmax(nm_555, nm_560, nm_565, nm_570, nm_575) > nm_495))
   
   # QC5 -> Removal of lines similar to "decreasing logarithms"
   columns_nm_range <- grep("^nm_(3[5-9][0-9]|4[0-9]{2}|500)$", colnames(reflectance_data_filtered), value = TRUE)
-  removed_QC5 <- reflectance_data_filtered %>% 
-    dplyr::rowwise() %>% 
+  removed_QC5 <- reflectance_data_filtered |> 
+    dplyr::rowwise() |> 
     dplyr::filter({
       valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
       diff_valori <- diff(valori)
       percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
       percentage_negative >= 0.95
-    }) %>% 
+    }) |> 
     dplyr::ungroup()
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date] <- 
     paste(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC5$measurement.date], "QC5", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
-    dplyr::rowwise() %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
+    dplyr::rowwise() |> 
     dplyr::filter({
       valori <- dplyr::c_across(dplyr::all_of(columns_nm_range))
       diff_valori <- diff(valori)
       percentage_negative <- mean(diff_valori < 0, na.rm = TRUE)
       percentage_negative < 0.95
-    }) %>% 
+    }) |> 
     dplyr::ungroup()
   
   # QC6 -> Removal of "invalid" lines (level2.quality)
   removed_QC6 <- reflectance_data_filtered[!(reflectance_data_filtered$level2.quality %in% c("okay", "suspect")), ]
   removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date] <- 
     paste(trimws(removed_rows$reason[reflectance_data_filtered$measurement.date %in% removed_QC6$measurement.date]), "QC6", sep = " ")
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
     dplyr::filter(!level2.quality %in% c("invalid", "none"))
   
   # Output message
@@ -390,7 +389,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
     return(NULL)
   }
   
-  reflectance_data_filtered <- reflectance_data_filtered %>% 
+  reflectance_data_filtered <- reflectance_data_filtered |> 
     dplyr::mutate(
       dplyr::across(
         dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
@@ -461,11 +460,10 @@ wisp_sr_reflectance_data <- function(qc_data) {
 #' data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr mutate select
-#' @importFrom plotly subplot
-#' @importFrom plotly plot_ly layout
+#' @importFrom dplyr select mutate
 #' @importFrom tidyr pivot_longer
-#' @importFrom viridis viridis 
+#' @importFrom viridis viridis
+#' @importFrom plotly plot_ly layout
 #' @export
 #' @examples
 #' # example code

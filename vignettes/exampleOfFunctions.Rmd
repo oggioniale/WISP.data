@@ -18,7 +18,7 @@ pwd <- Sys.getenv("WISP_IREA_PSW")
 
 If you want to download the data for a single date, consider using the function `wisp_get_reflectance_data()` instead.
 
-```{r echo = T, results = 'hide', warning=FALSE}
+```{r echo = T, results = 'hide', warning=FALSE, message=TRUE}
 reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_from = "2024-04-08T09:00",
   time_to = "2024-04-10T14:00",
@@ -28,12 +28,16 @@ reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
 )
 ```
 
-## Quality Check (QC) and Sunglint Removal (SR) of the reflectance data
-```{r echo = T, results = 'hide', warning=FALSE}
+## Quality Check (QC) of the reflectance data
+```{r echo = T, results = 'hide', warning=FALSE, message=TRUE}
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05
 )
+```
+
+## Sunglint Removal (SR) of the reflectance data
+```{r echo = T, results = 'hide', warning=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data = reflect_data_qc
 )

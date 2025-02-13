@@ -32,8 +32,9 @@ is requested.}
 \value{
 A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
-waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
-all the values of reflectance for each wevelength from 350 to 900 nm.
+waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
+default, all the values of reflectance for each wevelength from 350 to 900
+nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -45,7 +46,7 @@ multiple dates.
 \dontrun{
 ## Not run:
 # NA data
-reflect_data <- wisp_get_reflectance_multi_data(
+reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_from = "2024-04-08T09:00",
   time_to = "2024-04-10T14:00",
   station = "WISPstation012",
