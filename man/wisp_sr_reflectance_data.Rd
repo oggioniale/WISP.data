@@ -4,23 +4,32 @@
 \alias{wisp_sr_reflectance_data}
 \title{SUNGLINT Removal (SR) for WISPstation reflectance data}
 \usage{
-wisp_sr_reflectance_data(qc_data)
+wisp_sr_reflectance_data(qc_data, save_output = FALSE)
 }
 \arguments{
 \item{qc_data}{A \code{tibble} from wisp_qc_reflectance_data() function.}
+
+\item{save_output}{A \code{logical}. If \code{TRUE}, the function saves the output in a
+CSV file. Default is \code{FALSE}.}
 }
 \value{
-A tibble with the spectral signatures after the SR operation.
+A tibble with the spectral signatures after the SR operation and,
+if parameter \code{save_output} is \code{TRUE}, the function saves the reflectance data
+in a CSV file.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function applies the algorithm of Jiang et al., (2020) for removing sunglint from spectral signatures
+This function applies the algorithm of Jiang et al., (2020) for removing
+sunglint from spectral signatures
 }
 \examples{
 # example code
 \dontrun{
 ## Not run:
-reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(qc_data = reflect_data_qc) 
+reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
+  qc_data = reflect_data_qc,
+  save_output = TRUE
+) 
 }
 ## End (Not run)
 

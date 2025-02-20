@@ -37,9 +37,15 @@ reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
 ```
 
 ## Sunglint Removal (SR) of the reflectance data
+
+In this function if the `save_output` parameter is set to `TRUE`, the function
+will save the reflectance data with the sunglint removed as a .csv file in
+the working directory.
+
 ```{r echo = T, results = 'hide', warning=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
-  qc_data = reflect_data_qc
+  qc_data = reflect_data_qc,
+  save_output = TRUE
 )
 ```
 
