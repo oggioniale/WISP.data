@@ -51,5 +51,11 @@ reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
 
 ## Plot the reflectance data
 ```{r, warning=FALSE, out.width="100%"}
-WISP.data::wisp_plot_reflectance_data(data = reflect_data_sr)
+WISP.data::wisp_plot_reflectance_data(
+  data = reflect_data_sr,
+  legend_TSM = TRUE,
+  legend_Chla = TRUE,
+  legend_Kd = FALSE,
+  legend_cpc = FALSE
+)
 ```

@@ -4,15 +4,33 @@
 \alias{wisp_plot_reflectance_data}
 \title{Create a plot of reflectance data}
 \usage{
-wisp_plot_reflectance_data(data)
+wisp_plot_reflectance_data(
+  data,
+  legend_TSM = TRUE,
+  legend_Chla = TRUE,
+  legend_Kd = TRUE,
+  legend_cpc = TRUE
+)
 }
 \arguments{
 \item{data}{A \code{tibble} obtained by any of the functions provided by this
 package: wisp_get_reflectance_data(), or after QC and SR removal operations.}
+
+\item{legend_TSM}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{TSM}
+values. Default is \code{TRUE}.}
+
+\item{legend_Chla}{A \code{logical}. If \code{TRUE}, the plot legend includes the
+\code{Chla} values. Default is \code{TRUE}.}
+
+\item{legend_Kd}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{Kd}
+values. Default is \code{TRUE}.}
+
+\item{legend_cpc}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{cpc}
+values. Default is \code{TRUE}.}
 }
 \value{
-description A plotly object with the spectral signatures of the reflectance
-data.
+description A plotly object with the spectral signatures of the
+reflectance data.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

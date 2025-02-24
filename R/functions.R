@@ -198,7 +198,6 @@ wisp_get_reflectance_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' # NA data
 #' reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
@@ -421,7 +420,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
 #' ## Not run:
 #' reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
 #'   qc_data = reflect_data_qc,
-#'   save_output = TRUE
+#'   save_output = FALSE
 #' ) 
 #' }
 #' ## End (Not run)
@@ -493,8 +492,16 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE) {
 #' WISPstation.
 #' @param data A `tibble` obtained by any of the functions provided by this
 #' package: wisp_get_reflectance_data(), or after QC and SR removal operations.
-#' @return description A plotly object with the spectral signatures of the reflectance
-#' data.
+#' @param legend_TSM A `logical`. If `TRUE`, the plot legend includes the `TSM`
+#' values. Default is `TRUE`.
+#' @param legend_Chla A `logical`. If `TRUE`, the plot legend includes the
+#' `Chla` values. Default is `TRUE`.
+#' @param legend_Kd A `logical`. If `TRUE`, the plot legend includes the `Kd`
+#' values. Default is `TRUE`.
+#' @param legend_cpc A `logical`. If `TRUE`, the plot legend includes the `cpc`
+#' values. Default is `TRUE`.
+#' @return description A plotly object with the spectral signatures of the
+#' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr select mutate
@@ -511,7 +518,14 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE) {
 #' ## End (Not run)
 #'
 ### wisp_plot_reflectance_data
-wisp_plot_reflectance_data <- function(data) {
+wisp_plot_reflectance_data <- function(
+    data,
+    legend_TSM = TRUE,
+    legend_Chla = TRUE,
+    legend_Kd = TRUE,
+    legend_cpc = TRUE
+  ) {
+  # data structure
   data_2 <- data |>
     dplyr::select(
       measurement.date, starts_with("nm_"),
@@ -528,19 +542,46 @@ wisp_plot_reflectance_data <- function(data) {
     # Convert wavelength name to numeric format
     dplyr::mutate(
       wavelength = as.numeric(gsub("nm_", "", wavelength)),
-      measurement_info = as.factor(
+      date_time_info = as.factor(
         paste0(
-          "Time: ", substr(measurement.date, 12, 20),
-          "\nTSM [g/m3]: ", waterquality.tsm,
-          "\nChla [mg/m3]: ", waterquality.chla,
-          "\nKd [1/m]: ", waterquality.kd,
-          "\ncpc [mg/m3]: ", waterquality.cpc
+          "Date: ", substr(measurement.date, 1, 10),
+          "\nTime: ", substr(measurement.date, 12, 19)
         )
-      )  # Convert to factor for colours
-    )
-
+      ),
+      tsm_info = dplyr::case_when(
+        legend_TSM ~ as.factor(paste0(
+          "\nTSM [g/m3]: ", waterquality.tsm
+        )),
+        !legend_TSM ~ paste0("")
+      ),
+      chla_info = dplyr::case_when(
+        legend_Chla ~ as.factor(paste0(
+          "\nChla [mg/m3]: ", waterquality.chla
+        )),
+        !legend_Chla ~ paste0("")
+      ),
+      kd_info = dplyr::case_when(
+        legend_Kd ~ as.factor(paste0(
+          "\nKd [1/m]: ", waterquality.kd
+        )),
+        !legend_Kd ~ paste0("")
+      ),
+      cpc_info = dplyr::case_when(
+        legend_cpc ~ as.factor(paste0(
+          "\ncpc [mg/m3]: ", waterquality.cpc
+        )),
+        !legend_cpc ~ paste0("")
+      ),
+      legend_info = paste0(
+        date_time_info,
+        tsm_info,
+        chla_info,
+        kd_info,
+        cpc_info
+      )
+    ) # Convert to factor for colours
   # Color palette selection
-  num_colors <- length(unique(data_2$measurement_info))
+  num_colors <- length(unique(data_2$legend_info))
   color_palette <- viridis::viridis(num_colors)
   
   # select dates
@@ -569,7 +610,7 @@ wisp_plot_reflectance_data <- function(data) {
     data_2,
     x = ~wavelength,
     y = ~Rrs,
-    color = ~measurement_info,
+    color = ~legend_info,
     colors = color_palette, # Assign custom color palette
     type = 'scatter',
     mode = 'lines'

@@ -60,7 +60,13 @@ WISPstation.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_plot_reflectance_data</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_plot_reflectance_data</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  legend_TSM <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  legend_Chla <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  legend_Kd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  legend_cpc <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,13 +75,33 @@ WISPstation.</p>
 <dd><p>A <code>tibble</code> obtained by any of the functions provided by this
 package: wisp_get_reflectance_data(), or after QC and SR removal operations.</p></dd>
 
+
+<dt>legend_TSM</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>TSM</code>
+values. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt>legend_Chla</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the
+<code>Chla</code> values. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt>legend_Kd</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>Kd</code>
+values. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt>legend_cpc</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>cpc</code>
+values. Default is <code>TRUE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>description A plotly object with the spectral signatures of the reflectance
-data.</p>
+<p>description A plotly object with the spectral signatures of the
+reflectance data.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

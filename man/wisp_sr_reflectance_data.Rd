@@ -28,7 +28,7 @@ sunglint from spectral signatures
 ## Not run:
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data = reflect_data_qc,
-  save_output = TRUE
+  save_output = FALSE
 ) 
 }
 ## End (Not run)
