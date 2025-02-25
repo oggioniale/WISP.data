@@ -524,8 +524,8 @@ wisp_plot_reflectance_data <- function(
     legend_Chla = TRUE,
     legend_Kd = TRUE,
     legend_cpc = TRUE
-  ) {
-  # data structure
+) {
+  # Data preparation
   data_2 <- data |>
     dplyr::select(
       measurement.date, starts_with("nm_"),
@@ -539,52 +539,28 @@ wisp_plot_reflectance_data <- function(
       names_to = "wavelength",
       values_to = "Rrs"
     ) |>
-    # Convert wavelength name to numeric format
     dplyr::mutate(
       wavelength = as.numeric(gsub("nm_", "", wavelength)),
-      date_time_info = as.factor(
-        paste0(
-          "Date: ", substr(measurement.date, 1, 10),
-          "\nTime: ", substr(measurement.date, 12, 19)
-        )
+      
+      date_time_info = paste0(
+        "Date: ", substr(measurement.date, 1, 10),
+        "<br>Time: ", substr(measurement.date, 12, 19)
       ),
-      tsm_info = dplyr::case_when(
-        legend_TSM ~ as.factor(paste0(
-          "\nTSM [g/m3]: ", waterquality.tsm
-        )),
-        !legend_TSM ~ paste0("")
-      ),
-      chla_info = dplyr::case_when(
-        legend_Chla ~ as.factor(paste0(
-          "\nChla [mg/m3]: ", waterquality.chla
-        )),
-        !legend_Chla ~ paste0("")
-      ),
-      kd_info = dplyr::case_when(
-        legend_Kd ~ as.factor(paste0(
-          "\nKd [1/m]: ", waterquality.kd
-        )),
-        !legend_Kd ~ paste0("")
-      ),
-      cpc_info = dplyr::case_when(
-        legend_cpc ~ as.factor(paste0(
-          "\ncpc [mg/m3]: ", waterquality.cpc
-        )),
-        !legend_cpc ~ paste0("")
-      ),
-      legend_info = paste0(
-        date_time_info,
-        tsm_info,
-        chla_info,
-        kd_info,
-        cpc_info
-      )
-    ) # Convert to factor for colours
+      
+      tsm_info = ifelse(legend_TSM, paste0("TSM [g/m3]: ", waterquality.tsm), ""),
+      chla_info = ifelse(legend_Chla, paste0("Chla [mg/m3]: ", waterquality.chla), ""),
+      kd_info = ifelse(legend_Kd, paste0("Kd [1/m]: ", waterquality.kd), ""),
+      cpc_info = ifelse(legend_cpc, paste0("cpc [mg/m3]: ", waterquality.cpc), ""),
+      
+      products_info = paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
+      legend_info = paste(date_time_info, products_info, sep = "<br>")
+    )
+  
   # Color palette selection
   num_colors <- length(unique(data_2$legend_info))
   color_palette <- viridis::viridis(num_colors)
   
-  # select dates
+  # Plot title selection
   length_dates <- length(data$measurement.date)
   n_dates <- seq.Date(
     from = as.Date(data$measurement.date[1]),
@@ -593,38 +569,36 @@ wisp_plot_reflectance_data <- function(
   )
   if (length(n_dates) > 1) {
     dates_text <- paste0(
-      "\nfrom date: ",
-      n_dates[1],
-      "\nto date: ",
-      n_dates[length(n_dates)]
+      "<br>from date: ", n_dates[1],
+      "<br>to date: ", n_dates[length(n_dates)]
     )
   } else {
     dates_text <- paste0(
-      "\non the date: ",
-      n_dates[1]
+      "<br>on the date: ", n_dates[1]
     )
   }
   
-  # plot
+  # Plot
   fig <- plotly::plot_ly(
     data_2,
     x = ~wavelength,
     y = ~Rrs,
     color = ~legend_info,
-    colors = color_palette, # Assign custom color palette
+    text = ~legend_info,
+    hovertemplate = paste0(
+      "Wavelength: %{x} nm<br>",
+      "Rrs: %{y:.4f} [1/sr]<br>",
+      "%{text}<extra></extra>"
+    ),
+    colors = color_palette,
     type = 'scatter',
     mode = 'lines'
   ) |>
     plotly::layout(
-      title = paste0(
-        "Aquired by: ",
-        data$instrument.name[1],
-        dates_text
-      ),
-      # plot_bgcolor = "#e5ecf6",
-      xaxis = list(title = 'Wevelength [nm]'), 
-      yaxis = list(title = 'Rrs [1/sr]'),
-      legend = list(title = list(text = '<b>Time of aquisition</b>'))
+      title = paste0("Aquired by: ", data$instrument.name[1], dates_text),
+      xaxis = list(title = '<b>Wavelength [nm]<b>', dtick = 100),
+      yaxis = list(title = '<b>Rrs [1/sr]<b>'),
+      legend = list(title = list(text = '<b>Time of acquisition</b>'))
     )
   
   fig
