@@ -41,7 +41,13 @@ WISPstation.
 # example code
 \dontrun{
 ## Not run:
-WISP.data::wisp_plot_reflectance_data(data = reflect_data_sr)
+WISP.data::wisp_plot_reflectance_data(
+  data = reflect_data_sr,
+  legend_TSM = FALSE,
+  legend_Chla = TRUE,
+  legend_Kd = FALSE,
+  legend_cpc = FALSE
+)
 }
 ## End (Not run)
 
