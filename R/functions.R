@@ -494,7 +494,13 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' WISP.data::wisp_plot_reflectance_data(data = reflect_data_sr)
+#' WISP.data::wisp_plot_reflectance_data(
+#'   data = reflect_data_sr,
+#'   legend_TSM = FALSE,
+#'   legend_Chla = TRUE,
+#'   legend_Kd = FALSE,
+#'   legend_cpc = FALSE
+#' )
 #' }
 #' ## End (Not run)
 #'
@@ -533,7 +539,35 @@ wisp_plot_reflectance_data <- function(
       kd_info = ifelse(legend_Kd, paste0("Kd [1/m]: ", waterquality.kd), ""),
       cpc_info = ifelse(legend_cpc, paste0("cpc [mg/m3]: ", waterquality.cpc), ""),
       
-      products_info = paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
+      products_info = dplyr::case_when((legend_TSM == TRUE & legend_Chla == TRUE & legend_Kd == TRUE & legend_cpc == TRUE) ~
+                                         paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
+                                       (legend_TSM == TRUE & legend_Chla == TRUE & legend_Kd == TRUE) ~
+                                         paste(tsm_info, chla_info, kd_info, sep = "<br>"),
+                                       (legend_TSM == TRUE & legend_Chla == TRUE) ~
+                                         paste(tsm_info, chla_info, sep = "<br>"),
+                                       (legend_TSM == TRUE & legend_Kd == TRUE) ~
+                                         paste(tsm_info, kd_info, sep = "<br>"),
+                                       (legend_TSM == TRUE & legend_cpc == TRUE) ~
+                                         paste(tsm_info, cpc_info, sep = "<br>"),
+                                       (legend_Chla == TRUE & legend_Kd == TRUE & legend_cpc == TRUE) ~
+                                         paste(chla_info, kd_info, cpc_info, sep = "<br>"),
+                                       (legend_Chla == TRUE & legend_Kd == TRUE) ~
+                                         paste(chla_info, kd_info, sep = "<br>"),
+                                       (legend_Chla == TRUE & legend_cpc == TRUE) ~
+                                         paste(chla_info, cpc_info, sep = "<br>"),
+                                       (legend_Kd == TRUE & legend_cpc == TRUE) ~
+                                         paste(kd_info, cpc_info, sep = "<br>"),
+                                       (legend_TSM == TRUE) ~
+                                         tsm_info,
+                                       (legend_Chla == TRUE) ~
+                                         chla_info,
+                                       (legend_Kd == TRUE) ~
+                                         kd_info,
+                                       (legend_cpc == TRUE) ~
+                                         cpc_info,
+                                       TRUE ~ ""),
+
+      # products_info = paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
       legend_info = paste(date_time_info, products_info, sep = "<br>")
     )
   
