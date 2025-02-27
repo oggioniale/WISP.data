@@ -512,14 +512,26 @@ wisp_plot_reflectance_data <- function(
     legend_Kd = TRUE,
     legend_cpc = TRUE
 ) {
-  # Data preparation
+  # Production of data information
+  data <- data |>
+    dplyr::mutate(
+      products_info = mapply(function(tsm, chla, kd, cpc) {
+        paste(
+          c(
+            if (legend_TSM) paste("TSM [g/m3]:", tsm),
+            if (legend_Chla) paste("Chla [mg/m3]:", chla),
+            if (legend_Kd) paste("Kd [1/m]:", kd),
+            if (legend_cpc) paste("cpc [mg/m3]:", cpc)
+          ),
+          collapse = "<br>"
+        )
+      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc)
+    )
+  
+  # Data transformation
   data_2 <- data |>
     dplyr::select(
-      measurement.date, starts_with("nm_"),
-      waterquality.tsm,
-      waterquality.chla,
-      waterquality.kd,
-      waterquality.cpc
+      measurement.date, starts_with("nm_"), products_info
     ) |>
     tidyr::pivot_longer(
       cols = starts_with("nm_"),
@@ -527,73 +539,32 @@ wisp_plot_reflectance_data <- function(
       values_to = "Rrs"
     ) |>
     dplyr::mutate(
-      wavelength = as.numeric(gsub("nm_", "", wavelength)),
-      
+      wavelength = as.numeric(sub("nm_", "", wavelength)),
       date_time_info = paste0(
         "Date: ", substr(measurement.date, 1, 10),
         "<br>Time: ", substr(measurement.date, 12, 19)
       ),
-      
-      tsm_info = ifelse(legend_TSM, paste0("TSM [g/m3]: ", waterquality.tsm), ""),
-      chla_info = ifelse(legend_Chla, paste0("Chla [mg/m3]: ", waterquality.chla), ""),
-      kd_info = ifelse(legend_Kd, paste0("Kd [1/m]: ", waterquality.kd), ""),
-      cpc_info = ifelse(legend_cpc, paste0("cpc [mg/m3]: ", waterquality.cpc), ""),
-      
-      products_info = dplyr::case_when((legend_TSM == TRUE & legend_Chla == TRUE & legend_Kd == TRUE & legend_cpc == TRUE) ~
-                                         paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
-                                       (legend_TSM == TRUE & legend_Chla == TRUE & legend_Kd == TRUE) ~
-                                         paste(tsm_info, chla_info, kd_info, sep = "<br>"),
-                                       (legend_TSM == TRUE & legend_Chla == TRUE) ~
-                                         paste(tsm_info, chla_info, sep = "<br>"),
-                                       (legend_TSM == TRUE & legend_Kd == TRUE) ~
-                                         paste(tsm_info, kd_info, sep = "<br>"),
-                                       (legend_TSM == TRUE & legend_cpc == TRUE) ~
-                                         paste(tsm_info, cpc_info, sep = "<br>"),
-                                       (legend_Chla == TRUE & legend_Kd == TRUE & legend_cpc == TRUE) ~
-                                         paste(chla_info, kd_info, cpc_info, sep = "<br>"),
-                                       (legend_Chla == TRUE & legend_Kd == TRUE) ~
-                                         paste(chla_info, kd_info, sep = "<br>"),
-                                       (legend_Chla == TRUE & legend_cpc == TRUE) ~
-                                         paste(chla_info, cpc_info, sep = "<br>"),
-                                       (legend_Kd == TRUE & legend_cpc == TRUE) ~
-                                         paste(kd_info, cpc_info, sep = "<br>"),
-                                       (legend_TSM == TRUE) ~
-                                         tsm_info,
-                                       (legend_Chla == TRUE) ~
-                                         chla_info,
-                                       (legend_Kd == TRUE) ~
-                                         kd_info,
-                                       (legend_cpc == TRUE) ~
-                                         cpc_info,
-                                       TRUE ~ ""),
-
-      # products_info = paste(tsm_info, chla_info, kd_info, cpc_info, sep = "<br>"),
       legend_info = paste(date_time_info, products_info, sep = "<br>")
     )
   
-  # Color palette selection
+  # Color palette
   num_colors <- length(unique(data_2$legend_info))
   color_palette <- viridis::viridis(num_colors)
   
-  # Plot title selection
+  # Plot title
   length_dates <- length(data$measurement.date)
   n_dates <- seq.Date(
     from = as.Date(data$measurement.date[1]),
     to = as.Date(data$measurement.date[length_dates]),
     by = "day"
   )
-  if (length(n_dates) > 1) {
-    dates_text <- paste0(
-      "<br>from date: ", n_dates[1],
-      "<br>to date: ", n_dates[length(n_dates)]
-    )
+  dates_text <- if (length(n_dates) > 1) {
+    paste0("<br>from date: ", n_dates[1], "<br>to date: ", n_dates[length(n_dates)])
   } else {
-    dates_text <- paste0(
-      "<br>on the date: ", n_dates[1]
-    )
+    paste0("<br>on the date: ", n_dates[1])
   }
   
-  # Plot
+  # Plotly
   fig <- plotly::plot_ly(
     data_2,
     x = ~wavelength,
@@ -618,3 +589,4 @@ wisp_plot_reflectance_data <- function(
   
   fig
 }
+
