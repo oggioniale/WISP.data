@@ -653,6 +653,137 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
   return(list(qc_data = qc_data, sr_data = sr_data))
 }
 
+#' Calculation of Turbidity (FNU) (Novoa et al., 2017)
+#' @description `r lifecycle::badge("experimental")`
+#' This function calculates the Turbidity (FNU) in according 
+#' to Novoa et al., 2017 and creates new columns in qc_data e sr_data
+#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
+#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @import 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_novoa_TUR
+wisp_novoa_TUR <- function(qc_data, sr_data) {
+  
+  # Configurazione dell'algoritmo Novoa per la turbidity:
+  novoa_dict <- list(
+    novoa_waves_req   = c(665, 865),          # lunghezze d'onda richieste: Red e NIR
+    novoa_algorithm   = "nechad_centre",       # oppure "nechad_average"
+    novoa_output_switch = FALSE,
+    rhow_switch_nir   = c(0.08, 0.12)         # soglie per decidere il passaggio da red a NIR
+  )
+  
+  # Funzione per ottenere i coefficienti Nechad per le bande Red e NIR.
+  # ALTRO CONFIG FILE
+  get_nechad_coefficients <- function(wave) {
+    if (wave == 665) {
+      return(list(A = 282.95, C = 0.1728))
+    } else if (wave == 865) {
+      return(list(A = 2109.35, C = 0.2115))
+    } else {
+      stop("Wavelength not supported")
+    }
+  }
+  
+  # Calcolo della turbidity secondo la formula Nechad:
+  # turbidity = (A * rhow) / (1 - (rhow / C))
+  calculate_turbidity <- function(rhow, A, C) {
+    tur <- (A * rhow) / (1 - (rhow / C))
+    return(tur)
+  }
+  
+  # Funzione che computa la turbidity Novoa utilizzando le bande Red e NIR.
+  # Viene applicato uno switching (ed eventualmente blending) in base al valore
+  # di rhow della banda rossa, secondo la configurazione in novoa_dict.
+  compute_novoa_tur <- function(red_value, nir_value) {
+    # Ottieni i coefficienti per le bande Red e NIR
+    coeff_red <- get_nechad_coefficients(665)
+    coeff_nir <- get_nechad_coefficients(865)
+    
+    # Calcola la turbidity per ciascuna banda
+    red_tur <- calculate_turbidity(red_value, coeff_red$A, coeff_red$C)
+    nir_tur <- calculate_turbidity(nir_value, coeff_nir$A, coeff_nir$C)
+    
+    # Soglie per lo switching (in questo esempio, impostate in rhow_switch_nir)
+    lower <- novoa_dict$rhow_switch_nir[[1]]  # soglia inferiore (per usare la banda rossa)
+    upper <- novoa_dict$rhow_switch_nir[[2]]  # soglia superiore (per usare la banda NIR)
+    
+    # Se il valore di red è al di sotto della soglia inferiore, usa red_tur;
+    # se è al di sopra della soglia superiore, usa nir_tur;
+    # altrimenti effettua un blending lineare logaritmico.
+    if (red_value <= lower) {
+      tur_final <- red_tur
+      band_selected <- "Red (665nm)"
+    } else if (red_value >= upper) {
+      tur_final <- nir_tur
+      band_selected <- "NIR (865nm)"
+    } else {
+      logb <- log(upper / lower)
+      tur_final <- red_tur * log(upper / red_value) / logb +
+        nir_tur * log(red_value / lower) / logb
+      band_selected <- "Blending red and NIR"
+    }
+    
+    return(list(TUR = tur_final, band_selected = band_selected))
+  }
+  
+  # Funzione per selezionare le colonne che contengono i dati di una determinata lunghezza d'onda
+  # (riconosce colonne che iniziano con "nm_" e filtra in base al centro ± tol)
+  get_columns_in_range <- function(df, center, tol = 3) {
+    nm_cols <- names(df)[grepl('^nm_', names(df))]
+    wavelengths <- as.numeric(gsub('nm_', '', nm_cols))
+    selected_cols <- nm_cols[wavelengths >= (center - tol) & wavelengths <= (center + tol)]
+    return(selected_cols)
+  }
+  
+  #### Calcolo della turbidity per i dati QC ####   (POSIZIONEEEEEEEEEEEE)
+  red_cols_qc <- get_columns_in_range(qc_data, 665, tol = 3)
+  nir_cols_qc <- get_columns_in_range(qc_data, 865, tol = 3)
+  
+  qc_data <- qc_data %>%
+    rowwise() %>%
+    mutate(
+      # Calcola la media dei valori nelle colonne individuate e applica una correzione (moltiplicazione per pi)
+      red_value = as.numeric(mean(c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+      novoa_tur = list(compute_novoa_tur(red_value, nir_value))
+    ) %>%
+    ungroup() %>%
+    mutate(
+      # Formatto l'output (ad es. in NTU) e registro la banda utilizzata o il blending
+      Novoa_TUR      = paste0(round(map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended_chosen = map_chr(novoa_tur, "band_selected")
+    ) %>%
+    dplyr::relocate(Novoa_TUR, Blended_chosen, .after = waterquality.tsm) %>%
+    select(-red_value, -nir_value, -novoa_tur)
+  
+  #### Calcolo della turbidity per i dati SR #### (POSIZIONEEEEEEEEEEEE)
+  red_cols_sr <- get_columns_in_range(sr_data, 665, tol = 3)
+  nir_cols_sr <- get_columns_in_range(sr_data, 865, tol = 3)
+  
+  sr_data <- sr_data %>%
+    rowwise() %>%
+    mutate(
+      red_value = as.numeric(mean(c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
+      novoa_tur = list(compute_novoa_tur(red_value, nir_value))
+    ) %>%
+    ungroup() %>%
+    mutate(
+      Novoa_TUR      = paste0(round(map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended_chosen = map_chr(novoa_tur, "band_selected")
+    ) %>%
+    dplyr::relocate(Novoa_TUR, Blended_chosen, .after = waterquality.tsm) %>%
+    select(-red_value, -nir_value, -novoa_tur)
+  
+  return(list(qc_data = qc_data, sr_data = sr_data))
+}
+
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
 #' This function return a plotly of each spectral signature measured by a
