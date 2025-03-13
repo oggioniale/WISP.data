@@ -459,7 +459,7 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE, output_dir = 
   return(corrected_data)
 }
 
-#' Scattering peak for WISPstation reflectance data
+#' Scattering peak for WISPstation reflectance data  (UNITA' DI MISURAAAAA)
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the peak between 690 and 710 nm (scattering) 
 #' for each spectral signatures and adds a new column in "reflect_data_sr"
@@ -480,11 +480,12 @@ wisp_scattering_peak <- function(sr_data) {
   sr_data <- sr_data |>
     dplyr::mutate(
       scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)
-    )
+    ) |>
+    dplyr::relocate(scattering.peak, .after = waterquality.chla)
   
   return(sr_data)
 }
-  
+
 #' Band ratio for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the band ratio between the peak between 690 and 
@@ -509,7 +510,8 @@ wisp_band_ratio <- function(sr_data) {
     dplyr::mutate(
       scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE),
       band.ratio = scattering.peak / apply(dplyr::select(sr_data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE)
-    )
+    ) |>
+    dplyr::relocate(band.ratio, .after = scattering.peak)
   
   return(sr_data)
 }
@@ -517,18 +519,139 @@ wisp_band_ratio <- function(sr_data) {
 #' Calculation of SPM concentration (Novoa et al., 2017)
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the SPM concentration in according 
-#' to Novoa et al., 2017
-#' @param 
+#' to Novoa et al., 2017 and creates new columns in qc_data e sr_data
+#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
+#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
 #' @return 
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom 
+#' @import dplyr
+#' @import purrr
 #' @export
 #' @examples
 #' # example code
 #' \dontrun{
-### wisp_novoa_2017
-
+### wisp_novoa_SPM
+wisp_novoa_SPM <- function(qc_data, sr_data) {
+  
+  novoa_dict <- list(
+    novoa_waves_req = c(560, 665, 865),   
+    novoa_algorithm = "nechad_centre",     # "nechad_centre" or "nechad_average"
+    novoa_output_switch = FALSE,           
+    rhow_switch_red = c(0.007, 0.016),     
+    rhow_switch_nir = c(0.08, 0.12)        #  or "c(0.046,0.09)" (Bourgneuf) 
+  )
+  
+  # A_Nechad and C_Nechad coefficients for green, red and nir bands
+  get_nechad_coefficients <- function(wave) {
+    if (wave == 560) {
+      return(list(A = 104.2, C = 0.1449))
+    } else if (wave == 665) {
+      return(list(A = 355.85, C = 0.1728))
+    } else if (wave == 865) {
+      return(list(A = 2971.93, C = 0.2115))
+    } else {
+      stop("Wavelength not supported")
+    }
+  }
+  
+  # SPM concentration algorithm (Nechad et al., 2010)
+  calculate_spm <- function(rhow, A, C) {
+    spm <- (A * rhow) / (1 - (rhow / C))
+    return(spm)
+  }
+  
+  # Identification of wavelengths (+/- 3 nm)
+  get_columns_in_range <- function(df, center, tol = 3) {
+    nm_cols <- names(df)[grepl('^nm_', names(df))]
+    wavelengths <- as.numeric(gsub('nm_', '', nm_cols))
+    selected_cols <- nm_cols[wavelengths >= (center - tol) & wavelengths <= (center + tol)]
+    return(selected_cols)
+  }
+  
+  # SPM concentration algorithm (Novoa et al., 2017) + Blending
+  compute_novoa_spm <- function(green_value, red_value, nir_value) {
+    coeff_green <- get_nechad_coefficients(560)
+    coeff_red   <- get_nechad_coefficients(665)
+    coeff_nir   <- get_nechad_coefficients(865)
+    
+    spm_green <- calculate_spm(green_value, coeff_green$A, coeff_green$C)
+    spm_red   <- calculate_spm(red_value,   coeff_red$A,   coeff_red$C)
+    spm_nir   <- calculate_spm(nir_value,   coeff_nir$A,   coeff_nir$C)
+    
+    rhow_red_lower <- novoa_dict$rhow_switch_red[1]
+    rhow_red_upper <- novoa_dict$rhow_switch_red[2]
+    rhow_nir_lower <- novoa_dict$rhow_switch_nir[1]
+    rhow_nir_upper <- novoa_dict$rhow_switch_nir[2]
+    
+    if (red_value < rhow_red_lower) {
+      spm_final <- spm_green
+      band_selected <- "Green (560nm)"
+    } else if (red_value < rhow_red_upper) {
+      logb <- log(rhow_red_upper / rhow_red_lower)
+      spm_final <- spm_green * log(rhow_red_upper / red_value) / logb +
+        spm_red * log(red_value / rhow_red_lower) / logb
+      band_selected <- "Blending green and red"
+    } else if (red_value < rhow_nir_lower) {
+      spm_final <- spm_red
+      band_selected <- "Red (665nm)"
+    } else if (red_value < rhow_nir_upper) {
+      logb <- log(rhow_nir_upper / rhow_nir_lower)
+      spm_final <- spm_red * log(rhow_nir_upper / nir_value) / logb +
+        spm_nir * log(nir_value / rhow_nir_lower) / logb
+      band_selected <- "Blending red and NIR"
+    } else {
+      spm_final <- spm_nir
+      band_selected <- "NIR (865nm)"
+    }
+    
+    return(list(SPM = spm_final, band_selected = band_selected))
+  }
+  
+  # --- SPM calculation for "qc_data" ---
+  green_cols_qc <- get_columns_in_range(qc_data, 560, tol = 3)
+  red_cols_qc   <- get_columns_in_range(qc_data, 665, tol = 3)
+  nir_cols_qc   <- get_columns_in_range(qc_data, 865, tol = 3)
+  
+  qc_data <- qc_data %>%
+    rowwise() %>%
+    mutate(
+      green_value = as.numeric(mean(c_across(all_of(green_cols_qc)), na.rm = TRUE) * pi),
+      red_value   = as.numeric(mean(c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
+      nir_value   = as.numeric(mean(c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+      novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
+    ) %>%
+    ungroup() %>%
+    mutate(
+      Novoa_SPM      = paste0(round(map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended_chosen = map_chr(novoa_spm, "band_selected")
+    ) %>%
+    dplyr::relocate(Novoa_SPM, Blended_chosen, .after = waterquality.tsm) %>%
+    select(-green_value, -red_value, -nir_value, -novoa_spm)
+  
+  # --- SPM calculation for "sr_data" ---
+  green_cols_sr <- get_columns_in_range(sr_data, 560, tol = 3)
+  red_cols_sr   <- get_columns_in_range(sr_data, 665, tol = 3)
+  nir_cols_sr   <- get_columns_in_range(sr_data, 865, tol = 3)
+  
+  sr_data <- sr_data %>%
+    rowwise() %>%
+    mutate(
+      green_value = as.numeric(mean(c_across(all_of(green_cols_sr)), na.rm = TRUE) * pi),
+      red_value   = as.numeric(mean(c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
+      nir_value   = as.numeric(mean(c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
+      novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
+    ) %>%
+    ungroup() %>%
+    mutate(
+      Novoa_SPM      = paste0(round(map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended_chosen = map_chr(novoa_spm, "band_selected")
+    ) %>%
+    dplyr::relocate(Novoa_SPM, Blended_chosen, .after = waterquality.tsm) %>%
+    select(-green_value, -red_value, -nir_value, -novoa_spm)
+  
+  return(list(qc_data = qc_data, sr_data = sr_data))
+}
 
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
