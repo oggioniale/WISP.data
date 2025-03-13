@@ -514,22 +514,6 @@ wisp_band_ratio <- function(sr_data) {
   return(sr_data)
 }
 
-#' Calculation of SPM concentration (Nechad et al., 2010)
-#' @description `r lifecycle::badge("experimental")`
-#' This function calculates the SPM concentration in according 
-#' to Nechad et al., 2010
-#' @param 
-#' @return 
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom 
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-### wisp_nechad_2010
-
-
 #' Calculation of SPM concentration (Novoa et al., 2017)
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the SPM concentration in according 
