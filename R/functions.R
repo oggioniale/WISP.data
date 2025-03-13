@@ -407,7 +407,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
 #' ## End (Not run)
 #'
 ### wisp_sr_reflectance_data
-wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE) {
+wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE, output_dir = getwd()) {
   columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
                           colnames(qc_data), value = TRUE)
   columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
@@ -435,37 +435,116 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE) {
         ~ . - delta
       )
     )
-  # date range info
-  date_from <- format(
-    as.Date(
-      corrected_data$measurement.date[1]
-    ),
-    "%Y%m%d"
-  )
-  date_to <- format(
-    as.Date(
-      corrected_data$measurement.date[nrow(corrected_data)]
-    ),
-    "%Y%m%d"
-  )
-  # save data in CSV file if save_output is TRUE
-  if (identical(date_from, date_to)) {
-    dates <- date_from
-  } else {
-    dates <- paste0(date_from, "_", date_to)
-  }
+  
+  # Date range info
+  date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
+  date_to <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
+  
+  # Determines the filename
+  dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+  
+  # Save data in CSV file if save_output is TRUE
   if (save_output) {
-    output_file <- paste0("reflectance_data_sr_", dates, ".csv")
+    if (!dir.exists(output_dir)) {
+      dir.create(output_dir, recursive = TRUE)
+    }
+    
+    output_file <- file.path(output_dir, paste0("reflectance_data_sr_", dates, ".csv"))
     readr::write_csv(corrected_data, output_file)
-    cat(
-      "\n----\nThe reflectance data has been saved as",
-      output_file,
-      "\n----\n"
-    )
+    
+    cat("\n----\nThe reflectance data has been saved as:\n", output_file, "\n----\n")
   }
-  # return function output
+  
+  # Return function output
   return(corrected_data)
 }
+
+#' Scattering peak for WISPstation reflectance data
+#' @description `r lifecycle::badge("experimental")`
+#' This function calculates the peak between 690 and 710 nm (scattering) 
+#' for each spectral signatures and adds a new column in "reflect_data_sr"
+#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function. 
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_scattering_peak
+wisp_scattering_peak <- function(sr_data) {
+  
+  columns_690_710 <- grep("^nm_(69[0-9]|70[0-9]|710)$", colnames(sr_data), value = TRUE)
+  
+  sr_data <- sr_data |>
+    dplyr::mutate(
+      scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)
+    )
+  
+  return(sr_data)
+}
+  
+#' Band ratio for WISPstation reflectance data
+#' @description `r lifecycle::badge("experimental")`
+#' This function calculates the band ratio between the peak between 690 and 
+#' 710 nm and the peak between 670 e 680 nm 
+#' (??????????????????????????????????????????????????????????) 
+#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_band_ratio
+wisp_band_ratio <- function(sr_data) {
+  
+  columns_690_710 <- grep("^nm_(69[0-9]|70[0-9]|710)$", colnames(sr_data), value = TRUE)
+  columns_670_680 <- grep("^nm_(67[0-9]|680)$", colnames(sr_data), value = TRUE)
+  
+  sr_data <- sr_data |>
+    dplyr::mutate(
+      scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE),
+      band.ratio = scattering.peak / apply(dplyr::select(sr_data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE)
+    )
+  
+  return(sr_data)
+}
+
+#' Calculation of SPM concentration (Nechad et al., 2010)
+#' @description `r lifecycle::badge("experimental")`
+#' This function calculates the SPM concentration in according 
+#' to Nechad et al., 2010
+#' @param 
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_nechad_2010
+
+
+#' Calculation of SPM concentration (Novoa et al., 2017)
+#' @description `r lifecycle::badge("experimental")`
+#' This function calculates the SPM concentration in according 
+#' to Novoa et al., 2017
+#' @param 
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_novoa_2017
+
 
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
@@ -542,7 +621,7 @@ wisp_plot_reflectance_data <- function(
       wavelength = as.numeric(sub("nm_", "", wavelength)),
       date_time_info = paste0(
         "Date: ", substr(measurement.date, 1, 10),
-        "<br>Time: ", substr(measurement.date, 12, 19)
+        "<br>Time [UTC]: ", substr(measurement.date, 12, 19)
       ),
       legend_info = paste(date_time_info, products_info, sep = "<br>")
     )
@@ -589,4 +668,20 @@ wisp_plot_reflectance_data <- function(
   
   fig
 }
+
+#' Creates a plot of the trend of one or more parameters
+#' @description `r lifecycle::badge("experimental")`
+#' This function creates a graph related to the time trend of one or 
+#' more water quality parameters associated with spectral signatures filtered 
+#' and corrected by sunglint
+#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom 
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_trend_plot
 
