@@ -479,10 +479,11 @@ wisp_scattering_peak <- function(sr_data) {
   
   sr_data <- sr_data |>
     dplyr::mutate(
-      scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)
+      scattering.peak = units::set_units(as.numeric(
+        apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)), "1/sr")
     ) |>
     dplyr::relocate(scattering.peak, .after = waterquality.chla)
-  
+    
   return(sr_data)
 }
 
@@ -508,8 +509,9 @@ wisp_band_ratio <- function(sr_data) {
   
   sr_data <- sr_data |>
     dplyr::mutate(
-      scattering.peak = apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE),
-      band.ratio = scattering.peak / apply(dplyr::select(sr_data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE)
+      scattering.peak = units::set_units(as.numeric(
+        apply(dplyr::select(sr_data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)), "1/sr"),
+      band.ratio = units::set_units(scattering.peak / apply(dplyr::select(sr_data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE), "")
     ) |>
     dplyr::relocate(band.ratio, .after = scattering.peak)
   
@@ -525,8 +527,8 @@ wisp_band_ratio <- function(sr_data) {
 #' @return 
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @import dplyr
-#' @import purrr
+#' @importFrom dplyr mutate relocate rowwise ungroup select
+#' @importFrom purrr map_dbl map_chr
 #' @export
 #' @examples
 #' # example code
@@ -534,7 +536,7 @@ wisp_band_ratio <- function(sr_data) {
 ### wisp_novoa_SPM
 wisp_novoa_SPM <- function(qc_data, sr_data) {
   
-  novoa_dict <- list(
+  novoa_spm_dict <- list(
     novoa_waves_req = c(560, 665, 865),   
     novoa_algorithm = "nechad_centre",     # "nechad_centre" or "nechad_average"
     novoa_output_switch = FALSE,           
@@ -542,8 +544,8 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
     rhow_switch_nir = c(0.08, 0.12)        #  or "c(0.046,0.09)" (Bourgneuf) 
   )
   
-  # A_Nechad and C_Nechad coefficients for green, red and nir bands
-  get_nechad_coefficients <- function(wave) {
+  # A_Nechad and C_Nechad coefficients (SPM) for green, red and nir bands
+  get_nechad_spm_coefficients <- function(wave) {
     if (wave == 560) {
       return(list(A = 104.2, C = 0.1449))
     } else if (wave == 665) {
@@ -571,18 +573,18 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
   
   # SPM concentration algorithm (Novoa et al., 2017) + Blending
   compute_novoa_spm <- function(green_value, red_value, nir_value) {
-    coeff_green <- get_nechad_coefficients(560)
-    coeff_red   <- get_nechad_coefficients(665)
-    coeff_nir   <- get_nechad_coefficients(865)
+    coeff_green <- get_nechad_spm_coefficients(560)
+    coeff_red   <- get_nechad_spm_coefficients(665)
+    coeff_nir   <- get_nechad_spm_coefficients(865)
     
     spm_green <- calculate_spm(green_value, coeff_green$A, coeff_green$C)
     spm_red   <- calculate_spm(red_value,   coeff_red$A,   coeff_red$C)
     spm_nir   <- calculate_spm(nir_value,   coeff_nir$A,   coeff_nir$C)
     
-    rhow_red_lower <- novoa_dict$rhow_switch_red[1]
-    rhow_red_upper <- novoa_dict$rhow_switch_red[2]
-    rhow_nir_lower <- novoa_dict$rhow_switch_nir[1]
-    rhow_nir_upper <- novoa_dict$rhow_switch_nir[2]
+    rhow_red_lower <- novoa_spm_dict$rhow_switch_red[1]
+    rhow_red_upper <- novoa_spm_dict$rhow_switch_red[2]
+    rhow_nir_lower <- novoa_spm_dict$rhow_switch_nir[1]
+    rhow_nir_upper <- novoa_spm_dict$rhow_switch_nir[2]
     
     if (red_value < rhow_red_lower) {
       spm_final <- spm_green
@@ -613,42 +615,42 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
   red_cols_qc   <- get_columns_in_range(qc_data, 665, tol = 3)
   nir_cols_qc   <- get_columns_in_range(qc_data, 865, tol = 3)
   
-  qc_data <- qc_data %>%
-    rowwise() %>%
-    mutate(
-      green_value = as.numeric(mean(c_across(all_of(green_cols_qc)), na.rm = TRUE) * pi),
-      red_value   = as.numeric(mean(c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
-      nir_value   = as.numeric(mean(c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+  qc_data <- qc_data |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      green_value = as.numeric(mean(dplyr::c_across(all_of(green_cols_qc)), na.rm = TRUE) * pi),
+      red_value   = as.numeric(mean(dplyr::c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
+      nir_value   = as.numeric(mean(dplyr::c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
       novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
-    ) %>%
-    ungroup() %>%
-    mutate(
-      Novoa_SPM      = paste0(round(map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
-      Blended_chosen = map_chr(novoa_spm, "band_selected")
-    ) %>%
-    dplyr::relocate(Novoa_SPM, Blended_chosen, .after = waterquality.tsm) %>%
-    select(-green_value, -red_value, -nir_value, -novoa_spm)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Novoa_SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended_SPM = purrr::map_chr(novoa_spm, "band_selected")
+    ) |>
+    dplyr::relocate(Novoa_SPM, Blended_SPM, .after = waterquality.tsm) |>
+    dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
   
   # --- SPM calculation for "sr_data" ---
   green_cols_sr <- get_columns_in_range(sr_data, 560, tol = 3)
   red_cols_sr   <- get_columns_in_range(sr_data, 665, tol = 3)
   nir_cols_sr   <- get_columns_in_range(sr_data, 865, tol = 3)
   
-  sr_data <- sr_data %>%
-    rowwise() %>%
-    mutate(
-      green_value = as.numeric(mean(c_across(all_of(green_cols_sr)), na.rm = TRUE) * pi),
-      red_value   = as.numeric(mean(c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
-      nir_value   = as.numeric(mean(c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
+  sr_data <- sr_data |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      green_value = as.numeric(mean(dplyr::c_across(all_of(green_cols_sr)), na.rm = TRUE) * pi),
+      red_value   = as.numeric(mean(dplyr::c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
+      nir_value   = as.numeric(mean(dplyr::c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
       novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
-    ) %>%
-    ungroup() %>%
-    mutate(
-      Novoa_SPM      = paste0(round(map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
-      Blended_chosen = map_chr(novoa_spm, "band_selected")
-    ) %>%
-    dplyr::relocate(Novoa_SPM, Blended_chosen, .after = waterquality.tsm) %>%
-    select(-green_value, -red_value, -nir_value, -novoa_spm)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Novoa_SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended_SPM = purrr::map_chr(novoa_spm, "band_selected")
+    ) |>
+    dplyr::relocate(Novoa_SPM, Blended_SPM, .after = waterquality.tsm) |>
+    dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
   
   return(list(qc_data = qc_data, sr_data = sr_data))
 }
@@ -662,7 +664,8 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
 #' @return 
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @import 
+#' @importFrom dplyr mutate rowwise ungroup relocate select
+#' @importFrom purrr map_dbl map_chr
 #' @export
 #' @examples
 #' # example code
@@ -670,17 +673,15 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
 ### wisp_novoa_TUR
 wisp_novoa_TUR <- function(qc_data, sr_data) {
   
-  # Configurazione dell'algoritmo Novoa per la turbidity:
-  novoa_dict <- list(
-    novoa_waves_req   = c(665, 865),          # lunghezze d'onda richieste: Red e NIR
-    novoa_algorithm   = "nechad_centre",       # oppure "nechad_average"
+  novoa_tur_dict <- list(
+    novoa_waves_req   = c(665, 865),          
+    novoa_algorithm   = "nechad_centre",      # "nechad_centre" or "nechad_average"
     novoa_output_switch = FALSE,
-    rhow_switch_nir   = c(0.08, 0.12)         # soglie per decidere il passaggio da red a NIR
+    rhow_switch_nir   = c(0.08, 0.12)         #  or "c(0.046,0.09)" (Bourgneuf) 
   )
   
-  # Funzione per ottenere i coefficienti Nechad per le bande Red e NIR.
-  # ALTRO CONFIG FILE
-  get_nechad_coefficients <- function(wave) {
+  # A_Nechad and C_Nechad coefficients (TUR) for green, red and nir bands
+  get_nechad_tur_coefficients <- function(wave) {
     if (wave == 665) {
       return(list(A = 282.95, C = 0.1728))
     } else if (wave == 865) {
@@ -690,32 +691,31 @@ wisp_novoa_TUR <- function(qc_data, sr_data) {
     }
   }
   
-  # Calcolo della turbidity secondo la formula Nechad:
-  # turbidity = (A * rhow) / (1 - (rhow / C))
+  # Turbidity algorithm (Nechad et al., 2010)
   calculate_turbidity <- function(rhow, A, C) {
     tur <- (A * rhow) / (1 - (rhow / C))
     return(tur)
   }
   
-  # Funzione che computa la turbidity Novoa utilizzando le bande Red e NIR.
-  # Viene applicato uno switching (ed eventualmente blending) in base al valore
-  # di rhow della banda rossa, secondo la configurazione in novoa_dict.
+  # Identification of wavelengths (+/- 3 nm)
+  get_columns_in_range <- function(df, center, tol = 3) {
+    nm_cols <- names(df)[grepl('^nm_', names(df))]
+    wavelengths <- as.numeric(gsub('nm_', '', nm_cols))
+    selected_cols <- nm_cols[wavelengths >= (center - tol) & wavelengths <= (center + tol)]
+    return(selected_cols)
+  }
+  
+  # Turbidity algorithm (Novoa et al., 2017) + Blending
   compute_novoa_tur <- function(red_value, nir_value) {
-    # Ottieni i coefficienti per le bande Red e NIR
-    coeff_red <- get_nechad_coefficients(665)
-    coeff_nir <- get_nechad_coefficients(865)
+    coeff_red <- get_nechad_tur_coefficients(665)
+    coeff_nir <- get_nechad_tur_coefficients(865)
     
-    # Calcola la turbidity per ciascuna banda
     red_tur <- calculate_turbidity(red_value, coeff_red$A, coeff_red$C)
     nir_tur <- calculate_turbidity(nir_value, coeff_nir$A, coeff_nir$C)
     
-    # Soglie per lo switching (in questo esempio, impostate in rhow_switch_nir)
-    lower <- novoa_dict$rhow_switch_nir[[1]]  # soglia inferiore (per usare la banda rossa)
-    upper <- novoa_dict$rhow_switch_nir[[2]]  # soglia superiore (per usare la banda NIR)
+    lower <- novoa_tur_dict$rhow_switch_nir[[1]]  
+    upper <- novoa_tur_dict$rhow_switch_nir[[2]]  
     
-    # Se il valore di red è al di sotto della soglia inferiore, usa red_tur;
-    # se è al di sopra della soglia superiore, usa nir_tur;
-    # altrimenti effettua un blending lineare logaritmico.
     if (red_value <= lower) {
       tur_final <- red_tur
       band_selected <- "Red (665nm)"
@@ -732,54 +732,44 @@ wisp_novoa_TUR <- function(qc_data, sr_data) {
     return(list(TUR = tur_final, band_selected = band_selected))
   }
   
-  # Funzione per selezionare le colonne che contengono i dati di una determinata lunghezza d'onda
-  # (riconosce colonne che iniziano con "nm_" e filtra in base al centro ± tol)
-  get_columns_in_range <- function(df, center, tol = 3) {
-    nm_cols <- names(df)[grepl('^nm_', names(df))]
-    wavelengths <- as.numeric(gsub('nm_', '', nm_cols))
-    selected_cols <- nm_cols[wavelengths >= (center - tol) & wavelengths <= (center + tol)]
-    return(selected_cols)
-  }
-  
-  #### Calcolo della turbidity per i dati QC ####   (POSIZIONEEEEEEEEEEEE)
+ 
+  # --- TUR calculation for "qc_data" ---
   red_cols_qc <- get_columns_in_range(qc_data, 665, tol = 3)
   nir_cols_qc <- get_columns_in_range(qc_data, 865, tol = 3)
   
-  qc_data <- qc_data %>%
-    rowwise() %>%
-    mutate(
-      # Calcola la media dei valori nelle colonne individuate e applica una correzione (moltiplicazione per pi)
-      red_value = as.numeric(mean(c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
-      nir_value = as.numeric(mean(c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+  qc_data <- qc_data |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
       novoa_tur = list(compute_novoa_tur(red_value, nir_value))
-    ) %>%
-    ungroup() %>%
-    mutate(
-      # Formatto l'output (ad es. in NTU) e registro la banda utilizzata o il blending
-      Novoa_TUR      = paste0(round(map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
-      Blended_chosen = map_chr(novoa_tur, "band_selected")
-    ) %>%
-    dplyr::relocate(Novoa_TUR, Blended_chosen, .after = waterquality.tsm) %>%
-    select(-red_value, -nir_value, -novoa_tur)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Novoa_TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended_TUR = purrr::map_chr(novoa_tur, "band_selected")
+    ) |>
+    dplyr::relocate(Novoa_TUR, Blended_TUR, .after = Blended_SPM) |>
+    dplyr::select(-red_value, -nir_value, -novoa_tur)
   
-  #### Calcolo della turbidity per i dati SR #### (POSIZIONEEEEEEEEEEEE)
+  # --- TUR calculation for "sr_data" ---
   red_cols_sr <- get_columns_in_range(sr_data, 665, tol = 3)
   nir_cols_sr <- get_columns_in_range(sr_data, 865, tol = 3)
   
-  sr_data <- sr_data %>%
-    rowwise() %>%
-    mutate(
-      red_value = as.numeric(mean(c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
-      nir_value = as.numeric(mean(c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
+  sr_data <- sr_data |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
       novoa_tur = list(compute_novoa_tur(red_value, nir_value))
-    ) %>%
-    ungroup() %>%
-    mutate(
-      Novoa_TUR      = paste0(round(map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
-      Blended_chosen = map_chr(novoa_tur, "band_selected")
-    ) %>%
-    dplyr::relocate(Novoa_TUR, Blended_chosen, .after = waterquality.tsm) %>%
-    select(-red_value, -nir_value, -novoa_tur)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Novoa_TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended_TUR = purrr::map_chr(novoa_tur, "band_selected")
+    ) |>
+    dplyr::relocate(Novoa_TUR, Blended_TUR, .after = Blended_SPM) |>
+    dplyr::select(-red_value, -nir_value, -novoa_tur)
   
   return(list(qc_data = qc_data, sr_data = sr_data))
 }
