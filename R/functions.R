@@ -459,19 +459,25 @@ wisp_sr_reflectance_data <- function(qc_data, save_output = FALSE, output_dir = 
   return(corrected_data)
 }
 
-#' Scattering peak for WISPstation reflectance data  (UNITA' DI MISURAAAAA)
+#' Scattering peak for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the peak between 690 and 710 nm (scattering) 
 #' for each spectral signatures and adds a new column in "reflect_data_sr"
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function. 
-#' @return 
+#' @return sr_data tibble with the addition of the column “scattering.peak”
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom 
+#' @importFrom dplyr mutate select all_of relocate
+#' @importFrom units set_units
 #' @export
 #' @examples
 #' # example code
 #' \dontrun{
+#' ## Not run:
+#' reflect_data_sr <- WISP.data::wisp_scattering_peak(sr_data = reflect_data_sr)
+#' }
+#' ## End (Not run)
+#' 
 ### wisp_scattering_peak
 wisp_scattering_peak <- function(sr_data) {
   
@@ -493,14 +499,20 @@ wisp_scattering_peak <- function(sr_data) {
 #' 710 nm and the peak between 670 e 680 nm 
 #' (??????????????????????????????????????????????????????????) 
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @return 
+#' @return sr_data tibble with the addition of the column “band.ratio”
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom 
+#' @importFrom dplyr mutate select all_of relocate
+#' @importFrom units set_units
 #' @export
 #' @examples
 #' # example code
 #' \dontrun{
+#' ## Not run:
+#' reflect_data_sr <- WISP.data::wisp_band_ratio(sr_data = reflect_data_sr)
+#' }
+#' ## End (Not run)
+#' 
 ### wisp_band_ratio
 wisp_band_ratio <- function(sr_data) {
   
@@ -524,14 +536,15 @@ wisp_band_ratio <- function(sr_data) {
 #' to Novoa et al., 2017 and creates new columns in qc_data e sr_data
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @return 
+#' @return qc_data and sr_data tibbles with the addition of the columns 
+#' “Novoa.SPM” and “Blended.SPM”
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate relocate rowwise ungroup select
 #' @importFrom purrr map_dbl map_chr
 #' @export
 #' @examples
-#' # example code
+#' # example code (????????????????)
 #' \dontrun{
 ### wisp_novoa_SPM
 wisp_novoa_SPM <- function(qc_data, sr_data) {
@@ -625,10 +638,10 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa_SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
-      Blended_SPM = purrr::map_chr(novoa_spm, "band_selected")
+      Novoa.SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended.SPM = purrr::map_chr(novoa_spm, "band_selected")
     ) |>
-    dplyr::relocate(Novoa_SPM, Blended_SPM, .after = waterquality.tsm) |>
+    dplyr::relocate(Novoa.SPM, Blended.SPM, .after = waterquality.tsm) |>
     dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
   
   # --- SPM calculation for "sr_data" ---
@@ -646,10 +659,10 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa_SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
-      Blended_SPM = purrr::map_chr(novoa_spm, "band_selected")
+      Novoa.SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Blended.SPM = purrr::map_chr(novoa_spm, "band_selected")
     ) |>
-    dplyr::relocate(Novoa_SPM, Blended_SPM, .after = waterquality.tsm) |>
+    dplyr::relocate(Novoa.SPM, Blended.SPM, .after = waterquality.tsm) |>
     dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
   
   return(list(qc_data = qc_data, sr_data = sr_data))
@@ -661,14 +674,15 @@ wisp_novoa_SPM <- function(qc_data, sr_data) {
 #' to Novoa et al., 2017 and creates new columns in qc_data e sr_data
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @return 
+#' @return qc_data and sr_data tibbles with the addition of the columns 
+#' “Novoa.TUR” and “Blended.TUR”
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate rowwise ungroup relocate select
 #' @importFrom purrr map_dbl map_chr
 #' @export
 #' @examples
-#' # example code
+#' # example code (????????????????)
 #' \dontrun{
 ### wisp_novoa_TUR
 wisp_novoa_TUR <- function(qc_data, sr_data) {
@@ -746,10 +760,10 @@ wisp_novoa_TUR <- function(qc_data, sr_data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa_TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
-      Blended_TUR = purrr::map_chr(novoa_tur, "band_selected")
+      Novoa.TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
-    dplyr::relocate(Novoa_TUR, Blended_TUR, .after = Blended_SPM) |>
+    dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM) |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
   
   # --- TUR calculation for "sr_data" ---
@@ -765,10 +779,10 @@ wisp_novoa_TUR <- function(qc_data, sr_data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa_TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
-      Blended_TUR = purrr::map_chr(novoa_tur, "band_selected")
+      Novoa.TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
-    dplyr::relocate(Novoa_TUR, Blended_TUR, .after = Blended_SPM) |>
+    dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM) |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
   
   return(list(qc_data = qc_data, sr_data = sr_data))
