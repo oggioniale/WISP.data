@@ -258,12 +258,12 @@ wisp_get_reflectance_multi_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
+#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(data = reflect_data, maxPeak = 0.05, maxPeak_350 = 0.02)
 #' }
 #' ## End (Not run)
 #' 
 ### wisp_qc_reflectance_data
-wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
+wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -287,19 +287,21 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05) {
   removed_rows$reason[data$measurement.date %in% removed_QC3$measurement.date] <- 
     paste(removed_rows$reason[data$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
   
-  # QC4 -> Removal lines with outliers in the Blue domain
+  # QC4 -> Removal lines with outliers in the Blue domain (or 350nm > "maxPeak_350")
   removed_QC4 <- data[which(
-    data$nm_350 > pmax(data$nm_555,
-                       data$nm_560,
-                       data$nm_565,
-                       data$nm_570,
-                       data$nm_575) &
-      pmax(data$nm_555,
-           data$nm_560,
-           data$nm_565,
-           data$nm_570,
-           data$nm_575) > data$nm_495
+    (data$nm_350 > pmax(data$nm_555,
+                        data$nm_560,
+                        data$nm_565,
+                        data$nm_570,
+                        data$nm_575) &
+       pmax(data$nm_555,
+            data$nm_560,
+            data$nm_565,
+            data$nm_570,
+            data$nm_575) > data$nm_495) |
+      (data$nm_350 > maxPeak_350)
   ), ]
+  
   removed_rows$reason[data$measurement.date %in% removed_QC4$measurement.date] <- 
     paste(removed_rows$reason[data$measurement.date %in% removed_QC4$measurement.date], "QC4", sep = " ")
   
