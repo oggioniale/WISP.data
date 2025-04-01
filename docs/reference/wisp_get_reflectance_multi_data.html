@@ -66,7 +66,9 @@ multiple dates.</p>
 <span>  time_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  station <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  userid <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pwd <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pwd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -98,6 +100,15 @@ is requested.</p></dd>
 <dt>pwd</dt>
 <dd><p>A <code>character</code>. It is the password to access to the data service.</p></dd>
 
+
+<dt>save_csv</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the reflectance data.</p></dd>
+
+
+<dt>out_dir</dt>
+<dd><p>A <code>character</code>. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -124,7 +135,8 @@ nm.</p>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2024-04-10T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
-<span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span></span></span>
+<span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co">## End (Not run)</span></span></span>

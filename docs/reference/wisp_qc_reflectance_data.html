@@ -57,7 +57,13 @@ This function removes all anomalous spectral signatures and explains the reason 
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_qc_reflectance_data</span><span class="op">(</span><span class="va">data</span>, maxPeak <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_qc_reflectance_data</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  maxPeak <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  maxPeak_350 <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,7 +76,21 @@ This function removes all anomalous spectral signatures and explains the reason 
 <dd><p>A <code>decimal</code>. Maximum magnitude of the spectral signatures.
 We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
-#' Default is 0.05.</p></dd>
+Default is 0.05.</p></dd>
+
+
+<dt>maxPeak_350</dt>
+<dd><p>A <code>decimal</code>. Maximum magnitude 350nm values.
+We recommend setting this parameter to: 0.02 (default)</p></dd>
+
+
+<dt>save_csv</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the reflectance data.</p></dd>
+
+
+<dt>out_dir</dt>
+<dd><p>A <code>character</code>. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -91,7 +111,12 @@ a message containing the reason behind the elimination of each anomalous spectra
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example code</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Not run:</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data_qc</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_qc_reflectance_data</span><span class="op">(</span>data <span class="op">=</span> <span class="va">reflect_data</span>, maxPeak <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data_qc</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_qc_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="va">reflect_data</span>,</span></span>
+<span class="r-in"><span>  maxPeak <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
+<span class="r-in"><span>  maxPeak_350 <span class="op">=</span> <span class="fl">0.02</span>,</span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
 <span class="r-in"><span></span></span>

@@ -66,7 +66,9 @@ specific date.</p>
 <span>  time_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  station <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  userid <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pwd <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pwd <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,27 +80,34 @@ is "1.0"</p></dd>
 
 
 <dt>time_from</dt>
-<dd><p>A <code>string</code> representing the start date and time for the
-data query (format: "YYYY-MM-DD HH:MM:SS").</p></dd>
+<dd><p>A <code>character</code>. It is the date and time from which the data
+is requested.</p></dd>
 
 
 <dt>time_to</dt>
-<dd><p>A <code>string</code> representing the end date and time for the data
-query (format: "YYYY-MM-DD HH:MM:SS").</p></dd>
+<dd><p>A <code>character</code>. It is the date and time to which the data
+is requested.</p></dd>
 
 
 <dt>station</dt>
-<dd><p>A <code>string</code> for the station name.</p></dd>
+<dd><p>A <code>character</code>.  It is the name of the station.</p></dd>
 
 
 <dt>userid</dt>
-<dd><p>A string representing the user ID for authenticating the API
-request.</p></dd>
+<dd><p>A <code>character</code>. It is the userid to access to the data service.</p></dd>
 
 
 <dt>pwd</dt>
-<dd><p>A string representing the password for authenticating the API
-request.</p></dd>
+<dd><p>A <code>character</code>. It is the password to access to the data service.</p></dd>
+
+
+<dt>save_csv</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the reflectance data.</p></dd>
+
+
+<dt>out_dir</dt>
+<dd><p>A <code>character</code>. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -136,7 +145,8 @@ all the values of reflectance for each wevelength from 350 to 900 nm.</p>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2024-08-01T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
-<span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span></span></span>
+<span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># no data for the station selected</span></span></span>

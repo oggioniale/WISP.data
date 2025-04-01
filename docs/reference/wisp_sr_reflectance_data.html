@@ -60,7 +60,7 @@ sunglint from spectral signatures</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span><span class="va">qc_data</span>, save_output <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span><span class="va">qc_data</span>, save_csv <span class="op">=</span> <span class="cn">FALSE</span>, out_dir <span class="op">=</span> <span class="st">"outputs"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,9 +69,13 @@ sunglint from spectral signatures</p>
 <dd><p>A <code>tibble</code> from wisp_qc_reflectance_data() function.</p></dd>
 
 
-<dt>save_output</dt>
-<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the output in a
-CSV file. Default is <code>FALSE</code>.</p></dd>
+<dt>save_csv</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the reflectance data.</p></dd>
+
+
+<dt>out_dir</dt>
+<dd><p>A <code>character</code>. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -79,7 +83,7 @@ CSV file. Default is <code>FALSE</code>.</p></dd>
     
 
 <p>A tibble with the spectral signatures after the SR operation and,
-if parameter <code>save_output</code> is <code>TRUE</code>, the function saves the reflectance data
+if parameter <code>save_out_sr</code> is <code>TRUE</code>, the function saves the reflectance data
 in a CSV file.</p>
     </div>
     <div class="section level2">
@@ -95,7 +99,7 @@ in a CSV file.</p>
 <span class="r-in"><span><span class="co">## Not run:</span></span></span>
 <span class="r-in"><span><span class="va">reflect_data_sr</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  qc_data <span class="op">=</span> <span class="va">reflect_data_qc</span>,</span></span>
-<span class="r-in"><span>  save_output <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span> </span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
