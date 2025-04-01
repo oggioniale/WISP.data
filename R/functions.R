@@ -379,7 +379,7 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
         dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
       )
     )
-  
+
   return(reflectance_data_filtered)
 }
 
@@ -388,8 +388,6 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
 #' This function applies the algorithm of Jiang et al., (2020) for removing
 #' sunglint from spectral signatures
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
-#' @param save_out_sr A `logical`. If `TRUE`, the function saves the output in a
-#' CSV file. Default is `FALSE`.
 #' @return A tibble with the spectral signatures after the SR operation and,
 #' if parameter `save_out_sr` is `TRUE`, the function saves the reflectance data
 #' in a CSV file.
@@ -397,7 +395,6 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select all_of across
 #' @importFrom units set_units
-#' @importFrom readr write_csv
 #' @export
 #' @examples
 #' # example code
@@ -405,13 +402,12 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
 #' ## Not run:
 #' reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
 #'   qc_data = reflect_data_qc,
-#'   save_out_sr = FALSE
 #' ) 
 #' }
 #' ## End (Not run)
 #'
 ### wisp_sr_reflectance_data
-wisp_sr_reflectance_data <- function(qc_data, save_out_sr = FALSE, out_dir_sr = getwd()) {
+wisp_sr_reflectance_data <- function(qc_data) {
   columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
                           colnames(qc_data), value = TRUE)
   columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
@@ -440,26 +436,6 @@ wisp_sr_reflectance_data <- function(qc_data, save_out_sr = FALSE, out_dir_sr = 
       )
     )
   
-  # Date range info
-  date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
-  date_to <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
-  
-  # Determines the filename
-  dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-  
-  # Save data in CSV file if save_out_sr is TRUE
-  if (save_out_sr) {
-    if (!dir.exists(out_dir_sr)) {
-      dir.create(out_dir_sr, recursive = TRUE)
-    }
-    
-    output_file <- file.path(out_dir_sr, paste0("reflectance_data_sr_", dates, ".csv"))
-    readr::write_csv(corrected_data, output_file)
-    
-    cat("\n----\nThe reflectance data has been saved as:\n", output_file, "\n----\n")
-  }
-  
-  # Return function output
   return(corrected_data)
 }
 
@@ -978,3 +954,49 @@ wisp_plot_reflectance_data <- function(
 #' \dontrun{
 ### wisp_trend_plot
 
+
+#' Saves the outputs in CSV format
+#' @description `r lifecycle::badge("experimental")`
+#' This function saves the outputs of "wisp_get_reflectance_data", 
+#' “wisp_qc_reflectance_data”, and #' “wisp_sr_reflectance_data” 
+#' functions in CSV format
+#' @param 
+#' @return 
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom readr write_csv
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+### wisp_save_csv
+wisp_save_csv <- function(data, out_dir, prefix = "reflectance_data", save = FALSE, save_qc = FALSE, save_sr = FALSE) {
+  
+  date_from <- format(as.Date(data$measurement.date[1]), "%Y%m%d")
+  date_to   <- format(as.Date(data$measurement.date[nrow(data)]), "%Y%m%d")
+  dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+  
+  if (!dir.exists(out_dir)) {
+    dir.create(out_dir, recursive = TRUE)
+  }
+  
+  if (save) { 
+    file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
+    readr::write_csv(data, file)
+    cat("\n----\nThe reflectance data has been saved as:\n", file, "\n----\n")
+  }
+  
+  if (save_qc) { 
+    qc_file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
+    readr::write_csv(data, qc_file)
+    cat("\n----\nThe QC reflectance data has been saved as:\n", qc_file, "\n----\n")
+  }
+  
+  if (save_sr) {
+    sr_file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
+    readr::write_csv(data, sr_file)
+    cat("\n----\nThe SR reflectance data has been saved as:\n", sr_file, "\n----\n")
+  }
+  
+  invisible(NULL)
+}
