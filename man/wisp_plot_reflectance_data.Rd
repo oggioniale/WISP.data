@@ -14,7 +14,7 @@ wisp_plot_reflectance_data(
 }
 \arguments{
 \item{data}{A \code{tibble} obtained by any of the functions provided by this
-package: wisp_get_reflectance_data(), or after QC and SR removal operations.}
+package: \code{wisp_get_reflectance_data()}, or after QC and SR removal operations.}
 
 \item{legend_TSM}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{TSM}
 values. Default is \code{TRUE}.}

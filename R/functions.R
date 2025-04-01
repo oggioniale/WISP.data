@@ -11,6 +11,9 @@
 #' @param station A `character`.  It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
+#' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
+#' @param out_dir A `character`. The directory where the CSV file will be saved.
+#' Default is "outputs" within the working directory.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
@@ -43,7 +46,8 @@
 #'   time_to = "2024-08-01T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
-#'   pwd = pwd
+#'   pwd = pwd,
+#'   save_csv = TRUE
 #' )
 #'
 #' # no data for the station selected
@@ -73,7 +77,9 @@ wisp_get_reflectance_data <- function(
     time_to = NULL,
     station = NULL,
     userid = NULL,
-    pwd = NULL
+    pwd = NULL,
+    save_csv = FALSE,
+    out_dir = "outputs"
 ) {
   # check if the date is different
   start_date <- substr(time_from, start = 0, stop = 10)
@@ -156,21 +162,29 @@ wisp_get_reflectance_data <- function(
           
           level2.quality = as.character(level2.quality) # Conversion without units of measurement
         ) |>
-       
         dplyr::rename_with(
           ~ stringr::str_c(
-            # 'level2.reflectance_nm_',
             "nm_",
             350:900
           ),
           dplyr::starts_with("level2.reflectance_")
         )
     }
+    # create output csv file
+    if (save_csv) {
+      dates <- if (identical(start_date, end_date)) start_date else paste0(start_date, "_", end_date)
+      if (!dir.exists(out_dir)) {
+        dir.create(out_dir, recursive = TRUE)
+      }
+      file <- file.path(out_dir, paste0("reflectance_data_", dates, ".csv"))
+      readr::write_csv(x = reflectance_data_tbl, file = file)
+    }
   } else {
     reflectance_data_tbl <- NULL
-    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use: reflect_data <- wisp_get_reflectance_multi_data\n----\n")
+    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use function: wisp_get_reflectance_multi_data()\n----\n")
   }
-  reflectance_data_tbl
+  # output
+  return(reflectance_data_tbl)
 }
 
 #' Get data of reflectance (level2) from WISPstation for a multiple dates
@@ -186,6 +200,9 @@ wisp_get_reflectance_data <- function(
 #' @param station A `character`.  It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
+#' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
+#' @param out_dir A `character`. The directory where the CSV file will be saved.
+#' Default is "outputs" within the working directory.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
@@ -203,7 +220,8 @@ wisp_get_reflectance_data <- function(
 #'   time_to = "2024-04-10T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
-#'   pwd = pwd
+#'   pwd = pwd,
+#'   save_csv = TRUE
 #' )
 #' }
 #' ## End (Not run)
@@ -215,7 +233,9 @@ wisp_get_reflectance_multi_data <- function(
     time_to = NULL,
     station = NULL,
     userid = NULL,
-    pwd = NULL
+    pwd = NULL,
+    save_csv = FALSE,
+    out_dir = "outputs"
 ) {
   from_time <- sub(".*T", "", time_from)
   to_time <- sub(".*T", "", time_to)
@@ -231,11 +251,25 @@ wisp_get_reflectance_multi_data <- function(
       time_to = paste0(date, "T", to_time),
       station = station,
       userid = userid,
-      pwd = pwd
+      pwd = pwd,
+      save_csv = FALSE
     )
   }) |>
     dplyr::bind_rows()
-    return(data_multiDates)
+  
+  # create output csv file
+  if (save_csv) {
+    date_from <- format(as.Date(time_from), "%Y%m%d")
+    date_to   <- format(as.Date(time_to), "%Y%m%d")
+    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    if (!dir.exists(out_dir)) {
+      dir.create(out_dir, recursive = TRUE)
+    }
+    file <- file.path(out_dir, paste0("reflectance_data_", dates, ".csv"))
+    readr::write_csv(x = data_multiDates, file = file)
+  }
+  # output
+  return(data_multiDates)
 }
 
 #' Quality Control (QC) for WISPstation reflectance data
@@ -245,9 +279,12 @@ wisp_get_reflectance_multi_data <- function(
 #' @param maxPeak A `decimal`. Maximum magnitude of the spectral signatures.
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
-#' #' Default is 0.05.
+#' Default is 0.05.
 #' @param maxPeak_350 A `decimal`. Maximum magnitude 350nm values.
 #' We recommend setting this parameter to: 0.02 (default)
+#' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
+#' @param out_dir A `character`. The directory where the CSV file will be saved.
+#' Default is "outputs" within the working directory.
 #' @return A `tibble` with the spectral signatures that have passed QC operation. In addition,
 #' a message containing the reason behind the elimination of each anomalous spectral signature
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
@@ -260,12 +297,17 @@ wisp_get_reflectance_multi_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(data = reflect_data, maxPeak = 0.05, maxPeak_350 = 0.02)
+#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+#'   data = reflect_data,
+#'   maxPeak = 0.05,
+#'   maxPeak_350 = 0.02,
+#'   save_csv = TRUE
+#' )
 #' }
 #' ## End (Not run)
 #' 
 ### wisp_qc_reflectance_data
-wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
+wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02, save_csv =  FALSE, out_dir = "outputs") {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -380,6 +422,18 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
       )
     )
 
+  # create output csv file
+  if (save_csv) {
+    date_from <- format(as.Date(reflectance_data_filtered$measurement.date[1]), "%Y%m%d")
+    date_to <- format(as.Date(reflectance_data_filtered$measurement.date[nrow(reflectance_data_filtered)]), "%Y%m%d")
+    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    if (!dir.exists(out_dir)) {
+      dir.create(out_dir, recursive = TRUE)
+    }
+    file <- file.path(out_dir, paste0("reflectance_data", "_qc_", dates, ".csv"))
+    readr::write_csv(x = reflectance_data_filtered, file = file)
+  }
+  
   return(reflectance_data_filtered)
 }
 
@@ -388,6 +442,9 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
 #' This function applies the algorithm of Jiang et al., (2020) for removing
 #' sunglint from spectral signatures
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
+#' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
+#' @param out_dir A `character`. The directory where the CSV file will be saved.
+#' Default is "outputs" within the working directory.
 #' @return A tibble with the spectral signatures after the SR operation and,
 #' if parameter `save_out_sr` is `TRUE`, the function saves the reflectance data
 #' in a CSV file.
@@ -402,12 +459,13 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02) {
 #' ## Not run:
 #' reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
 #'   qc_data = reflect_data_qc,
+#'   save_csv = TRUE
 #' ) 
 #' }
 #' ## End (Not run)
 #'
 ### wisp_sr_reflectance_data
-wisp_sr_reflectance_data <- function(qc_data) {
+wisp_sr_reflectance_data <- function(qc_data, save_csv =  FALSE, out_dir = "outputs") {
   columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
                           colnames(qc_data), value = TRUE)
   columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
@@ -436,6 +494,18 @@ wisp_sr_reflectance_data <- function(qc_data) {
       )
     )
   
+  # create output csv file
+  if (save_csv) {
+    date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
+    date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
+    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    if (!dir.exists(out_dir)) {
+      dir.create(out_dir, recursive = TRUE)
+    }
+    file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
+    readr::write_csv(x = corrected_data, file = file)
+  }
+  
   return(corrected_data)
 }
 
@@ -444,13 +514,12 @@ wisp_sr_reflectance_data <- function(qc_data) {
 #' This function calculates the reflectance peak due to phytoplankton 
 #' scattering (690-710 nm) and calculates the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm).
-#' "calc_scatt" can be either TRUE (default) or FALSE.
+#' `calc_scatt``` can be either TRUE (default) or FALSE.
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function. 
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' two parameters. Default is `TRUE`. 
-#' @return qc_data and sr_data tibbles updated with two new columns 
-#' ("scattering.peak" and "band.ratio")
+#' @return The result is a list with two elements: ...
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select all_of relocate
@@ -474,7 +543,7 @@ wisp_sr_reflectance_data <- function(qc_data) {
 #' }
 #' ## End (Not run)
 #' 
-### wisp_scattering_peak
+### wisp_phyto_scattering
 wisp_phyto_scattering <- function(qc_data, sr_data, calc_scatt = TRUE) {
   
   if (calc_scatt) {
@@ -509,13 +578,12 @@ wisp_phyto_scattering <- function(qc_data, sr_data, calc_scatt = TRUE) {
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the SPM concentration in according 
 #' to Novoa et al., 2017 and creates new columns in qc_data e sr_data.
-#' "calc_SPM" can be either TRUE (default) or FALSE.
+#' `calc_SPM` can be either TRUE (default) or FALSE.
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
 #' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
 #' NOVOA SPM concentrations. Default is `TRUE`. 
-#' @return qc_data and sr_data tibbles with the addition of the columns 
-#' “Novoa.SPM” and “Blended.SPM”
+#' @return The result is a list with two elements: ...
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate relocate rowwise ungroup select
@@ -535,6 +603,8 @@ wisp_phyto_scattering <- function(qc_data, sr_data, calc_scatt = TRUE) {
 #' novoa_SPM_results <- WISP.data::wisp_novoa_SPM(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_SPM = F)
 #' reflect_data_qc <- novoa_SPM_results$qc_data
 #' reflect_data_sr <- novoa_SPM_results$sr_data
+#' }
+#' ## End (Not run)
 #' 
 ### wisp_novoa_SPM
 wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
@@ -668,13 +738,12 @@ wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
 #' @description `r lifecycle::badge("experimental")`
 #' This function calculates the Turbidity (FNU) in according 
 #' to Novoa et al., 2017 and creates new columns in qc_data e sr_data.
-#' #' "calc_SPM" can be either TRUE (default) or FALSE.
+#' `calc_TUR` can be either TRUE (default) or FALSE.
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
 #' NOVOA TUR values Default is `TRUE`. 
-#' @return qc_data and sr_data tibbles with the addition of the columns 
-#' “Novoa.TUR” and “Blended.TUR”
+#' @return The result is a list with two elements: ...
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate rowwise ungroup relocate select
@@ -683,7 +752,7 @@ wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
 #' @examples
 #' # example code
 #' \dontrun{
-#' #' ## Not run:
+#' ## Not run:
 #' 
 #' # Calculate NOVOA_SPM
 #' novoa_TUR_results <- WISP.data::wisp_novoa_TUR(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_TUR = T)
@@ -694,6 +763,8 @@ wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
 #' novoa_TUR_results <- WISP.data::wisp_novoa_TUR(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_TUR = F)
 #' reflect_data_qc <- novoa_TUR_results$qc_data
 #' reflect_data_sr <- novoa_TUR_results$sr_data
+#' }
+#' ## End (Not run)
 #' 
 ### wisp_novoa_TUR
 wisp_novoa_TUR <- function(qc_data, sr_data, calc_TUR = TRUE) {
@@ -820,7 +891,7 @@ wisp_novoa_TUR <- function(qc_data, sr_data, calc_TUR = TRUE) {
 #' This function return a plotly of each spectral signature measured by a
 #' WISPstation.
 #' @param data A `tibble` obtained by any of the functions provided by this
-#' package: wisp_get_reflectance_data(), or after QC and SR removal operations.
+#' package: `wisp_get_reflectance_data()`, or after QC and SR removal operations.
 #' @param legend_TSM A `logical`. If `TRUE`, the plot legend includes the `TSM`
 #' values. Default is `TRUE`.
 #' @param legend_Chla A `logical`. If `TRUE`, the plot legend includes the
@@ -938,65 +1009,18 @@ wisp_plot_reflectance_data <- function(
   fig
 }
 
-#' Creates a plot of the trend of one or more parameters
-#' @description `r lifecycle::badge("experimental")`
-#' This function creates a graph related to the time trend of one or 
-#' more water quality parameters associated with spectral signatures filtered 
-#' and corrected by sunglint
-#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @return 
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom 
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-### wisp_trend_plot
-
-
-#' Saves the outputs in CSV format
-#' @description `r lifecycle::badge("experimental")`
-#' This function saves the outputs of "wisp_get_reflectance_data", 
-#' “wisp_qc_reflectance_data”, and #' “wisp_sr_reflectance_data” 
-#' functions in CSV format
-#' @param 
-#' @return 
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom readr write_csv
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-### wisp_save_csv
-wisp_save_csv <- function(data, out_dir, prefix = "reflectance_data", save = FALSE, save_qc = FALSE, save_sr = FALSE) {
-  
-  date_from <- format(as.Date(data$measurement.date[1]), "%Y%m%d")
-  date_to   <- format(as.Date(data$measurement.date[nrow(data)]), "%Y%m%d")
-  dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-  
-  if (!dir.exists(out_dir)) {
-    dir.create(out_dir, recursive = TRUE)
-  }
-  
-  if (save) { 
-    file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
-    readr::write_csv(data, file)
-    cat("\n----\nThe reflectance data has been saved as:\n", file, "\n----\n")
-  }
-  
-  if (save_qc) { 
-    qc_file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
-    readr::write_csv(data, qc_file)
-    cat("\n----\nThe QC reflectance data has been saved as:\n", qc_file, "\n----\n")
-  }
-  
-  if (save_sr) {
-    sr_file <- file.path(out_dir, paste0(prefix, "_", dates, ".csv"))
-    readr::write_csv(data, sr_file)
-    cat("\n----\nThe SR reflectance data has been saved as:\n", sr_file, "\n----\n")
-  }
-  
-  invisible(NULL)
-}
+# #' Creates a plot of the trend of one or more parameters
+# #' @description `r lifecycle::badge("experimental")`
+# #' This function creates a graph related to the time trend of one or
+# #' more water quality parameters associated with spectral signatures filtered
+# #' and corrected by sunglint
+# #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
+# #' @return
+# #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+# #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+# #' @importFrom
+# #' @export
+# #' @examples
+# #' # example code
+# #' \dontrun{
+# #' ### wisp_trend_plot

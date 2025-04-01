@@ -4,17 +4,19 @@
 \alias{wisp_sr_reflectance_data}
 \title{SUNGLINT Removal (SR) for WISPstation reflectance data}
 \usage{
-wisp_sr_reflectance_data(qc_data, save_output = FALSE)
+wisp_sr_reflectance_data(qc_data, save_csv = FALSE, out_dir = "outputs")
 }
 \arguments{
 \item{qc_data}{A \code{tibble} from wisp_qc_reflectance_data() function.}
 
-\item{save_output}{A \code{logical}. If \code{TRUE}, the function saves the output in a
-CSV file. Default is \code{FALSE}.}
+\item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
+
+\item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.}
 }
 \value{
 A tibble with the spectral signatures after the SR operation and,
-if parameter \code{save_output} is \code{TRUE}, the function saves the reflectance data
+if parameter \code{save_out_sr} is \code{TRUE}, the function saves the reflectance data
 in a CSV file.
 }
 \description{
@@ -28,7 +30,7 @@ sunglint from spectral signatures
 ## Not run:
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data = reflect_data_qc,
-  save_output = FALSE
+  save_csv = TRUE
 ) 
 }
 ## End (Not run)

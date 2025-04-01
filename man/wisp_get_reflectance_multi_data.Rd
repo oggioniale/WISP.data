@@ -10,7 +10,9 @@ wisp_get_reflectance_multi_data(
   time_to = NULL,
   station = NULL,
   userid = NULL,
-  pwd = NULL
+  pwd = NULL,
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 }
 \arguments{
@@ -28,6 +30,11 @@ is requested.}
 \item{userid}{A \code{character}. It is the userid to access to the data service.}
 
 \item{pwd}{A \code{character}. It is the password to access to the data service.}
+
+\item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
+
+\item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.}
 }
 \value{
 A \code{tibble} with measurement id, measurement date, instrument name,
@@ -50,7 +57,8 @@ reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_to = "2024-04-10T14:00",
   station = "WISPstation012",
   userid = userid,
-  pwd = pwd
+  pwd = pwd,
+  save_csv = TRUE
 )
 }
 ## End (Not run)

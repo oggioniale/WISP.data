@@ -4,7 +4,13 @@
 \alias{wisp_qc_reflectance_data}
 \title{Quality Control (QC) for WISPstation reflectance data}
 \usage{
-wisp_qc_reflectance_data(data, maxPeak = 0.05)
+wisp_qc_reflectance_data(
+  data,
+  maxPeak = 0.05,
+  maxPeak_350 = 0.02,
+  save_csv = FALSE,
+  out_dir = "outputs"
+)
 }
 \arguments{
 \item{data}{A \code{tibble}. From wisp_get_reflectance_data() function.}
@@ -12,7 +18,15 @@ wisp_qc_reflectance_data(data, maxPeak = 0.05)
 \item{maxPeak}{A \code{decimal}. Maximum magnitude of the spectral signatures.
 We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
-#' Default is 0.05.}
+Default is 0.05.}
+
+\item{maxPeak_350}{A \code{decimal}. Maximum magnitude 350nm values.
+We recommend setting this parameter to: 0.02 (default)}
+
+\item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
+
+\item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
+Default is "outputs" within the working directory.}
 }
 \value{
 A \code{tibble} with the spectral signatures that have passed QC operation. In addition,
@@ -26,7 +40,12 @@ This function removes all anomalous spectral signatures and explains the reason 
 # example code
 \dontrun{
 ## Not run:
-reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(data = reflect_data, maxPeak = 0.05)
+reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+  data = reflect_data,
+  maxPeak = 0.05,
+  maxPeak_350 = 0.02,
+  save_csv = TRUE
+)
 }
 ## End (Not run)
 

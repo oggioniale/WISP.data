@@ -18,34 +18,46 @@ pwd <- Sys.getenv("WISP_IREA_PSW")
 
 If you want to download the data for a single date, consider using the function `wisp_get_reflectance_data()` instead.
 
+In this function if the `save_csv` parameter is set to `TRUE`, the function
+will save the reflectance data as a .csv file in the 'output' folder within
+the working directory.
+
 ```{r echo = T, results = 'hide', warning=FALSE, message=TRUE}
 reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_from = "2024-04-08T09:00",
   time_to = "2024-04-10T14:00",
   station = "WISPstation012",
   userid = userid,
-  pwd = pwd
+  pwd = pwd,
+  save_csv = FALSE
 )
 ```
 
 ## Quality Check (QC) of the reflectance data
+
+In this function if the `save_csv` parameter is set to `TRUE`, the function
+will save the quality checked reflectance data as a .csv file in
+the 'output' folder within the working directory.
+
 ```{r echo = T, results = 'hide', warning=FALSE, message=TRUE}
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data = reflect_data,
-  maxPeak = 0.05
+  maxPeak = 0.05,
+  maxPeak_350 = 0.02,
+  save_csv = FALSE
 )
 ```
 
 ## Sunglint Removal (SR) of the reflectance data
 
-In this function if the `save_output` parameter is set to `TRUE`, the function
+In this function if the `save_csv` parameter is set to `TRUE`, the function
 will save the reflectance data with the sunglint removed as a .csv file in
-the working directory.
+the 'output' folder within the working directory.
 
 ```{r echo = T, results = 'hide', warning=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data = reflect_data_qc,
-  save_output = TRUE
+  save_csv = FALSE
 )
 ```
 
