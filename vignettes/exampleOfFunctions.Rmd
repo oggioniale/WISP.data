@@ -31,6 +31,26 @@ reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   pwd = pwd,
   save_csv = FALSE
 )
+
+# ----
+# 9 spectral signatures were removed during QC:
+# 
+# - 5 spectral signatures were removed thanks to QC1
+# - 4 spectral signatures were removed thanks to QC2
+# 
+# The spectral signature of 2024-04-08 10:45:05 has been removed thanks to: QC2
+# The spectral signature of 2024-04-08 11:00:05 has been removed thanks to: QC2
+# The spectral signature of 2024-04-08 11:15:05 has been removed thanks to: QC2
+# The spectral signature of 2024-04-08 11:30:05 has been removed thanks to: QC2
+# The spectral signature of 2024-04-08 13:00:04 has been removed thanks to: QC1
+# The spectral signature of 2024-04-08 13:15:05 has been removed thanks to: QC1
+# The spectral signature of 2024-04-08 13:30:05 has been removed thanks to: QC1
+# The spectral signature of 2024-04-08 13:45:04 has been removed thanks to: QC1
+# The spectral signature of 2024-04-10 13:45:05 has been removed thanks to: QC1
+# 
+# QC1 remove spectral signatures with negative values below 845 nm
+# QC2 remove spectral signatures with outliers in the NIR (840 nm > 700 nm)
+# ----
 ```
 
 ## Quality Check (QC) of the reflectance data
@@ -39,7 +59,7 @@ In this function if the `save_csv` parameter is set to `TRUE`, the function
 will save the quality checked reflectance data as a .csv file in
 the 'output' folder within the working directory.
 
-```{r echo = T, results = 'hide', warning=FALSE, message=TRUE}
+```{r echo = T, results = 'hide', warning=FALSE, message=FALSE}
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05,
