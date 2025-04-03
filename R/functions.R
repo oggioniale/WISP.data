@@ -32,7 +32,7 @@
 #' \dontrun{
 #' ## Not run:
 #' # NA data
-#' reflect_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- wisp_get_reflectance_data(
 #'   time_from = "2024-09-01T09:00",
 #'   time_to = "2024-09-01T14:00",
 #'   station = "WISPstation012",
@@ -41,17 +41,17 @@
 #' )
 #' 
 #' # with data
-#' reflect_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- wisp_get_reflectance_data(
 #'   time_from = "2024-08-01T09:00",
 #'   time_to = "2024-08-01T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = TRUE
+#'   save_csv = FALSE
 #' )
 #'
 #' # no data for the station selected
-#' reflect_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2019-06-20T14:00",
 #'   station = "WISPstation012",
@@ -60,7 +60,7 @@
 #' )
 #' 
 #' # The two dates are not consistent
-#' reflect_data <- WISP.data::wisp_get_reflectance_data(
+#' reflect_data <- wisp_get_reflectance_data(
 #'   time_from = "2019-06-20T09:00",
 #'   time_to = "2020-06-20T14:00",
 #'   station = "WISPstation012",
@@ -215,13 +215,13 @@ wisp_get_reflectance_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
+#' reflect_data <- wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = TRUE
+#'   save_csv = FALSE
 #' )
 #' }
 #' ## End (Not run)
@@ -282,6 +282,12 @@ wisp_get_reflectance_multi_data <- function(
 #' Default is 0.05.
 #' @param maxPeak_350 A `decimal`. Maximum magnitude 350nm values.
 #' We recommend setting this parameter to: 0.02 (default)
+#' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
+#' two parameters. Default is `TRUE`.
+#' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
+#' NOVOA SPM concentrations. Default is `TRUE`.
+#' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
+#' NOVOA TUR values Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -297,17 +303,29 @@ wisp_get_reflectance_multi_data <- function(
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+#' reflect_data_qc <- wisp_qc_reflectance_data(
 #'   data = reflect_data,
 #'   maxPeak = 0.05,
 #'   maxPeak_350 = 0.02,
-#'   save_csv = TRUE
+#'   calc_scatt = TRUE,
+#'   calc_SPM = FALSE,
+#'   calc_TUR = TRUE,
+#'   save_csv = FALSE
 #' )
 #' }
 #' ## End (Not run)
 #' 
 ### wisp_qc_reflectance_data
-wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02, save_csv =  FALSE, out_dir = "outputs") {
+wisp_qc_reflectance_data <- function(
+    data,
+    maxPeak = 0.05,
+    maxPeak_350 = 0.02,
+    calc_scatt = TRUE,
+    calc_SPM = TRUE,
+    calc_TUR = TRUE,
+    save_csv = FALSE,
+    out_dir = "outputs"
+    ) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -419,9 +437,26 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02, s
     dplyr::mutate(
       dplyr::across(
         dplyr::starts_with("nm_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
-      )
+      ),
+      QC = "checked"
     )
-
+  # for indexes
+  if (calc_scatt) {
+    reflectance_data_filtered <- wisp_calc_scatt(reflectance_data_filtered)
+  }
+  if (calc_SPM) {
+    reflectance_data_filtered <- wisp_calc_SPM(reflectance_data_filtered)
+  }
+  if (calc_TUR) {
+    reflectance_data_filtered <- wisp_calc_TUR(reflectance_data_filtered)
+    if (calc_SPM) {
+      reflectance_data_filtered <- reflectance_data_filtered |>
+        dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
+    } else {
+      reflectance_data_filtered <- reflectance_data_filtered |>
+        dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
+    }
+  }
   # create output csv file
   if (save_csv) {
     date_from <- format(as.Date(reflectance_data_filtered$measurement.date[1]), "%Y%m%d")
@@ -442,6 +477,12 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02, s
 #' This function applies the algorithm of Jiang et al., (2020) for removing
 #' sunglint from spectral signatures
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
+#' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
+#' two parameters. Default is `TRUE`.
+#' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
+#' NOVOA SPM concentrations. Default is `TRUE`.
+#' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
+#' NOVOA TUR values Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -457,163 +498,125 @@ wisp_qc_reflectance_data <- function(data, maxPeak = 0.05, maxPeak_350 = 0.02, s
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
+#' reflect_data_sr <- wisp_sr_reflectance_data(
 #'   qc_data = reflect_data_qc,
-#'   save_csv = TRUE
-#' ) 
+#'   calc_scatt = TRUE,
+#'   calc_SPM = TRUE,
+#'   calc_TUR = TRUE,
+#'   save_csv = FALSE
+#' )
 #' }
 #' ## End (Not run)
 #'
 ### wisp_sr_reflectance_data
-wisp_sr_reflectance_data <- function(qc_data, save_csv =  FALSE, out_dir = "outputs") {
-  columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
-                          colnames(qc_data), value = TRUE)
-  columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
-  columns_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(qc_data), value = TRUE)
-  columns_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(qc_data), value = TRUE)
-  columns_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
-  
-  corrected_data <- qc_data |>
-    # Calculation of the median between 750 and 780 nm ("md_750_780")
-    dplyr::mutate(
-      md_750_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_750_780)), 1, median, na.rm = TRUE),
-      # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
-      md_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_780)), 1, median, na.rm = TRUE),
-      md_810 = apply(dplyr::select(qc_data, dplyr::all_of(columns_810)), 1, median, na.rm = TRUE),
-      md_840 = apply(dplyr::select(qc_data, dplyr::all_of(columns_840)), 1, median, na.rm = TRUE),
-      # Calculation of "RHW"
-      RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0)),
-      # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
-      est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW,
-      # Calculation of "delta" based on "RHW" value
-      delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr"),
-      # Rrs correction based on "delta"
-      dplyr::across(
-        dplyr::all_of(columns_nm), 
-        ~ . - delta
-      )
-    )
-  
-  # create output csv file
-  if (save_csv) {
-    date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
-    date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
-    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-    if (!dir.exists(out_dir)) {
-      dir.create(out_dir, recursive = TRUE)
-    }
-    file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
-    readr::write_csv(x = corrected_data, file = file)
-  }
-  
-  return(corrected_data)
-}
-
-#' Phytoplankton Scattering for WISPstation reflectance data
-#' @description `r lifecycle::badge("experimental")`
-#' This function calculates the reflectance peak due to phytoplankton 
-#' scattering (690-710 nm) and calculates the ratio of the latter 
-#' to the second chlorophyll absorption peak (670-680 nm).
-#' `calc_scatt``` can be either TRUE (default) or FALSE.
-#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function. 
-#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
-#' two parameters. Default is `TRUE`. 
-#' @return The result is a list with two elements: ...
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr mutate select all_of relocate
-#' @importFrom units set_units
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' 
-#' # Calculate the two parameters
-#' scattering_results <- WISP.data::wisp_phyto_scattering(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_scatt = T)
-#' reflect_data_qc <- scattering_results$qc_data
-#' reflect_data_sr <- scattering_results$sr_data
-#' 
-#' # Don't calculate the two parameters
-#' scattering_results <- WISP.data::wisp_phyto_scattering(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_scatt = F)
-#' reflect_data_qc <- scattering_results$qc_data
-#' reflect_data_sr <- scattering_results$sr_data
-#' 
-#' }
-#' ## End (Not run)
-#' 
-### wisp_phyto_scattering
-wisp_phyto_scattering <- function(qc_data, sr_data, calc_scatt = TRUE) {
-  
-  if (calc_scatt) {
-    process_data <- function(data) {
-      columns_690_710 <- grep("^nm_(69[0-9]|70[0-9]|710)$", colnames(data), value = TRUE)
-      columns_670_680 <- grep("^nm_(67[0-9]|680)$", colnames(data), value = TRUE)
-      
-      data <- data |>
-        dplyr::mutate(
-          scattering.peak = units::set_units(
-            as.numeric(apply(dplyr::select(data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)),
-            "1/sr"
-          ),
-          band.ratio = units::set_units(
-            scattering.peak / apply(dplyr::select(data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE),
-            ""
-          )
-        ) |>
-        dplyr::relocate(scattering.peak, band.ratio, .after = waterquality.chla)
-      
-      return(data)
-    }
+wisp_sr_reflectance_data <- function(
+    qc_data,
+    calc_scatt = TRUE,
+    calc_SPM = TRUE,
+    calc_TUR = TRUE,
+    save_csv = FALSE,
+    out_dir = "outputs"
+  ) {
+  if ("QC" %in% names(qc_data)) {
+    columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
+                            colnames(qc_data), value = TRUE)
+    columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
+    columns_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(qc_data), value = TRUE)
+    columns_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(qc_data), value = TRUE)
+    columns_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
     
-    qc_data <- process_data(qc_data)
-    sr_data <- process_data(sr_data)
+    corrected_data <- qc_data |>
+      # Calculation of the median between 750 and 780 nm ("md_750_780")
+      dplyr::mutate(
+        md_750_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_750_780)), 1, median, na.rm = TRUE),
+        # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
+        md_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_780)), 1, median, na.rm = TRUE),
+        md_810 = apply(dplyr::select(qc_data, dplyr::all_of(columns_810)), 1, median, na.rm = TRUE),
+        md_840 = apply(dplyr::select(qc_data, dplyr::all_of(columns_840)), 1, median, na.rm = TRUE),
+        # Calculation of "RHW"
+        RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0)),
+        # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
+        est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW,
+        # Calculation of "delta" based on "RHW" value
+        delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr"),
+        SR = "corrected",
+        # Rrs correction based on "delta"
+        dplyr::across(
+          dplyr::all_of(columns_nm), 
+          ~ . - delta
+        )
+      )
+    # remove columns calculated before
+    # check and eventually remove scattering.peak and band.ratio
+    corrected_data <- corrected_data |>
+      dplyr::select(-dplyr::one_of("scattering.peak", "band.ratio"))
+    # check and eventually remove Novoa.SPM and Blended.SPM
+    corrected_data <- corrected_data |>
+      dplyr::select(-dplyr::one_of("Novoa.SPM", "Blended.SPM"))
+    # check and eventually remove Novoa.TUR and Blended.TUR
+    corrected_data <- corrected_data |>
+      dplyr::select(-dplyr::one_of("Novoa.TUR", "Blended.TUR"))
+    
+    # for indexes
+    if (calc_scatt) {
+      corrected_data <- wisp_calc_scatt(corrected_data)
+    }
+    if (calc_SPM) {
+      corrected_data <- wisp_calc_SPM(corrected_data)
+    }
+    if (calc_TUR) {
+      corrected_data <- wisp_calc_TUR(corrected_data)
+      if (calc_SPM) {
+        corrected_data <- corrected_data |>
+          dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
+      } else {
+        corrected_data <- corrected_data |>
+          dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
+      }
+    }
+    # create output csv file
+    if (save_csv) {
+      date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
+      date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
+      dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+      if (!dir.exists(out_dir)) {
+        dir.create(out_dir, recursive = TRUE)
+      }
+      file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
+      readr::write_csv(x = corrected_data, file = file)
+    }
+    # Output
+    return(corrected_data)
+  } else {
+    message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
   }
-  
-  return(list(qc_data = qc_data, sr_data = sr_data))
 }
 
-#' Calculation of SPM concentration (Novoa et al., 2017)
-#' @description `r lifecycle::badge("experimental")`
-#' This function calculates the SPM concentration in according 
-#' to Novoa et al., 2017 and creates new columns in qc_data e sr_data.
-#' `calc_SPM` can be either TRUE (default) or FALSE.
-#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
-#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA SPM concentrations. Default is `TRUE`. 
-#' @return The result is a list with two elements: ...
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr mutate relocate rowwise ungroup select
-#' @importFrom purrr map_dbl map_chr
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-#' #' ## Not run:
-#' 
-#' # Calculate NOVOA_SPM
-#' novoa_SPM_results <- WISP.data::wisp_novoa_SPM(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_SPM = T)
-#' reflect_data_qc <- novoa_SPM_results$qc_data
-#' reflect_data_sr <- novoa_SPM_results$sr_data
-#' 
-#' # Don't calculate NOVOA_SPM
-#' novoa_SPM_results <- WISP.data::wisp_novoa_SPM(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_SPM = F)
-#' reflect_data_qc <- novoa_SPM_results$qc_data
-#' reflect_data_sr <- novoa_SPM_results$sr_data
-#' }
-#' ## End (Not run)
-#' 
-### wisp_novoa_SPM
-wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
+#' @noRd
+#' @keywords internal
+### wisp_calc_scatt
+wisp_calc_scatt <- function(data) {
+  columns_690_710 <- grep("^nm_(69[0-9]|70[0-9]|710)$", colnames(data), value = TRUE)
+  columns_670_680 <- grep("^nm_(67[0-9]|680)$", colnames(data), value = TRUE)
   
-  # If "calc_SPM = F", returns the original datasets
-  if (!calc_SPM) {
-    return(list(qc_data = qc_data, sr_data = sr_data))
-  }
-  
+  data <- data |>
+    dplyr::mutate(
+      scattering.peak = units::set_units(
+        as.numeric(apply(dplyr::select(data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)),
+        "1/sr"
+      ),
+      band.ratio = units::set_units(
+        scattering.peak / apply(dplyr::select(data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE),
+        ""
+      )
+    ) |>
+    dplyr::relocate(scattering.peak, band.ratio, .after = waterquality.chla)
+}
+
+#' @noRd
+#' @keywords internal
+### wisp_calc_SPM
+wisp_calc_SPM <- function(data) {
   # General parameters
   novoa_spm_dict <- list(
     novoa_waves_req = c(560, 665, 865),   
@@ -653,12 +656,12 @@ wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
   # SPM concentration algorithm (Novoa et al., 2017) + Blending
   compute_novoa_spm <- function(green_value, red_value, nir_value) {
     coeff_green <- get_nechad_spm_coefficients(560)
-    coeff_red   <- get_nechad_spm_coefficients(665)
-    coeff_nir   <- get_nechad_spm_coefficients(865)
+    coeff_red <- get_nechad_spm_coefficients(665)
+    coeff_nir <- get_nechad_spm_coefficients(865)
     
     spm_green <- calculate_spm(green_value, coeff_green$A, coeff_green$C)
-    spm_red   <- calculate_spm(red_value,   coeff_red$A,   coeff_red$C)
-    spm_nir   <- calculate_spm(nir_value,   coeff_nir$A,   coeff_nir$C)
+    spm_red <- calculate_spm(red_value, coeff_red$A, coeff_red$C)
+    spm_nir <- calculate_spm(nir_value, coeff_nir$A, coeff_nir$C)
     
     rhow_red_lower <- novoa_spm_dict$rhow_switch_red[1]
     rhow_red_upper <- novoa_spm_dict$rhow_switch_red[2]
@@ -689,97 +692,38 @@ wisp_novoa_SPM <- function(qc_data, sr_data, calc_SPM = TRUE) {
     return(list(SPM = spm_final, band_selected = band_selected))
   }
   
-  # --- SPM calculation for "qc_data" ---
-  green_cols_qc <- get_columns_in_range(qc_data, 560, tol = 3)
-  red_cols_qc   <- get_columns_in_range(qc_data, 665, tol = 3)
-  nir_cols_qc   <- get_columns_in_range(qc_data, 865, tol = 3)
+  # --- SPM calculation for "data" ---
+  green_cols <- get_columns_in_range(data, 560, tol = 3)
+  red_cols <- get_columns_in_range(data, 665, tol = 3)
+  nir_cols <- get_columns_in_range(data, 865, tol = 3)
   
-  qc_data <- qc_data |>
+  data <- data |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      green_value = as.numeric(mean(dplyr::c_across(all_of(green_cols_qc)), na.rm = TRUE) * pi),
-      red_value   = as.numeric(mean(dplyr::c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
-      nir_value   = as.numeric(mean(dplyr::c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+      green_value = as.numeric(mean(dplyr::c_across(all_of(green_cols)), na.rm = TRUE) * pi),
+      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols)), na.rm = TRUE) * pi),
       novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa.SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Novoa.SPM = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
       Blended.SPM = purrr::map_chr(novoa_spm, "band_selected")
     ) |>
     dplyr::relocate(Novoa.SPM, Blended.SPM, .after = waterquality.tsm) |>
     dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
-  
-  # --- SPM calculation for "sr_data" ---
-  green_cols_sr <- get_columns_in_range(sr_data, 560, tol = 3)
-  red_cols_sr   <- get_columns_in_range(sr_data, 665, tol = 3)
-  nir_cols_sr   <- get_columns_in_range(sr_data, 865, tol = 3)
-  
-  sr_data <- sr_data |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      green_value = as.numeric(mean(dplyr::c_across(all_of(green_cols_sr)), na.rm = TRUE) * pi),
-      red_value   = as.numeric(mean(dplyr::c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
-      nir_value   = as.numeric(mean(dplyr::c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
-      novoa_spm = list(compute_novoa_spm(green_value, red_value, nir_value))
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(
-      Novoa.SPM      = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
-      Blended.SPM = purrr::map_chr(novoa_spm, "band_selected")
-    ) |>
-    dplyr::relocate(Novoa.SPM, Blended.SPM, .after = waterquality.tsm) |>
-    dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
-  
-  return(list(qc_data = qc_data, sr_data = sr_data))
 }
 
-#' Calculation of Turbidity (FNU) (Novoa et al., 2017)
-#' @description `r lifecycle::badge("experimental")`
-#' This function calculates the Turbidity (FNU) in according 
-#' to Novoa et al., 2017 and creates new columns in qc_data e sr_data.
-#' `calc_TUR` can be either TRUE (default) or FALSE.
-#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
-#' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-#' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA TUR values Default is `TRUE`. 
-#' @return The result is a list with two elements: ...
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr mutate rowwise ungroup relocate select
-#' @importFrom purrr map_dbl map_chr
-#' @export
-#' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' 
-#' # Calculate NOVOA_SPM
-#' novoa_TUR_results <- WISP.data::wisp_novoa_TUR(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_TUR = T)
-#' reflect_data_qc <- novoa_TUR_results$qc_data
-#' reflect_data_sr <- novoa_TUR_results$sr_data
-#' 
-#' # Don't calculate NOVOA_SPM
-#' novoa_TUR_results <- WISP.data::wisp_novoa_TUR(qc_data = reflect_data_qc, sr_data = reflect_data_sr, calc_TUR = F)
-#' reflect_data_qc <- novoa_TUR_results$qc_data
-#' reflect_data_sr <- novoa_TUR_results$sr_data
-#' }
-#' ## End (Not run)
-#' 
-### wisp_novoa_TUR
-wisp_novoa_TUR <- function(qc_data, sr_data, calc_TUR = TRUE) {
-  
-  # # If "calc_TUR = F", returns the original datasets
-  if (!calc_TUR) {
-    return(list(qc_data = qc_data, sr_data = sr_data))
-  }
-  
+#' @noRd
+#' @keywords internal
+### wisp_calc_SPM
+wisp_calc_TUR <- function(data) {
   # General parameters
   novoa_tur_dict <- list(
-    novoa_waves_req   = c(665, 865),          
-    novoa_algorithm   = "nechad_centre",      # "nechad_centre" or "nechad_average"
+    novoa_waves_req = c(665, 865),          
+    novoa_algorithm = "nechad_centre",      # "nechad_centre" or "nechad_average"
     novoa_output_switch = FALSE,
-    rhow_switch_nir   = c(0.08, 0.12)         #  or "c(0.046,0.09)" (Bourgneuf) 
+    rhow_switch_nir = c(0.08, 0.12)         #  or "c(0.046,0.09)" (Bourgneuf) 
   )
   
   # A_Nechad and C_Nechad coefficients (TUR) for green, red and nir bands
@@ -834,56 +778,23 @@ wisp_novoa_TUR <- function(qc_data, sr_data, calc_TUR = TRUE) {
     return(list(TUR = tur_final, band_selected = band_selected))
   }
   
-  # Determine the position of the columns
-  relocate_columns <- function(data) {
-    if ("Blended.SPM" %in% colnames(data)) {
-      return(dplyr::relocate(data, Novoa.TUR, Blended.TUR, .after = Blended.SPM))
-    } else if ("waterquality.tsm" %in% colnames(data)) {
-      return(dplyr::relocate(data, Novoa.TUR, Blended.TUR, .after = waterquality.tsm))
-    } else {
-      return(data)
-    }
-  }
+  # --- TUR calculation for "data" ---
+  red_cols <- get_columns_in_range(data, 665, tol = 3)
+  nir_cols <- get_columns_in_range(data, 865, tol = 3)
   
-  # --- TUR calculation for "qc_data" ---
-  red_cols_qc <- get_columns_in_range(qc_data, 665, tol = 3)
-  nir_cols_qc <- get_columns_in_range(qc_data, 865, tol = 3)
-  
-  qc_data <- qc_data |>
+  data <- data |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols_qc)), na.rm = TRUE) * pi),
-      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols_qc)), na.rm = TRUE) * pi),
+      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols)), na.rm = TRUE) * pi),
+      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols)), na.rm = TRUE) * pi),
       novoa_tur = list(compute_novoa_tur(red_value, nir_value))
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa.TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Novoa.TUR = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
       Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
-    relocate_columns() |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
-  
-  # --- TUR calculation for "sr_data" ---
-  red_cols_sr <- get_columns_in_range(sr_data, 665, tol = 3)
-  nir_cols_sr <- get_columns_in_range(sr_data, 865, tol = 3)
-  
-  sr_data <- sr_data |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      red_value = as.numeric(mean(dplyr::c_across(all_of(red_cols_sr)), na.rm = TRUE) * pi),
-      nir_value = as.numeric(mean(dplyr::c_across(all_of(nir_cols_sr)), na.rm = TRUE) * pi),
-      novoa_tur = list(compute_novoa_tur(red_value, nir_value))
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(
-      Novoa.TUR      = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
-      Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
-    ) |>
-    relocate_columns() |>
-    dplyr::select(-red_value, -nir_value, -novoa_tur)
-  
-  return(list(qc_data = qc_data, sr_data = sr_data))
 }
 
 #' Create a plot of reflectance data
@@ -913,7 +824,7 @@ wisp_novoa_TUR <- function(qc_data, sr_data, calc_TUR = TRUE) {
 #' # example code
 #' \dontrun{
 #' ## Not run:
-#' WISP.data::wisp_plot_reflectance_data(
+#' wisp_plot_reflectance_data(
 #'   data = reflect_data_sr,
 #'   legend_TSM = FALSE,
 #'   legend_Chla = TRUE,
