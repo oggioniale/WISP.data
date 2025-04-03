@@ -60,13 +60,35 @@ sunglint from spectral signatures</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span><span class="va">qc_data</span>, save_csv <span class="op">=</span> <span class="cn">FALSE</span>, out_dir <span class="op">=</span> <span class="st">"outputs"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span></span>
+<span>  <span class="va">qc_data</span>,</span>
+<span>  calc_scatt <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calc_SPM <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calc_TUR <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>qc_data</dt>
 <dd><p>A <code>tibble</code> from wisp_qc_reflectance_data() function.</p></dd>
+
+
+<dt>calc_scatt</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function calculates the
+two parameters. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt>calc_SPM</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function calculates the
+NOVOA SPM concentrations. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt>calc_TUR</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function calculates the
+NOVOA TUR values Default is <code>TRUE</code>.</p></dd>
 
 
 <dt>save_csv</dt>
@@ -97,10 +119,13 @@ in a CSV file.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example code</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Not run:</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data_sr</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data_sr</span> <span class="op">&lt;-</span> <span class="fu">wisp_sr_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  qc_data <span class="op">=</span> <span class="va">reflect_data_qc</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span> </span></span>
+<span class="r-in"><span>  calc_scatt <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  calc_SPM <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  calc_TUR <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
 <span class="r-in"><span></span></span>

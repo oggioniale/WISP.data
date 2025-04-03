@@ -16,9 +16,6 @@ reference:
     - wisp_qc_reflectance_data
     - wisp_sr_reflectance_data
     - wisp_plot_reflectance_data
-    - wisp_phyto_scattering
-    - wisp_novoa_SPM
-    - wisp_novoa_TUR
     # - wisp_trend_plot
 navbar:
   structure:

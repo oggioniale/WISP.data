@@ -4,10 +4,26 @@
 \alias{wisp_sr_reflectance_data}
 \title{SUNGLINT Removal (SR) for WISPstation reflectance data}
 \usage{
-wisp_sr_reflectance_data(qc_data, save_csv = FALSE, out_dir = "outputs")
+wisp_sr_reflectance_data(
+  qc_data,
+  calc_scatt = TRUE,
+  calc_SPM = TRUE,
+  calc_TUR = TRUE,
+  save_csv = FALSE,
+  out_dir = "outputs"
+)
 }
 \arguments{
 \item{qc_data}{A \code{tibble} from wisp_qc_reflectance_data() function.}
+
+\item{calc_scatt}{A \code{logical}. If \code{TRUE}, the function calculates the
+two parameters. Default is \code{TRUE}.}
+
+\item{calc_SPM}{A \code{logical}. If \code{TRUE}, the function calculates the
+NOVOA SPM concentrations. Default is \code{TRUE}.}
+
+\item{calc_TUR}{A \code{logical}. If \code{TRUE}, the function calculates the
+NOVOA TUR values Default is \code{TRUE}.}
 
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
@@ -28,10 +44,13 @@ sunglint from spectral signatures
 # example code
 \dontrun{
 ## Not run:
-reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
+reflect_data_sr <- wisp_sr_reflectance_data(
   qc_data = reflect_data_qc,
-  save_csv = TRUE
-) 
+  calc_scatt = TRUE,
+  calc_SPM = TRUE,
+  calc_TUR = TRUE,
+  save_csv = FALSE
+)
 }
 ## End (Not run)
 

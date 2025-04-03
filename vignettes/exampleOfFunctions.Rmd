@@ -64,6 +64,9 @@ reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05,
   maxPeak_350 = 0.02,
+  calc_scatt = TRUE,
+  calc_SPM = TRUE,
+  calc_TUR = TRUE,
   save_csv = FALSE
 )
 ```
@@ -77,6 +80,9 @@ the 'output' folder within the working directory.
 ```{r echo = T, results = 'hide', warning=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data = reflect_data_qc,
+  calc_scatt = TRUE,
+  calc_SPM = TRUE,
+  calc_TUR = TRUE,
   save_csv = FALSE
 )
 ```

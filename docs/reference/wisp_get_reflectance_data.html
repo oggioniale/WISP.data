@@ -131,7 +131,7 @@ all the values of reflectance for each wevelength from 350 to 900 nm.</p>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## Not run:</span></span></span>
 <span class="r-in"><span><span class="co"># NA data</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  time_from <span class="op">=</span> <span class="st">"2024-09-01T09:00"</span>,</span></span>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2024-09-01T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
@@ -140,17 +140,17 @@ all the values of reflectance for each wevelength from 350 to 900 nm.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># with data</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  time_from <span class="op">=</span> <span class="st">"2024-08-01T09:00"</span>,</span></span>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2024-08-01T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
 <span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># no data for the station selected</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  time_from <span class="op">=</span> <span class="st">"2019-06-20T09:00"</span>,</span></span>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2019-06-20T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
@@ -159,7 +159,7 @@ all the values of reflectance for each wevelength from 350 to 900 nm.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The two dates are not consistent</span></span></span>
-<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">WISP.data</span><span class="fu">::</span><span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  time_from <span class="op">=</span> <span class="st">"2019-06-20T09:00"</span>,</span></span>
 <span class="r-in"><span>  time_to <span class="op">=</span> <span class="st">"2020-06-20T14:00"</span>,</span></span>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>

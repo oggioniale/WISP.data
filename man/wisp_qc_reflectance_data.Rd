@@ -8,6 +8,9 @@ wisp_qc_reflectance_data(
   data,
   maxPeak = 0.05,
   maxPeak_350 = 0.02,
+  calc_scatt = TRUE,
+  calc_SPM = TRUE,
+  calc_TUR = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -22,6 +25,15 @@ Default is 0.05.}
 
 \item{maxPeak_350}{A \code{decimal}. Maximum magnitude 350nm values.
 We recommend setting this parameter to: 0.02 (default)}
+
+\item{calc_scatt}{A \code{logical}. If \code{TRUE}, the function calculates the
+two parameters. Default is \code{TRUE}.}
+
+\item{calc_SPM}{A \code{logical}. If \code{TRUE}, the function calculates the
+NOVOA SPM concentrations. Default is \code{TRUE}.}
+
+\item{calc_TUR}{A \code{logical}. If \code{TRUE}, the function calculates the
+NOVOA TUR values Default is \code{TRUE}.}
 
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
@@ -40,11 +52,14 @@ This function removes all anomalous spectral signatures and explains the reason 
 # example code
 \dontrun{
 ## Not run:
-reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+reflect_data_qc <- wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05,
   maxPeak_350 = 0.02,
-  save_csv = TRUE
+  calc_scatt = TRUE,
+  calc_SPM = FALSE,
+  calc_TUR = TRUE,
+  save_csv = FALSE
 )
 }
 ## End (Not run)

@@ -52,13 +52,13 @@ multiple dates.
 # example code
 \dontrun{
 ## Not run:
-reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
+reflect_data <- wisp_get_reflectance_multi_data(
   time_from = "2024-04-08T09:00",
   time_to = "2024-04-10T14:00",
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = TRUE
+  save_csv = FALSE
 )
 }
 ## End (Not run)

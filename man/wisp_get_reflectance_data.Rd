@@ -52,7 +52,7 @@ specific date.
 \dontrun{
 ## Not run:
 # NA data
-reflect_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- wisp_get_reflectance_data(
   time_from = "2024-09-01T09:00",
   time_to = "2024-09-01T14:00",
   station = "WISPstation012",
@@ -61,17 +61,17 @@ reflect_data <- WISP.data::wisp_get_reflectance_data(
 )
 
 # with data
-reflect_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- wisp_get_reflectance_data(
   time_from = "2024-08-01T09:00",
   time_to = "2024-08-01T14:00",
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = TRUE
+  save_csv = FALSE
 )
 
 # no data for the station selected
-reflect_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- wisp_get_reflectance_data(
   time_from = "2019-06-20T09:00",
   time_to = "2019-06-20T14:00",
   station = "WISPstation012",
@@ -80,7 +80,7 @@ reflect_data <- WISP.data::wisp_get_reflectance_data(
 )
 
 # The two dates are not consistent
-reflect_data <- WISP.data::wisp_get_reflectance_data(
+reflect_data <- wisp_get_reflectance_data(
   time_from = "2019-06-20T09:00",
   time_to = "2020-06-20T14:00",
   station = "WISPstation012",
