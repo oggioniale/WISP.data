@@ -607,7 +607,7 @@ wisp_calc_scatt <- function(data) {
       ),
       band.ratio = units::set_units(
         scattering.peak / apply(dplyr::select(data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE),
-        ""
+        "1"
       )
     ) |>
     dplyr::relocate(scattering.peak, band.ratio, .after = waterquality.chla)
