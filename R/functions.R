@@ -1,6 +1,6 @@
 #' Get data of reflectance (level2) from WISPstation for a specific date
 #' @description `r lifecycle::badge("experimental")`
-#' This function obtains the data of reflectance from WISPstation for a
+#' This function obtains the reflectance data from WISPstation for a
 #' specific date.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
@@ -17,7 +17,7 @@
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
-#' all the values of reflectance for each wevelength from 350 to 900 nm.
+#' all the reflectance values from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom httr2 request req_url_query req_auth_basic req_perform resp_body_string
@@ -37,7 +37,9 @@
 #'   time_to = "2024-09-01T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
-#'   pwd = pwd
+#'   pwd = pwd,
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' 
 #' # with data
@@ -47,7 +49,8 @@
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #'
 #' # no data for the station selected
@@ -56,7 +59,9 @@
 #'   time_to = "2019-06-20T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
-#'   pwd = pwd
+#'   pwd = pwd,
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' 
 #' # The two dates are not consistent
@@ -65,7 +70,9 @@
 #'   time_to = "2020-06-20T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
-#'   pwd = pwd
+#'   pwd = pwd,
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' }
 #' ## End (Not run)
@@ -187,9 +194,9 @@ wisp_get_reflectance_data <- function(
   return(reflectance_data_tbl)
 }
 
-#' Get data of reflectance (level2) from WISPstation for a multiple dates
+#' Get data of reflectance (level2) from WISPstation for multiple dates
 #' @description `r lifecycle::badge("experimental")`
-#' This function obtains the data of reflectance from WISPstation for a
+#' This function obtains the reflectance data from WISPstation for
 #' multiple dates.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
@@ -206,9 +213,9 @@ wisp_get_reflectance_data <- function(
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
-#' default, all the values of reflectance for each wevelength from 350 to 900
-#' nm.
+#' default, all the reflectance values from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr bind_rows
 #' @export
 #' @examples
@@ -221,7 +228,8 @@ wisp_get_reflectance_data <- function(
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' }
 #' ## End (Not run)
@@ -274,20 +282,22 @@ wisp_get_reflectance_multi_data <- function(
 
 #' Quality Control (QC) for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
-#' This function removes all anomalous spectral signatures and explains the reason for each elimination
+#' This function removes all anomalous spectral signatures and 
+#' explains the reason for each elimination
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @param maxPeak A `decimal`. Maximum magnitude of the spectral signatures.
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' Default is 0.05.
-#' @param maxPeak_350 A `decimal`. Maximum magnitude 350nm values.
+#' @param maxPeak_350 A `decimal`. Maximum magnitude 350 nm values.
 #' We recommend setting this parameter to: 0.02 (default)
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
-#' two parameters. Default is `TRUE`.
+#' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
+#' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
 #' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA SPM concentrations. Default is `TRUE`.
+#' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA TUR values Default is `TRUE`.
+#' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -310,7 +320,8 @@ wisp_get_reflectance_multi_data <- function(
 #'   calc_scatt = TRUE,
 #'   calc_SPM = FALSE,
 #'   calc_TUR = TRUE,
-#'   save_csv = FALSE
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' }
 #' ## End (Not run)
@@ -440,6 +451,7 @@ wisp_qc_reflectance_data <- function(
       ),
       QC = "checked"
     )
+  
   # for indexes
   if (calc_scatt) {
     reflectance_data_filtered <- wisp_calc_scatt(reflectance_data_filtered)
@@ -478,11 +490,12 @@ wisp_qc_reflectance_data <- function(
 #' sunglint from spectral signatures
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
-#' two parameters. Default is `TRUE`.
+#' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
+#' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
 #' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA SPM concentrations. Default is `TRUE`.
+#' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
-#' NOVOA TUR values Default is `TRUE`.
+#' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -503,7 +516,8 @@ wisp_qc_reflectance_data <- function(
 #'   calc_scatt = TRUE,
 #'   calc_SPM = TRUE,
 #'   calc_TUR = TRUE,
-#'   save_csv = FALSE
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
 #' )
 #' }
 #' ## End (Not run)
@@ -546,6 +560,7 @@ wisp_sr_reflectance_data <- function(
           ~ . - delta
         )
       )
+    
     # remove columns calculated before
     # check and eventually remove scattering.peak and band.ratio
     corrected_data <- corrected_data |>
@@ -574,6 +589,7 @@ wisp_sr_reflectance_data <- function(
           dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
       }
     }
+    
     # create output csv file
     if (save_csv) {
       date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
@@ -585,6 +601,7 @@ wisp_sr_reflectance_data <- function(
       file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
       readr::write_csv(x = corrected_data, file = file)
     }
+    
     # Output
     return(corrected_data)
   } else {
@@ -617,6 +634,7 @@ wisp_calc_scatt <- function(data) {
 #' @keywords internal
 ### wisp_calc_SPM
 wisp_calc_SPM <- function(data) {
+  
   # General parameters
   novoa_spm_dict <- list(
     novoa_waves_req = c(560, 665, 865),   
@@ -718,6 +736,7 @@ wisp_calc_SPM <- function(data) {
 #' @keywords internal
 ### wisp_calc_SPM
 wisp_calc_TUR <- function(data) {
+  
   # General parameters
   novoa_tur_dict <- list(
     novoa_waves_req = c(665, 865),          
@@ -842,6 +861,7 @@ wisp_plot_reflectance_data <- function(
     legend_Kd = TRUE,
     legend_cpc = TRUE
 ) {
+ 
   # Production of data information
   data <- data |>
     dplyr::mutate(
