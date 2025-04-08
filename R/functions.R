@@ -100,7 +100,7 @@ wisp_get_reflectance_data <- function(
         REQUEST = "GetData",
         INSTRUMENT = station,
         TIME = paste(time_from, time_to, sep = ","),
-        INCLUDE = "measurement.id,measurement.date,instrument.name,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
+        INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,"
       ) |> 
       httr2::req_auth_basic(userid, pwd) |>
       httr2::req_perform(verbosity = 3)
@@ -120,7 +120,7 @@ wisp_get_reflectance_data <- function(
           VERSION = version,
           REQUEST = "GetData",
           TIME = paste(time_from, time_to, sep = ","),
-          INCLUDE = "measurement.id,measurement.date,instrument.name,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
+          INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,"
         ) |> 
         httr2::req_auth_basic(userid, pwd) |>
         httr2::req_perform(verbosity = 3)
@@ -162,11 +162,12 @@ wisp_get_reflectance_data <- function(
             dplyr::starts_with("waterquality."), ~ as.numeric(as.character(.))
           ),
           measurement.date = lubridate::as_datetime(measurement.date),
+          measurement.latitude = units::set_units(as.numeric(measurement.latitude), degree),
+          measurement.longitude = units::set_units(as.numeric(measurement.longitude), degree),
           waterquality.tsm = units::set_units(waterquality.tsm, "g/m3"),
           waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
           waterquality.kd = units::set_units(waterquality.kd, "1/m"),
           waterquality.cpc = units::set_units(waterquality.cpc, "mg/m3"),
-          
           level2.quality = as.character(level2.quality) # Conversion without units of measurement
         ) |>
         dplyr::rename_with(
