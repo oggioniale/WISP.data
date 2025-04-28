@@ -620,11 +620,11 @@ wisp_calc_scatt <- function(data) {
   data <- data |>
     dplyr::mutate(
       scattering.peak = units::set_units(
-        as.numeric(apply(dplyr::select(data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)),
+        round(as.numeric(apply(dplyr::select(data, dplyr::all_of(columns_690_710)), 1, max, na.rm = TRUE)), 4),
         "1/sr"
       ),
       band.ratio = units::set_units(
-        scattering.peak / apply(dplyr::select(data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE),
+        round(scattering.peak / apply(dplyr::select(data, dplyr::all_of(columns_670_680)), 1, max, na.rm = TRUE), 4),
         "1"
       )
     ) |>
@@ -816,12 +816,13 @@ wisp_calc_TUR <- function(data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa.TUR = units::set_units(purrr::map_dbl(novoa_tur, "TUR"), "NTU"),
+      Novoa.TUR = units::set_units(round(purrr::map_dbl(novoa_tur, "TUR"), 1), "NTU"),
       Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
   
   units::remove_unit("NTU", "Nephelometric Turbidity Unit")
+  data <- data
 }
 
 #' Create a plot of reflectance data
