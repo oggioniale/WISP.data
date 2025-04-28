@@ -820,6 +820,8 @@ wisp_calc_TUR <- function(data) {
       Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
+  
+  units::remove_unit("NTU", "Nephelometric Turbidity Unit")
 }
 
 #' Create a plot of reflectance data
