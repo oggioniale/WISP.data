@@ -695,17 +695,17 @@ wisp_calc_SPM <- function(data) {
       spm_final <- spm_green * log(rhow_red_upper / red_value) / logb +
         spm_red * log(red_value / rhow_red_lower) / logb
       band_selected <- "Blending green and red"
-    } else if (red_value < rhow_nir_lower) {
+    } else if (red_value <= rhow_nir_lower) {
       spm_final <- spm_red
       band_selected <- "Red (665nm)"
-    } else if (red_value < rhow_nir_upper) {
-      logb <- log(rhow_nir_upper / rhow_nir_lower)
-      spm_final <- spm_red * log(rhow_nir_upper / nir_value) / logb +
-        spm_nir * log(nir_value / rhow_nir_lower) / logb
-      band_selected <- "Blending red and NIR"
-    } else {
+    } else if (red_value >= rhow_nir_upper) {
       spm_final <- spm_nir
       band_selected <- "NIR (865nm)"
+    } else {
+      logb <- log(rhow_nir_upper / rhow_nir_lower)
+      spm_final <- spm_red * log(rhow_nir_upper / red_value) / logb +
+        spm_nir * log(red_value / rhow_nir_lower) / logb
+      band_selected <- "Blending red and NIR"
     }
     
     return(list(SPM = spm_final, band_selected = band_selected))
@@ -726,7 +726,7 @@ wisp_calc_SPM <- function(data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa.SPM = paste0(round(purrr::map_dbl(novoa_spm, "SPM"), 1), " [g/m3]"),
+      Novoa.SPM = units::set_units(round(purrr::map_dbl(novoa_spm, "SPM"), 1), "g/m3"),
       Blended.SPM = purrr::map_chr(novoa_spm, "band_selected")
     ) |>
     dplyr::relocate(Novoa.SPM, Blended.SPM, .after = waterquality.tsm) |>
@@ -802,6 +802,11 @@ wisp_calc_TUR <- function(data) {
   red_cols <- get_columns_in_range(data, 665, tol = 3)
   nir_cols <- get_columns_in_range(data, 865, tol = 3)
   
+  units::install_unit(
+    symbol = "NTU",
+    name = c("Nephelometric Turbidity Unit")
+  )
+  
   data <- data |>
     dplyr::rowwise() |>
     dplyr::mutate(
@@ -811,7 +816,7 @@ wisp_calc_TUR <- function(data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      Novoa.TUR = paste0(round(purrr::map_dbl(novoa_tur, "TUR"), 1), " [NTU]"),
+      Novoa.TUR = units::set_units(purrr::map_dbl(novoa_tur, "TUR"), "NTU"),
       Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
     dplyr::select(-red_value, -nir_value, -novoa_tur)
@@ -831,6 +836,14 @@ wisp_calc_TUR <- function(data) {
 #' values. Default is `TRUE`.
 #' @param legend_cpc A `logical`. If `TRUE`, the plot legend includes the `cpc`
 #' values. Default is `TRUE`.
+#' @param legend_scatt A `logical`. If `TRUE`, the plot legend includes the `scattering`
+#' values. Default is `FALSE`.
+#' @param legend_ratio A `logical`. If `TRUE`, the plot legend includes the `ratio`
+#' values. Default is `FALSE`.
+#' @param legend_novoa_SPM A `logical`. If `TRUE`, the plot legend includes 
+#' the `Novoa_SPM`values. Default is `FALSE`.
+#' @param legend_novoa_TUR A `logical`. If `TRUE`, the plot legend includes 
+#' the `Novoa_TUR`values. Default is `FALSE`.
 #' @return description A plotly object with the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
@@ -850,6 +863,10 @@ wisp_calc_TUR <- function(data) {
 #'   legend_Chla = TRUE,
 #'   legend_Kd = FALSE,
 #'   legend_cpc = FALSE
+#'   legend_scatt = FALSE
+#'   legend_ratio = FALSE
+#'   legend_novoa_SPM = FALSE
+#'   legend_novoa_TUR = FALSE
 #' )
 #' }
 #' ## End (Not run)
@@ -860,23 +877,32 @@ wisp_plot_reflectance_data <- function(
     legend_TSM = TRUE,
     legend_Chla = TRUE,
     legend_Kd = TRUE,
-    legend_cpc = TRUE
+    legend_cpc = TRUE,
+    legend_scatt = FALSE,
+    legend_ratio = FALSE,
+    legend_novoa_SPM = FALSE,
+    legend_novoa_TUR = FALSE
 ) {
  
   # Production of data information
   data <- data |>
     dplyr::mutate(
-      products_info = mapply(function(tsm, chla, kd, cpc) {
+      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur) {
+        
         paste(
           c(
             if (legend_TSM) paste("TSM [g/m3]:", tsm),
             if (legend_Chla) paste("Chla [mg/m3]:", chla),
             if (legend_Kd) paste("Kd [1/m]:", kd),
-            if (legend_cpc) paste("cpc [mg/m3]:", cpc)
+            if (legend_cpc) paste("Cpc [mg/m3]:", cpc),
+            if (legend_scatt) paste("Scatt [1/sr]:", scatt),
+            if (legend_ratio) paste("Ratio:", ratio),
+            if (legend_novoa_SPM) paste("Novoa_SPM [g/m3]:", novoa_spm),
+            if (legend_novoa_TUR) paste("Novoa_TUR [NTU]:", novoa_tur)
           ),
           collapse = "<br>"
         )
-      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc)
+      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc, scattering.peak, band.ratio, Novoa.SPM, Novoa.TUR)
     )
   
   # Data transformation
@@ -932,7 +958,7 @@ wisp_plot_reflectance_data <- function(
     mode = 'lines'
   ) |>
     plotly::layout(
-      title = paste0("Aquired by: ", data$instrument.name[1], dates_text),
+      title = paste0("Acquired by: ", data$instrument.name[1], dates_text),
       xaxis = list(title = '<b>Wavelength [nm]<b>', dtick = 100),
       yaxis = list(title = '<b>Rrs [1/sr]<b>'),
       legend = list(title = list(text = '<b>Time of acquisition</b>'))
