@@ -246,36 +246,50 @@ wisp_get_reflectance_multi_data <- function(
     save_csv = FALSE,
     out_dir = "outputs"
 ) {
+
   from_time <- sub(".*T", "", time_from)
-  to_time <- sub(".*T", "", time_to)
-  data_multiDates <- lapply(
-    seq.Date(
-      from = as.Date(time_from),
-      to = as.Date(time_to),
-      by = "day"
-    ), function(date) {
-    wisp_get_reflectance_data(
-      version = version,
-      time_from = paste0(date, "T", from_time),
-      time_to = paste0(date, "T", to_time),
-      station = station,
-      userid = userid,
-      pwd = pwd,
-      save_csv = FALSE
-    )
-  }) |>
-    dplyr::bind_rows()
+  to_time   <- sub(".*T", "", time_to)
+  dates <- seq.Date(
+    from = as.Date(time_from),
+    to   = as.Date(time_to),
+    by   = "day"
+  )
+  
+  # skip dates with no data
+  daily_list <- lapply(dates, function(date) {
+    this_from <- paste0(date, "T", from_time)
+    this_to   <- paste0(date, "T", to_time)
+    tryCatch({
+      wisp_get_reflectance_data(
+        version  = version,
+        time_from = this_from,
+        time_to   = this_to,
+        station   = station,
+        userid    = userid,
+        pwd       = pwd,
+        save_csv  = FALSE
+      )
+    }, error = function(e) {
+      message(sprintf(
+        "\n----\nSkipping %s: %s\n----\n",
+        as.character(date),
+        e$message
+      ))
+      return(NULL)
+    })
+  })
+  
+  # combine only successful results
+  data_multiDates <- dplyr::bind_rows(daily_list)
   
   # create output csv file
   if (save_csv) {
     date_from <- format(as.Date(time_from), "%Y%m%d")
-    date_to   <- format(as.Date(time_to), "%Y%m%d")
-    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-    if (!dir.exists(out_dir)) {
-      dir.create(out_dir, recursive = TRUE)
-    }
-    file <- file.path(out_dir, paste0("reflectance_data_", dates, ".csv"))
-    readr::write_csv(x = data_multiDates, file = file)
+    date_to   <- format(as.Date(time_to),   "%Y%m%d")
+    dates_str <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+    file_path <- file.path(out_dir, paste0("reflectance_data_", dates_str, ".csv"))
+    readr::write_csv(x = data_multiDates, file = file_path)
   }
   # output
   return(data_multiDates)
