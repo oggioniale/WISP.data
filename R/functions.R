@@ -306,6 +306,10 @@ wisp_get_reflectance_multi_data <- function(
 #' Default is 0.05.
 #' @param maxPeak_blue A `decimal`. Maximum magnitude 350 nm values.
 #' We recommend setting this parameter to: 0.02 (default)
+#' @param qa_threshold A `decimal`. Minimum threshold for Quality Assurance (QA).
+#' We recommend setting this parameter to: 0.5 (default)
+#' @param qwip_threshold A `decimal`. Maximum threshold for Quality Water Index Polynomial (QWIP).
+#' We recommend setting this parameter to: 0.2 (default)
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
@@ -332,11 +336,14 @@ wisp_get_reflectance_multi_data <- function(
 #'   data = reflect_data,
 #'   maxPeak = 0.05,
 #'   maxPeak_blue = 0.02,
+#'   qa_threshold    = 0.5,
+#'   qwip_threshold  = 0.2,
 #'   calc_scatt = TRUE,
 #'   calc_SPM = FALSE,
 #'   calc_TUR = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
+#'   QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
 #' )
 #' }
 #' ## End (Not run)
@@ -344,13 +351,16 @@ wisp_get_reflectance_multi_data <- function(
 ### wisp_qc_reflectance_data
 wisp_qc_reflectance_data <- function(
     data,
-    maxPeak = 0.05,
-    maxPeak_blue = 0.02,
-    calc_scatt = TRUE,
-    calc_SPM = TRUE,
-    calc_TUR = TRUE,
-    save_csv = FALSE,
-    out_dir = "outputs"
+    maxPeak         = 0.05,
+    maxPeak_blue    = 0.02,
+    qa_threshold    = 0.5,
+    qwip_threshold  = 0.2,
+    calc_scatt      = TRUE,
+    calc_SPM        = TRUE,
+    calc_TUR        = TRUE,
+    save_csv        = FALSE,
+    out_dir         = "outputs",
+    QA_ref_csv      = "path/QA_raw_data_nRrs_Wei2016.csv"  # createlo su R!!!!!!
     ) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
@@ -378,7 +388,6 @@ wisp_qc_reflectance_data <- function(
   # QC4 -> Removal lines with outliers in the Blue domain (or Blue > "maxPeak_blue")
   # Find the band closest to 350 nm among the available columns (350-450 nm)
   candidate_bands <- grep("^nm_3[5-9][0-9]$|^nm_350$|^nm_4[0-4][0-9]$|^nm_450$", names(data), value = TRUE)
-  
   if (length(candidate_bands) > 0) {
     band_wavelengths <- as.numeric(sub("nm_", "", candidate_bands))
     closest_idx <- which.min(abs(band_wavelengths - 350))
@@ -386,7 +395,6 @@ wisp_qc_reflectance_data <- function(
   } else {
     stop("No band between 350 and 450 nm available for QC4.")
   }
-  
   removed_QC4 <- data[which(
     (data[[blue_ref_band]] > pmax(data$nm_555,
                                   data$nm_560,
@@ -400,7 +408,6 @@ wisp_qc_reflectance_data <- function(
             data$nm_575) > data$nm_495) |
       (data[[blue_ref_band]] > maxPeak_blue)
   ), ]
-  
   removed_rows$reason[data$measurement.date %in% removed_QC4$measurement.date] <- 
     paste(removed_rows$reason[data$measurement.date %in% removed_QC4$measurement.date], "QC4", sep = " ")
   
@@ -423,6 +430,69 @@ wisp_qc_reflectance_data <- function(
   removed_rows$reason[data$measurement.date %in% removed_QC6$measurement.date] <- 
     paste(trimws(removed_rows$reason[data$measurement.date %in% removed_QC6$measurement.date]), "QC6", sep = " ")
   
+  # QA -> Removal of lines according to Wei et al., 2016
+  QA_dt <- read.csv(QA_ref_csv, header = TRUE, row.names = 1)
+  QA_median <- QA_dt[1:23, ]
+  QA_lower <- QA_dt[24:46, ]
+  QA_upper <- QA_dt[47:69, ]
+  target_waves <- c(412, 443, 488, 510, 531, 547, 555, 667, 678)
+  
+  mean_band <- function(row, wave, window = 3) {
+    band_names <- paste0("nm_", (wave - window):(wave + window))
+    band_names <- band_names[band_names %in% names(row)]
+    mean(as.numeric(row[band_names]), na.rm = TRUE)
+  }
+  
+  cosa <- function(tmp_nRrs, one_median) {
+    sum(tmp_nRrs * one_median) / sqrt(sum(tmp_nRrs^2) * sum(one_median^2))
+  }
+  
+  QA_wei <- function(one_Rrs, QA_median, QA_lower, QA_upper) {
+    nRrs <- one_Rrs / sqrt(sum(one_Rrs^2))
+    all_cosa <- apply(QA_median, 1, cosa, tmp_nRrs = nRrs)
+    max_cosa <- which.max(all_cosa)
+    found_lower <- QA_lower[max_cosa, ]
+    found_upper <- QA_upper[max_cosa, ]
+    tmp_QA <- as.numeric(nRrs >= found_lower & nRrs <= found_upper)
+    mean(tmp_QA)
+  }
+  
+  QA_input_data <- data[removed_rows$reason == "", ]
+  QA_values <- apply(QA_input_data, 1, function(row) {
+    row <- as.list(row)
+    band_means <- sapply(target_waves, function(wave) mean_band(row, wave))
+    if (any(is.na(band_means))) return(NA)
+    QA_wei(band_means, QA_median, QA_lower, QA_upper)
+  })
+  
+  removed_QA <- QA_input_data[which(QA_values < qa_threshold | is.na(QA_values)), ]
+  removed_rows$reason[data$measurement.date %in% removed_QA$measurement.date] <-
+    paste(trimws(removed_rows$reason[data$measurement.date %in% removed_QA$measurement.date]), "QA")
+  
+  # QWIP -> Removal of lines according to Dierssen et al., 2022
+  cal_QWIP_score_hyper <- function(rrs, wave){
+    rrs <- as.numeric(rrs)
+    names(rrs) <- paste0("Rrs", wave)
+    vis_dt <- data.frame(wl=seq(400,700),
+                         Rrs=rrs[which(wave==400):which(wave==700)])
+    AVW <- sum(vis_dt$Rrs,na.rm=TRUE)/sum(vis_dt$Rrs/vis_dt$wl,na.rm=TRUE)
+    NDI <- (rrs["Rrs665"]-rrs["Rrs492"])/(rrs["Rrs665"]+rrs["Rrs492"])
+    p <- c(-8.399885e-9,1.715532e-5,-1.301670e-2,4.357838e0,-5.449532e2)
+    QWIP_exp <- p[1]*AVW^4 + p[2]*AVW^3 + p[3]*AVW^2 + p[4]*AVW + p[5]
+    NDI - QWIP_exp
+  }
+  
+  spec_cols  <- grep("^nm_", colnames(data), value=TRUE)
+  spec_waves <- as.numeric(sub("nm_","", spec_cols))
+  
+  QWIP_input <- data[removed_rows$reason=="", ]
+  QWIP_scores <- vapply(seq_len(nrow(QWIP_input)), function(i){
+    cal_QWIP_score_hyper(as.numeric(QWIP_input[i, spec_cols]), spec_waves)
+  }, numeric(1))
+  removed_QWIP <- QWIP_input[which(QWIP_scores > qwip_threshold | is.na(QWIP_scores)), ]
+  removed_rows$reason[data$measurement.date %in% removed_QWIP$measurement.date] <-
+    paste(trimws(removed_rows$reason[data$measurement.date %in% removed_QWIP$measurement.date]), "QWIP")
+  
   # Removal of outlier spectral signatures
   reflectance_data_filtered <- data[removed_rows$reason == "", ]
   
@@ -438,7 +508,9 @@ wisp_qc_reflectance_data <- function(
     QC3 = "remove spectral signatures with maximum peak greater than maxPeak",
     QC4 = "remove spectral signatures with outliers in the Blue domain",
     QC5 = "remove spectral signatures similar to 'decreasing logarithms' functions",
-    QC6 = "remove 'invalid' and 'None' spectral signatures according to level2.quality"
+    QC6 = "remove 'invalid' and 'None' spectral signatures according to level2.quality",
+    QA = "remove spectral signatures with low quality based on Wei et al. (2016)",
+    QWIP = "remove spectral signatures with low quality based on Dierssen et al., 2022"
   )
   
   message("\n----")
@@ -848,6 +920,11 @@ wisp_calc_TUR <- function(data) {
   units::remove_unit("NTU", "Nephelometric Turbidity Unit")
   data <- data
 }
+
+#' @noRd
+#' @keywords internal
+### wisp_calc_TSS_Jiang
+
 
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
