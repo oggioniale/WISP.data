@@ -304,7 +304,7 @@ wisp_get_reflectance_multi_data <- function(
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' Default is 0.05.
-#' @param maxPeak_350 A `decimal`. Maximum magnitude 350 nm values.
+#' @param maxPeak_blue A `decimal`. Maximum magnitude 350 nm values.
 #' We recommend setting this parameter to: 0.02 (default)
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
@@ -331,7 +331,7 @@ wisp_get_reflectance_multi_data <- function(
 #' reflect_data_qc <- wisp_qc_reflectance_data(
 #'   data = reflect_data,
 #'   maxPeak = 0.05,
-#'   maxPeak_350 = 0.02,
+#'   maxPeak_blue = 0.02,
 #'   calc_scatt = TRUE,
 #'   calc_SPM = FALSE,
 #'   calc_TUR = TRUE,
@@ -345,7 +345,7 @@ wisp_get_reflectance_multi_data <- function(
 wisp_qc_reflectance_data <- function(
     data,
     maxPeak = 0.05,
-    maxPeak_350 = 0.02,
+    maxPeak_blue = 0.02,
     calc_scatt = TRUE,
     calc_SPM = TRUE,
     calc_TUR = TRUE,
@@ -375,19 +375,30 @@ wisp_qc_reflectance_data <- function(
   removed_rows$reason[data$measurement.date %in% removed_QC3$measurement.date] <- 
     paste(removed_rows$reason[data$measurement.date %in% removed_QC3$measurement.date], "QC3", sep = " ")
   
-  # QC4 -> Removal lines with outliers in the Blue domain (or 350nm > "maxPeak_350")
+  # QC4 -> Removal lines with outliers in the Blue domain (or Blue > "maxPeak_blue")
+  # Find the band closest to 350 nm among the available columns (350-450 nm)
+  candidate_bands <- grep("^nm_3[5-9][0-9]$|^nm_350$|^nm_4[0-4][0-9]$|^nm_450$", names(data), value = TRUE)
+  
+  if (length(candidate_bands) > 0) {
+    band_wavelengths <- as.numeric(sub("nm_", "", candidate_bands))
+    closest_idx <- which.min(abs(band_wavelengths - 350))
+    blue_ref_band <- candidate_bands[closest_idx]
+  } else {
+    stop("No band between 350 and 450 nm available for QC4.")
+  }
+  
   removed_QC4 <- data[which(
-    (data$nm_350 > pmax(data$nm_555,
-                        data$nm_560,
-                        data$nm_565,
-                        data$nm_570,
-                        data$nm_575) &
+    (data[[blue_ref_band]] > pmax(data$nm_555,
+                                  data$nm_560,
+                                  data$nm_565,
+                                  data$nm_570,
+                                  data$nm_575) &
        pmax(data$nm_555,
             data$nm_560,
             data$nm_565,
             data$nm_570,
             data$nm_575) > data$nm_495) |
-      (data$nm_350 > maxPeak_350)
+      (data[[blue_ref_band]] > maxPeak_blue)
   ), ]
   
   removed_rows$reason[data$measurement.date %in% removed_QC4$measurement.date] <- 
@@ -547,12 +558,11 @@ wisp_sr_reflectance_data <- function(
     out_dir = "outputs"
   ) {
   if ("QC" %in% names(qc_data)) {
-    columns_750_780 <- grep("^nm_(750|751|752|753|754|755|756|757|758|759|760|761|762|763|764|765|766|767|768|769|770|771|772|773|774|775|776|777|778|779|780)$", 
-                            colnames(qc_data), value = TRUE)
-    columns_780 <- grep("^nm_(775|776|777|778|779|780|781|782|783|784|785)$", colnames(qc_data), value = TRUE)
-    columns_810 <- grep("^nm_(805|806|807|808|809|810|811|812|813|814|815)$", colnames(qc_data), value = TRUE)
-    columns_840 <- grep("^nm_(835|836|837|838|839|840|841|842|843|844|845)$", colnames(qc_data), value = TRUE)
-    columns_nm <- grep("^nm_", colnames(qc_data), value = TRUE)
+    columns_750_780 <- grep("^nm_(7[5-9][0-9]|780)$", colnames(qc_data), value = TRUE)
+    columns_780     <- grep("^nm_(77[5-9]|78[0-5])$", colnames(qc_data), value = TRUE)
+    columns_810     <- grep("^nm_(80[5-9]|81[0-5])$", colnames(qc_data), value = TRUE)
+    columns_840     <- grep("^nm_(83[5-9]|84[0-5])$", colnames(qc_data), value = TRUE)
+    columns_nm      <- grep("^nm_", colnames(qc_data), value = TRUE)
     
     corrected_data <- qc_data |>
       # Calculation of the median between 750 and 780 nm ("md_750_780")
