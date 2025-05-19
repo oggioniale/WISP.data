@@ -282,6 +282,11 @@ wisp_get_reflectance_multi_data <- function(
   # combine only successful results
   data_multiDates <- dplyr::bind_rows(daily_list)
   
+  # remove column "X"
+  if ("X" %in% colnames(data_multiDates)) {
+    data_multiDates <- dplyr::select(data_multiDates, -X)
+  }
+  
   # create output csv file
   if (save_csv) {
     date_from <- format(as.Date(time_from), "%Y%m%d")
@@ -505,6 +510,7 @@ wisp_qc_reflectance_data <- function(
   )  
   
   QA_dt <- read.csv(text = QA_ref_csv_text, header = TRUE, row.names = 1)
+  QA_dt[] <- lapply(QA_dt, as.numeric)
   QA_median <- QA_dt[1:23, ]
   QA_lower <- QA_dt[24:46, ]
   QA_upper <- QA_dt[47:69, ]
@@ -530,17 +536,24 @@ wisp_qc_reflectance_data <- function(
     mean(tmp_QA)
   }
   
-  QA_input_data <- data[removed_rows$reason == "", ]
-  QA_values <- apply(QA_input_data, 1, function(row) {
-    row <- as.list(row)
-    band_means <- sapply(target_waves, function(wave) mean_band(row, wave))
-    if (any(is.na(band_means))) return(NA)
-    QA_wei(band_means, QA_median, QA_lower, QA_upper)
-  })
+  spec_cols  <- grep("^nm_", colnames(data), value = TRUE)
+  spec_waves <- as.numeric(sub("nm_", "", spec_cols))
+  QA_input_idx <- which(removed_rows$reason == "")
+  QA_score <- rep(NA, initial_nrow)
+  for (i in QA_input_idx) {
+    row_list <- as.list(data[i, ])
+    band_means <- sapply(target_waves, function(w) mean_band(row_list, w))
+    if (any(is.na(band_means))) {
+      QA_score[i] <- NA
+    } else {
+      raw_QA_score <- QA_wei(band_means, QA_median, QA_lower, QA_upper)
+      QA_score[i] <- round(raw_QA_score, 2)
+    }
+  }
   
-  removed_QA <- QA_input_data[which(QA_values < qa_threshold | is.na(QA_values)), ]
-  removed_rows$reason[data$measurement.date %in% removed_QA$measurement.date] <-
-    paste(trimws(removed_rows$reason[data$measurement.date %in% removed_QA$measurement.date]), "QA")
+  removed_QA <- which(QA_score < qa_threshold | is.na(QA_score))
+  removed_rows$reason[removed_QA] <-
+    paste(trimws(removed_rows$reason[removed_QA]), "QA")
   
   # QWIP -> Removal of lines according to Dierssen et al., 2022
   cal_QWIP_score_hyper <- function(rrs, wave){
@@ -555,16 +568,18 @@ wisp_qc_reflectance_data <- function(
     NDI - QWIP_exp
   }
   
-  spec_cols  <- grep("^nm_", colnames(data), value=TRUE)
-  spec_waves <- as.numeric(sub("nm_","", spec_cols))
+  QWIP_score <- rep(NA, initial_nrow)
+  QWIP_input_idx <- which(removed_rows$reason == "")
+  for (i in QWIP_input_idx) {
+    raw_QWIP_score <- cal_QWIP_score_hyper(
+      as.numeric(data[i, spec_cols]), spec_waves
+    )
+    QWIP_score[i] <- round(raw_QWIP_score, 4)
+  }
   
-  QWIP_input <- data[removed_rows$reason=="", ]
-  QWIP_scores <- vapply(seq_len(nrow(QWIP_input)), function(i){
-    cal_QWIP_score_hyper(as.numeric(QWIP_input[i, spec_cols]), spec_waves)
-  }, numeric(1))
-  removed_QWIP <- QWIP_input[which(QWIP_scores > qwip_threshold | is.na(QWIP_scores)), ]
-  removed_rows$reason[data$measurement.date %in% removed_QWIP$measurement.date] <-
-    paste(trimws(removed_rows$reason[data$measurement.date %in% removed_QWIP$measurement.date]), "QWIP")
+  removed_QWIP <- which(QWIP_score > qwip_threshold | is.na(QWIP_score))
+  removed_rows$reason[removed_QWIP] <-
+    paste(trimws(removed_rows$reason[removed_QWIP]), "QWIP")
   
   # Removal of outlier spectral signatures
   reflectance_data_filtered <- data[removed_rows$reason == "", ]
@@ -614,6 +629,12 @@ wisp_qc_reflectance_data <- function(
     message("Thank you for your request, but the QC operation removed all the spectral signatures available on this date.")
     return(NULL)
   }
+  
+  final_idx <- which(removed_rows$reason == "")
+  reflectance_data_filtered <- data[final_idx, ]
+  
+  reflectance_data_filtered$QA_score   <- QA_score[final_idx]
+  reflectance_data_filtered$QWIP_score <- QWIP_score[final_idx]
   
   reflectance_data_filtered <- reflectance_data_filtered |> 
     dplyr::mutate(
@@ -702,34 +723,73 @@ wisp_sr_reflectance_data <- function(
     save_csv = FALSE,
     out_dir = "outputs"
   ) {
-  if ("QC" %in% names(qc_data)) {
-    columns_750_780 <- grep("^nm_(7[5-9][0-9]|780)$", colnames(qc_data), value = TRUE)
-    columns_780     <- grep("^nm_(77[5-9]|78[0-5])$", colnames(qc_data), value = TRUE)
-    columns_810     <- grep("^nm_(80[5-9]|81[0-5])$", colnames(qc_data), value = TRUE)
-    columns_840     <- grep("^nm_(83[5-9]|84[0-5])$", colnames(qc_data), value = TRUE)
-    columns_nm      <- grep("^nm_", colnames(qc_data), value = TRUE)
-    
-    corrected_data <- qc_data |>
-      # Calculation of the median between 750 and 780 nm ("md_750_780")
-      dplyr::mutate(
-        md_750_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_750_780)), 1, median, na.rm = TRUE),
-        # Calculation of the median at 780, 810 and 840 nm (± 5 nm) ("md_780", "md_810", "md_840")
-        md_780 = apply(dplyr::select(qc_data, dplyr::all_of(columns_780)), 1, median, na.rm = TRUE),
-        md_810 = apply(dplyr::select(qc_data, dplyr::all_of(columns_810)), 1, median, na.rm = TRUE),
-        md_840 = apply(dplyr::select(qc_data, dplyr::all_of(columns_840)), 1, median, na.rm = TRUE),
-        # Calculation of "RHW"
-        RHW = md_810 - md_780 - ((md_840 - md_780) * (810.0 - 780.0) / (840.0 - 780.0)),
-        # Calculation of "est_md_750_780" (median estimate between 750 and 780 nm)
-        est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW,
-        # Calculation of "delta" based on "RHW" value
-        delta = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr"),
-        SR = "corrected",
-        # Rrs correction based on "delta"
-        dplyr::across(
-          dplyr::all_of(columns_nm), 
-          ~ . - delta
-        )
-      )
+  if (!"QC" %in% names(qc_data)) {
+    message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
+    return(invisible(NULL))
+  }
+  
+  columns_nm       <- grep("^nm_", colnames(qc_data), value = TRUE)
+  
+  # ranges for SR checks
+  cols_350_400     <- grep("^nm_3(5[0-9]|6[0-9]|7[0-9]|8[0-9]|9[0-9]|400)$", columns_nm, value = TRUE)
+  cols_400_700     <- grep("^nm_([4-6][0-9]{2}|700)$", columns_nm, value = TRUE)
+  
+  # deglint algorithm
+  tmp <- dplyr::mutate(
+    qc_data,
+    md_750_780 = apply(dplyr::select(qc_data, matches("^nm_(7[5-9][0-9]|780)$")), 1, median, na.rm = TRUE),
+    md_780     = apply(dplyr::select(qc_data, matches("^nm_(77[5-9]|78[0-5])$")), 1, median, na.rm = TRUE),
+    md_810     = apply(dplyr::select(qc_data, matches("^nm_(80[5-9]|81[0-5])$")), 1, median, na.rm = TRUE),
+    md_840     = apply(dplyr::select(qc_data, matches("^nm_(83[5-9]|84[0-5])$")), 1, median, na.rm = TRUE),
+    RHW        = md_810 - md_780 - ((md_840 - md_780) * (810 - 780) / (840 - 780)),
+    est_md_750_780 = 18267.884 * RHW^3 - 129.158 * RHW^2 + 3.072 * RHW,
+    delta      = units::set_units(ifelse(RHW > 0, md_750_780 - est_md_750_780, md_750_780), "1/sr")
+  )
+  
+  # temporary SR correction
+  tmp_corrected <- dplyr::mutate(
+    tmp,
+    !!!rlang::set_names(
+      lapply(columns_nm, function(col) {
+        rlang::quo(!!rlang::sym(col) - delta)
+      }),
+      paste0("check_", columns_nm)
+    )
+  )
+  valid_flag <- apply(tmp_corrected[, paste0("check_", columns_nm)], 1, function(row) {
+    vals_350_400 <- row[paste0("check_", cols_350_400)]
+    vals_400_700 <- row[paste0("check_", cols_400_700)]
+    all(vals_400_700 >= 0, na.rm = TRUE) && all(vals_350_400 <= 0.05, na.rm = TRUE)
+  })
+  
+  # definitive SR correction
+  corrected_data <- dplyr::mutate(
+    tmp,
+    SR = ifelse(valid_flag, "corrected", "not corrected (risk of overcorrection)")
+  )
+  
+  # apply SR adjustment
+  for (col in columns_nm) {
+    corrected_data[[col]] <- ifelse(valid_flag, corrected_data[[col]] - corrected_data$delta, corrected_data[[col]])
+  }
+  
+  # set delta to NA for uncorrected rows
+  corrected_data <- dplyr::mutate(
+    corrected_data,
+    delta = ifelse(
+      SR == "not corrected (risk of overcorrection)",
+      units::set_units(NA_real_, "1/sr"),
+      delta
+    )
+  )
+  
+  # remove intermediate columns
+  corrected_data <- dplyr::select(
+    corrected_data,
+    -starts_with("check_"),
+    -md_750_780, -md_780, -md_810, -md_840,
+    -RHW, -est_md_750_780
+  )
     
     # remove columns calculated before
     # check and eventually remove scattering.peak and band.ratio
@@ -774,10 +834,7 @@ wisp_sr_reflectance_data <- function(
     
     # Output
     return(corrected_data)
-  } else {
-    message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
-  }
-}
+ }
 
 #' @noRd
 #' @keywords internal
