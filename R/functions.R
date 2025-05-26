@@ -79,14 +79,14 @@
 #' 
 ### wisp_get_reflectance_data
 wisp_get_reflectance_data <- function(
-    version = "1.0",
+    version   = "1.0",
     time_from = NULL,
-    time_to = NULL,
-    station = NULL,
-    userid = NULL,
-    pwd = NULL,
-    save_csv = FALSE,
-    out_dir = "outputs"
+    time_to   = NULL,
+    station   = NULL,
+    userid    = NULL,
+    pwd       = NULL,
+    save_csv  = FALSE,
+    out_dir   = "outputs"
 ) {
   # check if the date is different
   start_date <- substr(time_from, start = 0, stop = 10)
@@ -237,14 +237,14 @@ wisp_get_reflectance_data <- function(
 #' 
 ### wisp_get_reflectance_multi_data
 wisp_get_reflectance_multi_data <- function(
-    version = "1.0",
+    version   = "1.0",
     time_from = NULL,
-    time_to = NULL,
-    station = NULL,
-    userid = NULL,
-    pwd = NULL,
-    save_csv = FALSE,
-    out_dir = "outputs"
+    time_to   = NULL,
+    station   = NULL,
+    userid    = NULL,
+    pwd       = NULL,
+    save_csv  = FALSE,
+    out_dir   = "outputs"
 ) {
 
   from_time <- sub(".*T", "", time_from)
@@ -322,6 +322,8 @@ wisp_get_reflectance_multi_data <- function(
 #' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
 #' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
+#' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
+#' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -346,6 +348,7 @@ wisp_get_reflectance_multi_data <- function(
 #'   calc_scatt = TRUE,
 #'   calc_SPM = FALSE,
 #'   calc_TUR = TRUE,
+#'   calc_TSS = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #'   QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
@@ -356,15 +359,16 @@ wisp_get_reflectance_multi_data <- function(
 ### wisp_qc_reflectance_data
 wisp_qc_reflectance_data <- function(
     data,
-    maxPeak         = 0.05,
-    maxPeak_blue    = 0.02,
-    qa_threshold    = 0.5,
-    qwip_threshold  = 0.2,
-    calc_scatt      = TRUE,
-    calc_SPM        = TRUE,
-    calc_TUR        = TRUE,
-    save_csv        = FALSE,
-    out_dir         = "outputs"
+    maxPeak        = 0.05,
+    maxPeak_blue   = 0.02,
+    qa_threshold   = 0.5,
+    qwip_threshold = 0.2,
+    calc_scatt     = TRUE,
+    calc_SPM       = TRUE,
+    calc_TUR       = TRUE,
+    calc_TSS       = TRUE,
+    save_csv       = FALSE,
+    out_dir        = "outputs"
     ) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
@@ -649,10 +653,10 @@ wisp_qc_reflectance_data <- function(
     reflectance_data_filtered <- wisp_calc_scatt(reflectance_data_filtered)
   }
   if (calc_SPM) {
-    reflectance_data_filtered <- wisp_calc_SPM(reflectance_data_filtered)
+    reflectance_data_filtered <- wisp_calc_Novoa_SPM(reflectance_data_filtered)
   }
   if (calc_TUR) {
-    reflectance_data_filtered <- wisp_calc_TUR(reflectance_data_filtered)
+    reflectance_data_filtered <- wisp_calc_Novoa_TUR(reflectance_data_filtered)
     if (calc_SPM) {
       reflectance_data_filtered <- reflectance_data_filtered |>
         dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
@@ -661,6 +665,20 @@ wisp_qc_reflectance_data <- function(
         dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
     }
   }
+  if (calc_TSS) {
+    reflectance_data_filtered <- wisp_calc_Jiang_TSS(reflectance_data_filtered)
+    if (!calc_SPM && !calc_TUR) {
+      reflectance_data_filtered <- reflectance_data_filtered |>
+        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = waterquality.tsm)
+    } else if (calc_SPM && !calc_TUR) {
+      reflectance_data_filtered <- reflectance_data_filtered |>
+        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.SPM)
+    } else {
+      reflectance_data_filtered <- reflectance_data_filtered |>
+        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.TUR)
+    }
+  }
+
   # create output csv file
   if (save_csv) {
     date_from <- format(as.Date(reflectance_data_filtered$measurement.date[1]), "%Y%m%d")
@@ -688,6 +706,8 @@ wisp_qc_reflectance_data <- function(
 #' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
 #' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
+#' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
+#' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -708,6 +728,7 @@ wisp_qc_reflectance_data <- function(
 #'   calc_scatt = TRUE,
 #'   calc_SPM = TRUE,
 #'   calc_TUR = TRUE,
+#'   calc_TSS = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -718,10 +739,11 @@ wisp_qc_reflectance_data <- function(
 wisp_sr_reflectance_data <- function(
     qc_data,
     calc_scatt = TRUE,
-    calc_SPM = TRUE,
-    calc_TUR = TRUE,
-    save_csv = FALSE,
-    out_dir = "outputs"
+    calc_SPM   = TRUE,
+    calc_TUR   = TRUE,
+    calc_TSS   = TRUE,
+    save_csv   = FALSE,
+    out_dir    = "outputs"
   ) {
   if (!"QC" %in% names(qc_data)) {
     message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
@@ -807,10 +829,10 @@ wisp_sr_reflectance_data <- function(
       corrected_data <- wisp_calc_scatt(corrected_data)
     }
     if (calc_SPM) {
-      corrected_data <- wisp_calc_SPM(corrected_data)
+      corrected_data <- wisp_calc_Novoa_SPM(corrected_data)
     }
     if (calc_TUR) {
-      corrected_data <- wisp_calc_TUR(corrected_data)
+      corrected_data <- wisp_calc_Novoa_TUR(corrected_data)
       if (calc_SPM) {
         corrected_data <- corrected_data |>
           dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
@@ -818,6 +840,19 @@ wisp_sr_reflectance_data <- function(
         corrected_data <- corrected_data |>
           dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
       }
+      if (calc_TSS) {
+        corrected_data <- wisp_calc_Jiang_TSS(corrected_data)
+        if (!calc_SPM && !calc_TUR) {
+          corrected_data <- corrected_data |>
+            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = waterquality.tsm)
+        } else if (calc_SPM && !calc_TUR) {
+          corrected_data <- corrected_data |>
+            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.SPM)
+        } else {
+          corrected_data <- corrected_data |>
+            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.TUR)
+        }
+      }  
     }
     
     # create output csv file
@@ -835,6 +870,7 @@ wisp_sr_reflectance_data <- function(
     # Output
     return(corrected_data)
  }
+
 
 #' @noRd
 #' @keywords internal
@@ -859,8 +895,8 @@ wisp_calc_scatt <- function(data) {
 
 #' @noRd
 #' @keywords internal
-### wisp_calc_SPM
-wisp_calc_SPM <- function(data) {
+### wisp_calc_Novoa_SPM
+wisp_calc_Novoa_SPM <- function(data) {
   
   # General parameters
   novoa_spm_dict <- list(
@@ -961,8 +997,8 @@ wisp_calc_SPM <- function(data) {
 
 #' @noRd
 #' @keywords internal
-### wisp_calc_SPM
-wisp_calc_TUR <- function(data) {
+### wisp_calc_Novoa_TUR
+wisp_calc_Novoa_TUR <- function(data) {
   
   # General parameters
   novoa_tur_dict <- list(
@@ -1053,7 +1089,85 @@ wisp_calc_TUR <- function(data) {
 
 #' @noRd
 #' @keywords internal
-### wisp_calc_TSS_Jiang
+### wisp_calc_Jiang_TSS 
+wisp_calc_Jiang_TSS <- function(data) {
+  
+  # Remove any remaining columns from previous calculation
+  cols_to_drop <- intersect(names(data), c("a", "bbp", "ref_band", "Jiang.TSS"))
+  if (length(cols_to_drop) > 0) {
+    data <- data[, !names(data) %in% cols_to_drop]
+  }
+  
+  # General parameters
+  wave <- c(443, 490, 560, 620, 665, 754, 865)
+  aw <- c(0.005046443, 0.013589323, 0.062122106, 0.276193682, 0.42748488, 2.868335728, 4.639441062)
+  bbw <- c(0.00214135, 0.001381358, 0.000778527, 0.000502851, 0.000372427, 0.000217139, 0.000120218)
+  names(aw) <- names(bbw) <- paste0("Rrs", wave)
+  
+  # Single-spectrum calculation
+  calc_tss_single <- function(rrs) {
+    if (all(is.na(rrs)) || all(rrs == 0)) {
+      return(data.frame(a = NA, bbp = NA, ref_band = NA, Jiang.TSS = NA))
+    }
+    rrs_sub <- rrs / (0.52 + 1.7 * rrs)
+    u <- (-0.089 + sqrt(0.089^2 + 4 * 0.125 * rrs_sub)) / (2 * 0.125)
+    
+    # Band selection
+    band <- if (rrs["Rrs490"] > rrs["Rrs560"]) {
+      "Rrs560"
+    } else if (rrs["Rrs490"] > rrs["Rrs620"]) {
+      "Rrs665"
+    } else if (rrs["Rrs754"] > rrs["Rrs490"] && rrs["Rrs754"] > 0.010) {
+      "Rrs865"
+    } else {
+      "Rrs754"
+    }
+    
+    # Absorption
+    if (band == "Rrs560") {
+      x <- log10((rrs["Rrs443"] + rrs["Rrs490"]) /
+                   (rrs["Rrs560"] + 5 * (rrs["Rrs665"]^2 / rrs["Rrs490"])))
+      a_val_raw <- aw[band] + 10^(-1.146 - 1.366 * x - 0.469 * x^2)
+    } else if (band == "Rrs665") {
+      a_val_raw <- aw[band] + 0.39 * (rrs["Rrs665"] / (rrs["Rrs443"] + rrs["Rrs490"]))^1.14
+    } else {
+      a_val_raw <- aw[band]
+    }
+    
+    # Backscattering
+    bbp_val_raw <- ((u[band] * a_val_raw) / (1 - u[band])) - bbw[band]
+    
+    # Round + Units
+    a_val   <- units::set_units(round(a_val_raw, 3), "m-1")
+    bbp_val <- units::set_units(round(bbp_val_raw, 3), "m-1")
+    coeff   <- switch(band, Rrs560=94.6074, Rrs665=114.0121, Rrs754=137.6652, Rrs865=166.1682)
+    TSS_val <- units::set_units(round(coeff * bbp_val_raw, 1), "g/m3")
+    
+    return(data.frame(a = a_val, bbp = bbp_val, ref_band = paste0("QAA_", sub("Rrs", "", band)), Jiang.TSS = TSS_val))
+  }
+  
+  # Compute Rrs means (±3 nm)
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  wl <- as.numeric(sub("^nm_", "", nm_cols))
+  cols_list <- lapply(wave, function(w) {
+    nm_cols[wl >= w - 3 & wl <= w + 3]
+  })
+  names(cols_list) <- paste0("Rrs", wave)
+  rrs_df <- as.data.frame(
+    sapply(cols_list, function(cols) {
+      rowMeans(data[, cols, drop = FALSE], na.rm = TRUE)
+    })
+  )
+  colnames(rrs_df) <- names(cols_list)
+  
+  # TSS calculation for each spectral signature
+  tss_list <- apply(rrs_df, 1, calc_tss_single)
+  tss_df <- dplyr::bind_rows(tss_list)
+  
+  # Combine with original data
+  out <- dplyr::bind_cols(data, tss_df)
+  return(out)
+}
 
 
 #' Create a plot of reflectance data
@@ -1078,6 +1192,8 @@ wisp_calc_TUR <- function(data) {
 #' the `Novoa_SPM`values. Default is `FALSE`.
 #' @param legend_novoa_TUR A `logical`. If `TRUE`, the plot legend includes 
 #' the `Novoa_TUR`values. Default is `FALSE`.
+#' @param legend_jiang_TSS A `logical`. If `TRUE`, the plot legend includes 
+#' the `Jiang_TSS`values. Default is `FALSE`.
 #' @return description A plotly object with the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
@@ -1101,6 +1217,7 @@ wisp_calc_TUR <- function(data) {
 #'   legend_ratio = FALSE
 #'   legend_novoa_SPM = FALSE
 #'   legend_novoa_TUR = FALSE
+#'   legend_jiang_TSS = FALSE
 #' )
 #' }
 #' ## End (Not run)
@@ -1108,20 +1225,21 @@ wisp_calc_TUR <- function(data) {
 ### wisp_plot_reflectance_data
 wisp_plot_reflectance_data <- function(
     data,
-    legend_TSM = TRUE,
-    legend_Chla = TRUE,
-    legend_Kd = TRUE,
-    legend_cpc = TRUE,
-    legend_scatt = FALSE,
-    legend_ratio = FALSE,
+    legend_TSM       = TRUE,
+    legend_Chla      = TRUE,
+    legend_Kd        = TRUE,
+    legend_cpc       = TRUE,
+    legend_scatt     = FALSE,
+    legend_ratio     = FALSE,
     legend_novoa_SPM = FALSE,
-    legend_novoa_TUR = FALSE
+    legend_novoa_TUR = FALSE,
+    legend_jiang_TSS = FALSE
 ) {
  
   # Production of data information
   data <- data |>
     dplyr::mutate(
-      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur) {
+      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss) {
         
         paste(
           c(
@@ -1132,11 +1250,12 @@ wisp_plot_reflectance_data <- function(
             if (legend_scatt) paste("Scatt [1/sr]:", scatt),
             if (legend_ratio) paste("Ratio:", ratio),
             if (legend_novoa_SPM) paste("Novoa_SPM [g/m3]:", novoa_spm),
-            if (legend_novoa_TUR) paste("Novoa_TUR [NTU]:", novoa_tur)
+            if (legend_novoa_TUR) paste("Novoa_TUR [NTU]:", novoa_tur),
+            if (legend_jiang_TSS) paste("Jiang_TSS [g/m3]:", jiang_tss)
           ),
           collapse = "<br>"
         )
-      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc, scattering.peak, band.ratio, Novoa.SPM, Novoa.TUR)
+      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc, scattering.peak, band.ratio, Novoa.SPM, Novoa.TUR, Jiang.TSS)
     )
   
   # Data transformation
