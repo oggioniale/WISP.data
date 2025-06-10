@@ -1240,22 +1240,31 @@ wisp_plot_reflectance_data <- function(
   data <- data |>
     dplyr::mutate(
       products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss) {
-        
         paste(
           c(
-            if (legend_TSM) paste("TSM [g/m3]:", tsm),
-            if (legend_Chla) paste("Chla [mg/m3]:", chla),
-            if (legend_Kd) paste("Kd [1/m]:", kd),
-            if (legend_cpc) paste("Cpc [mg/m3]:", cpc),
-            if (legend_scatt) paste("Scatt [1/sr]:", scatt),
-            if (legend_ratio) paste("Ratio:", ratio),
-            if (legend_novoa_SPM) paste("Novoa_SPM [g/m3]:", novoa_spm),
-            if (legend_novoa_TUR) paste("Novoa_TUR [NTU]:", novoa_tur),
-            if (legend_jiang_TSS) paste("Jiang_TSS [g/m3]:", jiang_tss)
+            if (legend_TSM && !is.null(tsm)) paste("TSM [g/m3]:", tsm),
+            if (legend_Chla && !is.null(chla)) paste("Chla [mg/m3]:", chla),
+            if (legend_Kd && !is.null(kd)) paste("Kd [1/m]:", kd),
+            if (legend_cpc && !is.null(cpc)) paste("Cpc [mg/m3]:", cpc),
+            if (legend_scatt && !is.null(scatt)) paste("Scatt [1/sr]:", scatt),
+            if (legend_ratio && !is.null(ratio)) paste("Ratio:", ratio),
+            if (legend_novoa_SPM && !is.null(novoa_spm)) paste("Novoa_SPM [g/m3]:", novoa_spm),
+            if (legend_novoa_TUR && !is.null(novoa_tur)) paste("Novoa_TUR [NTU]:", novoa_tur),
+            if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss)
           ),
           collapse = "<br>"
         )
-      }, waterquality.tsm, waterquality.chla, waterquality.kd, waterquality.cpc, scattering.peak, band.ratio, Novoa.SPM, Novoa.TUR, Jiang.TSS)
+      },
+      tsm        = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else rep(NA, nrow(data)),
+      chla       = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else rep(NA, nrow(data)),
+      kd         = if ("waterquality.kd"      %in% names(data)) data$waterquality.kd else rep(NA, nrow(data)),
+      cpc        = if ("waterquality.cpc"     %in% names(data)) data$waterquality.cpc else rep(NA, nrow(data)),
+      scatt      = if ("scattering.peak"      %in% names(data)) data$scattering.peak else rep(NA, nrow(data)),
+      ratio      = if ("band.ratio"           %in% names(data)) data$band.ratio else rep(NA, nrow(data)),
+      novoa_spm  = if ("Novoa.SPM"            %in% names(data)) data$Novoa.SPM else rep(NA, nrow(data)),
+      novoa_tur  = if ("Novoa.TUR"            %in% names(data)) data$Novoa.TUR else rep(NA, nrow(data)),
+      jiang_tss  = if ("Jiang.TSS"            %in% names(data)) data$Jiang.TSS else rep(NA, nrow(data))
+      )
     )
   
   # Data transformation
