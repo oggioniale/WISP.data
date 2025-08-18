@@ -6,9 +6,11 @@
 cff-version: 1.2.0
 message: 'To cite package "WISP.data" in publications use:'
 type: software
-title: 'WISP.data: What the Package Does (One Line, Title Case)'
+title: 'WISP.data: Managing WISPstation Hyperspectral Data'
 version: 0.1.0
-abstract: What the package does (one paragraph).
+doi: 10.5281/zenodo.16893167
+abstract: R package for downloading, performing quality control (QC), and visualizing
+  data from the WISP station.
 authors:
 - family-names: Oggioni
   given-names: Alessandro
@@ -20,7 +22,7 @@ authors:
   orcid: https://orcid.org/0000-0002-5006-9853
 preferred-citation:
   type: generic
-  title: WISP.data
+  title: WISP.data - Managing WISPstation Hyperspectral Data
   authors:
   - family-names: Oggioni
     given-names: Alessandro
@@ -31,6 +33,7 @@ preferred-citation:
     email: nicola.ghirardi@cnr.it
     orcid: https://orcid.org/0000-0002-5006-9853
   year: '2025'
+  doi: 10.5281/zenodo.16893167
   notes: R package version v0.1.0
 repository-code: https://github.com/oggioniale/WISP.data
 url: https://github.com/oggioniale/WISP.data
@@ -39,6 +42,10 @@ contact:
   given-names: Alessandro
   email: alessandro.oggioni@cnr.it
   orcid: https://orcid.org/0000-0002-7997-219X
+- family-names: Ghirardi
+  given-names: Nicola
+  email: nicola.ghirardi@cnr.it
+  orcid: https://orcid.org/0000-0002-5006-9853
 references:
 - type: software
   title: 'R: A Language and Environment for Statistical Computing'

@@ -2,8 +2,8 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "WISP.data",
-  "description": "What the package does (one paragraph).",
-  "name": "WISP.data: What the Package Does (One Line, Title Case)",
+  "description": "R package for downloading, performing quality control (QC), and visualizing data from the WISP station.",
+  "name": "WISP.data: Managing WISPstation Hyperspectral Data",
   "codeRepository": "https://github.com/oggioniale/WISP.data",
   "issueTracker": "https://github.com/oggioniale/WISP.data/issues",
   "license": "`use_gpl3_license()`",
@@ -101,7 +101,7 @@
         }
       ],
       "name": "WISP.data",
-      "description": "R package version v0.1.0"
+      "description": "R package for downloading, performing quality control (QC), and visualizing data from the WISP station."
     }
   ]
 }

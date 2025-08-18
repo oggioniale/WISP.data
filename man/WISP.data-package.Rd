@@ -4,9 +4,9 @@
 \name{WISP.data-package}
 \alias{WISP.data}
 \alias{WISP.data-package}
-\title{WISP.data: What the Package Does (One Line, Title Case)}
+\title{WISP.data: Managing WISPstation Hyperspectral Data}
 \description{
-What the package does (one paragraph).
+R package for downloading, performing quality control (QC), and visualizing data from the WISP station.
 }
 \seealso{
 Useful links:
