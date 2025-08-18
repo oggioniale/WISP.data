@@ -7,9 +7,10 @@ citEntry(entry = "Misc",
          author = personList(as.person("Alessandro Oggioni"),
                              as.person("Nicola Ghirardi")),
          year = year,
+         DOI = "https://doi.org/10.5281/zenodo.10053702",
          note = paste("R package version", "v0.1.0"),
          textVersion =
          paste("Alessandro Oggioni & Nicola Ghirardi.",
          " (year). WISP.data (v0.1.0).",
-         "Zenodo. https://doi.org/10.5281/zenodo.xxxxxx")
+         "Zenodo. https://doi.org/10.5281/zenodo.10053702")
          )
