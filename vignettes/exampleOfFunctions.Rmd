@@ -63,7 +63,7 @@ the 'output' folder within the working directory.
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05,
-  maxPeak_350 = 0.02,
+  maxPeak_blue = 0.02,
   calc_scatt = TRUE,
   calc_SPM = TRUE,
   calc_TUR = TRUE,

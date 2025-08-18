@@ -9,6 +9,7 @@ wisp_sr_reflectance_data(
   calc_scatt = TRUE,
   calc_SPM = TRUE,
   calc_TUR = TRUE,
+  calc_TSS = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -17,13 +18,17 @@ wisp_sr_reflectance_data(
 \item{qc_data}{A \code{tibble} from wisp_qc_reflectance_data() function.}
 
 \item{calc_scatt}{A \code{logical}. If \code{TRUE}, the function calculates the
-two parameters. Default is \code{TRUE}.}
+peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter
+to the second chlorophyll absorption peak (670-680 nm). Default is \code{TRUE}.}
 
 \item{calc_SPM}{A \code{logical}. If \code{TRUE}, the function calculates the
-NOVOA SPM concentrations. Default is \code{TRUE}.}
+SPM concentrations in according to Novoa et al., (2017). Default is \code{TRUE}.}
 
 \item{calc_TUR}{A \code{logical}. If \code{TRUE}, the function calculates the
-NOVOA TUR values Default is \code{TRUE}.}
+turbidity (FNU) in according to Novoa et al., (2017). Default is \code{TRUE}.}
+
+\item{calc_TSS}{A \code{logical}. If \code{TRUE}, the function calculates the
+TSS concentrations in according to Jiang et al., (2021). Default is \code{TRUE}.}
 
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
@@ -49,7 +54,9 @@ reflect_data_sr <- wisp_sr_reflectance_data(
   calc_scatt = TRUE,
   calc_SPM = TRUE,
   calc_TUR = TRUE,
-  save_csv = FALSE
+  calc_TSS = TRUE,
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 }
 ## End (Not run)

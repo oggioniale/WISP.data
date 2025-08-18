@@ -40,11 +40,11 @@ Default is "outputs" within the working directory.}
 A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
 waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
-all the values of reflectance for each wevelength from 350 to 900 nm.
+all the reflectance values from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function obtains the data of reflectance from WISPstation for a
+This function obtains the reflectance data from WISPstation for a
 specific date.
 }
 \examples{
@@ -57,7 +57,9 @@ reflect_data <- wisp_get_reflectance_data(
   time_to = "2024-09-01T14:00",
   station = "WISPstation012",
   userid = userid,
-  pwd = pwd
+  pwd = pwd,
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 
 # with data
@@ -67,7 +69,8 @@ reflect_data <- wisp_get_reflectance_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 
 # no data for the station selected
@@ -76,7 +79,9 @@ reflect_data <- wisp_get_reflectance_data(
   time_to = "2019-06-20T14:00",
   station = "WISPstation012",
   userid = userid,
-  pwd = pwd
+  pwd = pwd,
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 
 # The two dates are not consistent
@@ -85,7 +90,9 @@ reflect_data <- wisp_get_reflectance_data(
   time_to = "2020-06-20T14:00",
   station = "WISPstation012",
   userid = userid,
-  pwd = pwd
+  pwd = pwd,
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 }
 ## End (Not run)

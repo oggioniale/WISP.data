@@ -4,9 +4,9 @@
 \name{WISP.data-package}
 \alias{WISP.data}
 \alias{WISP.data-package}
-\title{WISP.data: What the Package Does (One Line, Title Case)}
+\title{WISP.data: Managing WISPstation Hyperspectral Data}
 \description{
-What the package does (one paragraph).
+R package for downloading, performing quality control (QC), and visualizing data from the WISP station.
 }
 \seealso{
 Useful links:
@@ -18,11 +18,6 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Alessandro Oggioni \email{alessandro.oggioni@cnr.it} (\href{https://orcid.org/0000-0002-7997-219X}{ORCID}) [funder]
-
-Authors:
-\itemize{
-  \item Nicola Ghirardi \email{nicola.ghirardi@cnr.it} (\href{https://orcid.org/0000-0002-5006-9853}{ORCID})
-}
 
 }
 \keyword{internal}

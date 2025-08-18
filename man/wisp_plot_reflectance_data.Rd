@@ -9,7 +9,12 @@ wisp_plot_reflectance_data(
   legend_TSM = TRUE,
   legend_Chla = TRUE,
   legend_Kd = TRUE,
-  legend_cpc = TRUE
+  legend_cpc = TRUE,
+  legend_scatt = FALSE,
+  legend_ratio = FALSE,
+  legend_novoa_SPM = FALSE,
+  legend_novoa_TUR = FALSE,
+  legend_jiang_TSS = FALSE
 )
 }
 \arguments{
@@ -27,6 +32,21 @@ values. Default is \code{TRUE}.}
 
 \item{legend_cpc}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{cpc}
 values. Default is \code{TRUE}.}
+
+\item{legend_scatt}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{scattering}
+values. Default is \code{FALSE}.}
+
+\item{legend_ratio}{A \code{logical}. If \code{TRUE}, the plot legend includes the \code{ratio}
+values. Default is \code{FALSE}.}
+
+\item{legend_novoa_SPM}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{Novoa_SPM}values. Default is \code{FALSE}.}
+
+\item{legend_novoa_TUR}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{Novoa_TUR}values. Default is \code{FALSE}.}
+
+\item{legend_jiang_TSS}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{Jiang_TSS}values. Default is \code{FALSE}.}
 }
 \value{
 description A plotly object with the spectral signatures of the
@@ -47,6 +67,11 @@ wisp_plot_reflectance_data(
   legend_Chla = TRUE,
   legend_Kd = FALSE,
   legend_cpc = FALSE
+  legend_scatt = FALSE
+  legend_ratio = FALSE
+  legend_novoa_SPM = FALSE
+  legend_novoa_TUR = FALSE
+  legend_jiang_TSS = FALSE
 )
 }
 ## End (Not run)
