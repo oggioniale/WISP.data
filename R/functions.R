@@ -246,7 +246,7 @@ wisp_get_reflectance_multi_data <- function(
     save_csv  = FALSE,
     out_dir   = "outputs"
 ) {
-
+  
   from_time <- sub(".*T", "", time_from)
   to_time   <- sub(".*T", "", time_to)
   dates <- seq.Date(
@@ -385,7 +385,7 @@ wisp_qc_reflectance_data <- function(
     calc_mishra    = TRUE,
     save_csv       = FALSE,
     out_dir        = "outputs"
-    ) {
+) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
   
@@ -741,7 +741,7 @@ wisp_qc_reflectance_data <- function(
       .after = all_of(after_col)
     )
   }
-
+  
   # create output csv file
   if (save_csv) {
     date_from <- format(as.Date(reflectance_data_filtered$measurement.date[1]), "%Y%m%d")
@@ -823,7 +823,7 @@ wisp_sr_reflectance_data <- function(
     calc_mishra  = TRUE,
     save_csv     = FALSE,
     out_dir      = "outputs"
-  ) {
+) {
   if (!"QC" %in% names(qc_data)) {
     message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
     return(invisible(NULL))
@@ -891,111 +891,111 @@ wisp_sr_reflectance_data <- function(
     -md_750_780, -md_780, -md_810, -md_840,
     -RHW, -est_md_750_780
   )
-    
-    # remove columns calculated before
-    # check and eventually remove scattering.peak and band.ratio
-    corrected_data <- corrected_data |>
-      dplyr::select(-dplyr::one_of("scattering.peak", "band.ratio"))
-    # check and eventually remove Novoa.SPM and Blended.SPM
-    corrected_data <- corrected_data |>
-      dplyr::select(-dplyr::one_of("Novoa.SPM", "Blended.SPM"))
-    # check and eventually remove Novoa.TUR and Blended.TUR
-    corrected_data <- corrected_data |>
-      dplyr::select(-dplyr::one_of("Novoa.TUR", "Blended.TUR"))
-    
-    # for indexes
-    if (calc_scatt) {
-      corrected_data <- wisp_calc_scatt(corrected_data)
+  
+  # remove columns calculated before
+  # check and eventually remove scattering.peak and band.ratio
+  corrected_data <- corrected_data |>
+    dplyr::select(-dplyr::one_of("scattering.peak", "band.ratio"))
+  # check and eventually remove Novoa.SPM and Blended.SPM
+  corrected_data <- corrected_data |>
+    dplyr::select(-dplyr::one_of("Novoa.SPM", "Blended.SPM"))
+  # check and eventually remove Novoa.TUR and Blended.TUR
+  corrected_data <- corrected_data |>
+    dplyr::select(-dplyr::one_of("Novoa.TUR", "Blended.TUR"))
+  
+  # for indexes
+  if (calc_scatt) {
+    corrected_data <- wisp_calc_scatt(corrected_data)
+  }
+  if (calc_SPM) {
+    corrected_data <- wisp_calc_Novoa_SPM(corrected_data)
+  }
+  if (calc_TUR) {
+    corrected_data <- wisp_calc_Novoa_TUR(corrected_data)
+    after_col <- if (calc_SPM) "Blended.SPM" else "waterquality.tsm"
+    corrected_data <- dplyr::relocate(
+      corrected_data,
+      Novoa.TUR, Blended.TUR,
+      .after = all_of(after_col)
+    )
+  }
+  if (calc_TSS) {
+    corrected_data <- wisp_calc_Jiang_TSS(corrected_data)
+    after_col <- if (!calc_SPM && !calc_TUR) {
+      "waterquality.tsm"
+    } else if (calc_SPM && !calc_TUR) {
+      "Blended.SPM"
+    } else {
+      "Blended.TUR"
     }
-    if (calc_SPM) {
-      corrected_data <- wisp_calc_Novoa_SPM(corrected_data)
-    }
-    if (calc_TUR) {
-      corrected_data <- wisp_calc_Novoa_TUR(corrected_data)
-      after_col <- if (calc_SPM) "Blended.SPM" else "waterquality.tsm"
+    corrected_data <- dplyr::relocate(
+      corrected_data,
+      Jiang.TSS, ref_band, a, bbp,
+      .after = all_of(after_col)
+    )
+  }
+  if (calc_gons) {
+    corrected_data <- wisp_calc_Gons_CHL(corrected_data)
+    if (all(c("Gons.CHL", "waterquality.chla") %in% names(corrected_data))) {
       corrected_data <- dplyr::relocate(
         corrected_data,
-        Novoa.TUR, Blended.TUR,
+        Gons.CHL,
+        .after = all_of("waterquality.chla")
+      )
+    }
+  }
+  if (calc_gons740) {
+    corrected_data <- wisp_calc_Gons740_CHL(corrected_data)
+    if ("Gons740.CHL" %in% names(corrected_data)) {
+      after_col <- if ("Gons.CHL" %in% names(corrected_data)) "Gons.CHL" else "waterquality.chla"
+      corrected_data <- dplyr::relocate(
+        corrected_data,
+        Gons740.CHL,
         .after = all_of(after_col)
       )
     }
-    if (calc_TSS) {
-      corrected_data <- wisp_calc_Jiang_TSS(corrected_data)
-      after_col <- if (!calc_SPM && !calc_TUR) {
-        "waterquality.tsm"
-      } else if (calc_SPM && !calc_TUR) {
-        "Blended.SPM"
-      } else {
-        "Blended.TUR"
-      }
-      corrected_data <- dplyr::relocate(
-        corrected_data,
-        Jiang.TSS, ref_band, a, bbp,
-        .after = all_of(after_col)
-      )
+  }
+  if (calc_NDCI) {
+    corrected_data <- wisp_calc_NDCI(corrected_data)
+    after_col <- if (!("Gons.CHL" %in% names(corrected_data)) &&
+                     !("Gons740.CHL" %in% names(corrected_data))) {
+      "waterquality.chla"
+    } else if (!("Gons740.CHL" %in% names(corrected_data))) {
+      "Gons.CHL"
+    } else {
+      "Gons740.CHL"
     }
-    if (calc_gons) {
-      corrected_data <- wisp_calc_Gons_CHL(corrected_data)
-      if (all(c("Gons.CHL", "waterquality.chla") %in% names(corrected_data))) {
-        corrected_data <- dplyr::relocate(
-          corrected_data,
-          Gons.CHL,
-          .after = all_of("waterquality.chla")
-        )
-      }
+    corrected_data <- dplyr::relocate(
+      corrected_data,
+      NDCI,
+      .after = all_of(after_col)
+    )
+  }
+  if (calc_mishra) {
+    corrected_data <- wisp_calc_Mishra_CHL(corrected_data)
+    after_col <- "NDCI"
+    corrected_data <- dplyr::relocate(
+      corrected_data,
+      Mishra.CHL,
+      .after = all_of(after_col)
+    )
+  }
+  
+  # create output csv file
+  if (save_csv) {
+    date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
+    date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
+    dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    if (!dir.exists(out_dir)) {
+      dir.create(out_dir, recursive = TRUE)
     }
-    if (calc_gons740) {
-      corrected_data <- wisp_calc_Gons740_CHL(corrected_data)
-      if ("Gons740.CHL" %in% names(corrected_data)) {
-        after_col <- if ("Gons.CHL" %in% names(corrected_data)) "Gons.CHL" else "waterquality.chla"
-        corrected_data <- dplyr::relocate(
-          corrected_data,
-          Gons740.CHL,
-          .after = all_of(after_col)
-        )
-      }
-    }
-    if (calc_NDCI) {
-      corrected_data <- wisp_calc_NDCI(corrected_data)
-      after_col <- if (!("Gons.CHL" %in% names(corrected_data)) &&
-                       !("Gons740.CHL" %in% names(corrected_data))) {
-        "waterquality.chla"
-      } else if (!("Gons740.CHL" %in% names(corrected_data))) {
-        "Gons.CHL"
-      } else {
-        "Gons740.CHL"
-      }
-      corrected_data <- dplyr::relocate(
-        corrected_data,
-        NDCI,
-        .after = all_of(after_col)
-      )
-    }
-    if (calc_mishra) {
-      corrected_data <- wisp_calc_Mishra_CHL(corrected_data)
-      after_col <- "NDCI"
-      corrected_data <- dplyr::relocate(
-        corrected_data,
-        Mishra.CHL,
-        .after = all_of(after_col)
-      )
-    }
-    
-    # create output csv file
-    if (save_csv) {
-      date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
-      date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
-      dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-      if (!dir.exists(out_dir)) {
-        dir.create(out_dir, recursive = TRUE)
-      }
-      file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
-      readr::write_csv(x = corrected_data, file = file)
-    }
-    
-    # Output
-    return(corrected_data)
- }
+    file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
+    readr::write_csv(x = corrected_data, file = file)
+  }
+  
+  # Output
+  return(corrected_data)
+}
 
 
 #' @noRd
@@ -1299,7 +1299,7 @@ wisp_calc_Jiang_TSS <- function(data) {
 #' @keywords internal
 ### wisp_calc_Gons_CHL 
 wisp_calc_Gons_CHL <- function(data) {
- 
+  
   # Identification of wavelengths (+/- 3 nm)
   nm_cols <- grep("^nm_", names(data), value = TRUE)
   wl <- as.numeric(sub("^nm_", "", nm_cols))
@@ -1345,7 +1345,7 @@ wisp_calc_Gons_CHL <- function(data) {
   data$Gons.CHL <- units::set_units(round(chl, 1), "mg/m3")
   data
 }
-  
+
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Gons740_CHL 
@@ -1548,7 +1548,7 @@ wisp_plot_reflectance_data <- function(
     legend_NDCI        = FALSE,
     legend_mishra_CHL  = FALSE
 ) {
- 
+  
   # Production of data information
   data <- data |>
     dplyr::mutate(
