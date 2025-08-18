@@ -324,6 +324,14 @@ wisp_get_reflectance_multi_data <- function(
 #' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
 #' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
+#' @param calc_gons A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Gons et al. (2002) algorithm (NIR ~782 nm). Default is `TRUE`.
+#' @param calc_gons740 A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Gons et al. (2002) algorithm (NIR ~740 nm). Default is `TRUE`.
+#' @param calc_NDCI A `logical`. If `TRUE`, the function calculates The Normalised
+#' Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is `TRUE`.
+#' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -346,9 +354,13 @@ wisp_get_reflectance_multi_data <- function(
 #'   qa_threshold    = 0.5,
 #'   qwip_threshold  = 0.2,
 #'   calc_scatt = TRUE,
-#'   calc_SPM = FALSE,
+#'   calc_SPM = TRUE,
 #'   calc_TUR = TRUE,
 #'   calc_TSS = TRUE,
+#'   calc_gons = TRUE,
+#'   calc_gons740 = TRUE,
+#'   calc_NDCI = TRUE,
+#'   calc_mishra = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #'   QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
@@ -367,6 +379,10 @@ wisp_qc_reflectance_data <- function(
     calc_SPM       = TRUE,
     calc_TUR       = TRUE,
     calc_TSS       = TRUE,
+    calc_gons      = TRUE,
+    calc_gons740   = TRUE,
+    calc_NDCI      = TRUE,
+    calc_mishra    = TRUE,
     save_csv       = FALSE,
     out_dir        = "outputs"
     ) {
@@ -657,26 +673,73 @@ wisp_qc_reflectance_data <- function(
   }
   if (calc_TUR) {
     reflectance_data_filtered <- wisp_calc_Novoa_TUR(reflectance_data_filtered)
-    if (calc_SPM) {
-      reflectance_data_filtered <- reflectance_data_filtered |>
-        dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
-    } else {
-      reflectance_data_filtered <- reflectance_data_filtered |>
-        dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
-    }
+    after_col <- if (calc_SPM) "Blended.SPM" else "waterquality.tsm"
+    reflectance_data_filtered <- dplyr::relocate(
+      reflectance_data_filtered,
+      Novoa.TUR, Blended.TUR,
+      .after = all_of(after_col)
+    )
   }
   if (calc_TSS) {
     reflectance_data_filtered <- wisp_calc_Jiang_TSS(reflectance_data_filtered)
-    if (!calc_SPM && !calc_TUR) {
-      reflectance_data_filtered <- reflectance_data_filtered |>
-        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = waterquality.tsm)
+    after_col <- if (!calc_SPM && !calc_TUR) {
+      "waterquality.tsm"
     } else if (calc_SPM && !calc_TUR) {
-      reflectance_data_filtered <- reflectance_data_filtered |>
-        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.SPM)
+      "Blended.SPM"
     } else {
-      reflectance_data_filtered <- reflectance_data_filtered |>
-        dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.TUR)
+      "Blended.TUR"
     }
+    reflectance_data_filtered <- dplyr::relocate(
+      reflectance_data_filtered,
+      Jiang.TSS, ref_band, a, bbp,
+      .after = all_of(after_col)
+    )
+  }
+  if (calc_gons) {
+    reflectance_data_filtered <- wisp_calc_Gons_CHL(reflectance_data_filtered)
+    if (all(c("Gons.CHL", "waterquality.chla") %in% names(reflectance_data_filtered))) {
+      reflectance_data_filtered <- dplyr::relocate(
+        reflectance_data_filtered,
+        Gons.CHL,
+        .after = all_of("waterquality.chla")
+      )
+    }
+  }
+  if (calc_gons740) {
+    reflectance_data_filtered <- wisp_calc_Gons740_CHL(reflectance_data_filtered)
+    if ("Gons740.CHL" %in% names(reflectance_data_filtered)) {
+      after_col <- if ("Gons.CHL" %in% names(reflectance_data_filtered)) "Gons.CHL" else "waterquality.chla"
+      reflectance_data_filtered <- dplyr::relocate(
+        reflectance_data_filtered,
+        Gons740.CHL,
+        .after = all_of(after_col)
+      )
+    }
+  }
+  if (calc_NDCI) {
+    reflectance_data_filtered <- wisp_calc_NDCI(reflectance_data_filtered)
+    after_col <- if (!("Gons.CHL" %in% names(reflectance_data_filtered)) &&
+                     !("Gons740.CHL" %in% names(reflectance_data_filtered))) {
+      "waterquality.chla"
+    } else if (!("Gons740.CHL" %in% names(reflectance_data_filtered))) {
+      "Gons.CHL"
+    } else {
+      "Gons740.CHL"
+    }
+    reflectance_data_filtered <- dplyr::relocate(
+      reflectance_data_filtered,
+      NDCI,
+      .after = all_of(after_col)
+    )
+  }
+  if (calc_mishra) {
+    reflectance_data_filtered <- wisp_calc_Mishra_CHL(reflectance_data_filtered)
+    after_col <- "NDCI"
+    reflectance_data_filtered <- dplyr::relocate(
+      reflectance_data_filtered,
+      Mishra.CHL,
+      .after = all_of(after_col)
+    )
   }
 
   # create output csv file
@@ -708,6 +771,14 @@ wisp_qc_reflectance_data <- function(
 #' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
 #' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
 #' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
+#' @param calc_gons A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Gons et al. (2002) algorithm (NIR ~782 nm). Default is `TRUE`.
+#' @param calc_gons740 A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Gons et al. (2002) algorithm (NIR ~740 nm). Default is `TRUE`.
+#' @param calc_NDCI A `logical`. If `TRUE`, the function calculates The Normalised
+#' Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is `TRUE`.
+#' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
+#' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -729,6 +800,10 @@ wisp_qc_reflectance_data <- function(
 #'   calc_SPM = TRUE,
 #'   calc_TUR = TRUE,
 #'   calc_TSS = TRUE,
+#'   calc_gons  = TRUE,
+#'   calc_gons740 = TRUE,
+#'   calc_NDCI = TRUE,
+#'   calc_mishra = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -738,12 +813,16 @@ wisp_qc_reflectance_data <- function(
 ### wisp_sr_reflectance_data
 wisp_sr_reflectance_data <- function(
     qc_data,
-    calc_scatt = TRUE,
-    calc_SPM   = TRUE,
-    calc_TUR   = TRUE,
-    calc_TSS   = TRUE,
-    save_csv   = FALSE,
-    out_dir    = "outputs"
+    calc_scatt   = TRUE,
+    calc_SPM     = TRUE,
+    calc_TUR     = TRUE,
+    calc_TSS     = TRUE,
+    calc_gons    = TRUE,
+    calc_gons740 = TRUE,
+    calc_NDCI    = TRUE,
+    calc_mishra  = TRUE,
+    save_csv     = FALSE,
+    out_dir      = "outputs"
   ) {
   if (!"QC" %in% names(qc_data)) {
     message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
@@ -833,26 +912,73 @@ wisp_sr_reflectance_data <- function(
     }
     if (calc_TUR) {
       corrected_data <- wisp_calc_Novoa_TUR(corrected_data)
-      if (calc_SPM) {
-        corrected_data <- corrected_data |>
-          dplyr::relocate(Novoa.TUR, Blended.TUR, .after = Blended.SPM)
+      after_col <- if (calc_SPM) "Blended.SPM" else "waterquality.tsm"
+      corrected_data <- dplyr::relocate(
+        corrected_data,
+        Novoa.TUR, Blended.TUR,
+        .after = all_of(after_col)
+      )
+    }
+    if (calc_TSS) {
+      corrected_data <- wisp_calc_Jiang_TSS(corrected_data)
+      after_col <- if (!calc_SPM && !calc_TUR) {
+        "waterquality.tsm"
+      } else if (calc_SPM && !calc_TUR) {
+        "Blended.SPM"
       } else {
-        corrected_data <- corrected_data |>
-          dplyr::relocate(Novoa.TUR, Blended.TUR, .after = waterquality.tsm)
+        "Blended.TUR"
       }
-      if (calc_TSS) {
-        corrected_data <- wisp_calc_Jiang_TSS(corrected_data)
-        if (!calc_SPM && !calc_TUR) {
-          corrected_data <- corrected_data |>
-            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = waterquality.tsm)
-        } else if (calc_SPM && !calc_TUR) {
-          corrected_data <- corrected_data |>
-            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.SPM)
-        } else {
-          corrected_data <- corrected_data |>
-            dplyr::relocate(Jiang.TSS, ref_band, a, bbp, .after = Blended.TUR)
-        }
-      }  
+      corrected_data <- dplyr::relocate(
+        corrected_data,
+        Jiang.TSS, ref_band, a, bbp,
+        .after = all_of(after_col)
+      )
+    }
+    if (calc_gons) {
+      corrected_data <- wisp_calc_Gons_CHL(corrected_data)
+      if (all(c("Gons.CHL", "waterquality.chla") %in% names(corrected_data))) {
+        corrected_data <- dplyr::relocate(
+          corrected_data,
+          Gons.CHL,
+          .after = all_of("waterquality.chla")
+        )
+      }
+    }
+    if (calc_gons740) {
+      corrected_data <- wisp_calc_Gons740_CHL(corrected_data)
+      if ("Gons740.CHL" %in% names(corrected_data)) {
+        after_col <- if ("Gons.CHL" %in% names(corrected_data)) "Gons.CHL" else "waterquality.chla"
+        corrected_data <- dplyr::relocate(
+          corrected_data,
+          Gons740.CHL,
+          .after = all_of(after_col)
+        )
+      }
+    }
+    if (calc_NDCI) {
+      corrected_data <- wisp_calc_NDCI(corrected_data)
+      after_col <- if (!("Gons.CHL" %in% names(corrected_data)) &&
+                       !("Gons740.CHL" %in% names(corrected_data))) {
+        "waterquality.chla"
+      } else if (!("Gons740.CHL" %in% names(corrected_data))) {
+        "Gons.CHL"
+      } else {
+        "Gons740.CHL"
+      }
+      corrected_data <- dplyr::relocate(
+        corrected_data,
+        NDCI,
+        .after = all_of(after_col)
+      )
+    }
+    if (calc_mishra) {
+      corrected_data <- wisp_calc_Mishra_CHL(corrected_data)
+      after_col <- "NDCI"
+      corrected_data <- dplyr::relocate(
+        corrected_data,
+        Mishra.CHL,
+        .after = all_of(after_col)
+      )
     }
     
     # create output csv file
@@ -1169,6 +1295,177 @@ wisp_calc_Jiang_TSS <- function(data) {
   return(out)
 }
 
+#' @noRd
+#' @keywords internal
+### wisp_calc_Gons_CHL 
+wisp_calc_Gons_CHL <- function(data) {
+ 
+  # Identification of wavelengths (+/- 3 nm)
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  wl <- as.numeric(sub("^nm_", "", nm_cols))
+  get_cols <- function(center, tol = 3) nm_cols[wl >= center - tol & wl <= center + tol]
+  
+  red_cols <- get_cols(664)
+  re_cols  <- get_cols(704)
+  nir_cols <- get_cols(782)
+  
+  # If bands are missing, return NA
+  if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
+    warning("wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
+    data$Gons.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
+    return(data)
+  }
+  
+  # Consider Rrs as dimensionless numerical values
+  mnum <- function(df) rowMeans(as.data.frame(lapply(df, function(x) as.numeric(x))), na.rm = TRUE)
+  rrs_red <- mnum(data[red_cols])
+  rrs_re  <- mnum(data[re_cols])
+  rrs_nir <- mnum(data[nir_cols])
+  
+  # Coefficients derived from Gons et al. (2002)
+  gc <- c(1.61, 0.082, 0.6, 0.7, 0.40, 1.05)
+  astar <- 0.015
+  
+  denom <- gc[2] - gc[3] * rrs_nir
+  bb <- rep(NA_real_, length(rrs_nir))
+  ok  <- !is.na(denom) & denom != 0
+  bb[ok] <- (gc[1] * rrs_nir[ok]) / denom[ok]
+  
+  rm <- rrs_re / rrs_red
+  
+  # CHL concentration algorithm (Gons et al., 2002)
+  chl <- ((rm * (gc[4] + bb)) - gc[5] - (bb ^ gc[6])) / astar
+  
+  # Validation (gm = c(0.005, 0.63)); invalid if (Rrs_red <= 0.005) or (rm <= 0.63)
+  gm <- c(0.005, 0.63)
+  chl[chl < 0] <- NA_real_
+  chl[(rrs_red <= gm[1]) | (rm <= gm[2])] <- NA_real_
+  
+  # Enter unit of measurement
+  data$Gons.CHL <- units::set_units(round(chl, 1), "mg/m3")
+  data
+}
+  
+#' @noRd
+#' @keywords internal
+### wisp_calc_Gons740_CHL 
+wisp_calc_Gons740_CHL <- function(data) {
+  
+  # Identification of wavelengths (+/- 3 nm)
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  wl <- as.numeric(sub("^nm_", "", nm_cols))
+  get_cols <- function(center, tol = 3) nm_cols[wl >= center - tol & wl <= center + tol]
+  
+  red_cols <- get_cols(664)
+  re_cols  <- get_cols(704)
+  nir_cols <- get_cols(740)
+  
+  # If bands are missing, return NA
+  if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
+    warning("wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
+    data$Gons740.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
+    return(data)
+  }
+  
+  # Consider Rrs as dimensionless numerical values
+  mnum <- function(df) rowMeans(as.data.frame(lapply(df, function(x) as.numeric(x))), na.rm = TRUE)
+  rrs_red <- mnum(data[red_cols])
+  rrs_re  <- mnum(data[re_cols])
+  rrs_nir <- mnum(data[nir_cols])
+  
+  # Coefficients derived from Gons et al. (2002)
+  gc <- c(1.61, 0.082, 0.6, 0.7, 0.40, 1.05)
+  astar <- 0.015
+  
+  denom <- gc[2] - gc[3] * rrs_nir
+  bb <- rep(NA_real_, length(rrs_nir))
+  ok  <- !is.na(denom) & denom != 0
+  bb[ok] <- (gc[1] * rrs_nir[ok]) / denom[ok]
+  
+  rm <- rrs_re / rrs_red
+  
+  # CHL concentration algorithm (Gons et al., 2002)
+  chl <- ((rm * (gc[4] + bb)) - gc[5] - (bb ^ gc[6])) / astar
+  
+  # Validation (gm = c(0.005, 0.63)); invalid if (Rrs_red <= 0.005) or (rm <= 0.63)
+  gm <- c(0.005, 0.63)
+  chl[chl < 0] <- NA_real_
+  chl[(rrs_red <= gm[1]) | (rm <= gm[2])] <- NA_real_
+  
+  # Set unit of measurement
+  data$Gons740.CHL <- units::set_units(round(chl, 1), "mg/m3")
+  data
+}
+
+#' @noRd
+#' @keywords internal
+### wisp_calc_NDCI
+wisp_calc_NDCI <- function(data) {
+  
+  # Identification of wavelengths (+/- 3 nm)
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  wl <- as.numeric(sub("^nm_", "", nm_cols))
+  get_cols <- function(center, tol = 3) nm_cols[wl >= center - tol & wl <= center + tol]
+  
+  cols_670 <- get_cols(670)
+  cols_705 <- get_cols(705)
+  
+  # If bands are missing, return NA
+  if (length(cols_670) == 0 || length(cols_705) == 0) {
+    warning("wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
+    data$NDCI <- units::set_units(rep(NA_real_, nrow(data)), "1")
+    return(data)
+  }
+  
+  # Consider Rrs as dimensionless numerical values
+  mnum <- function(df) rowMeans(as.data.frame(lapply(df, function(x) as.numeric(x))), na.rm = TRUE)
+  rrs_670 <- mnum(data[cols_670])
+  rrs_705 <- mnum(data[cols_705])
+  
+  # Compute NDCI, handling division by zero / NA
+  numerator <- rrs_705 - rrs_670
+  denom <- rrs_705 + rrs_670
+  
+  ndci <- rep(NA_real_, length(numerator))
+  ok <- !is.na(denom) & denom != 0
+  ndci[ok] <- numerator[ok] / denom[ok]
+  
+  # Set unit and rounding consistent with other functions
+  data$NDCI <- units::set_units(round(ndci, 4), "1")
+  data
+}
+
+#' @noRd
+#' @keywords internal
+### wisp_calc_Mishra_CHL
+wisp_calc_Mishra_CHL <- function(data) {
+  
+  # Check if NDCI column is present
+  if (!"NDCI" %in% names(data)) {
+    stop("Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
+  }
+  
+  # Coefficients derived from Mishra and Mishra (2012)
+  a0 <- 14.039
+  a1 <- 86.115
+  a2 <- 194.325
+  
+  # Use the NDCI value calculated previously
+  ndci <- as.numeric(data$NDCI)
+  
+  # CHL concentration algorithm (Mishra and Mishra, 2012)
+  chl <- rep(NA_real_, length(ndci))
+  valid_ndci <- !is.na(ndci)
+  chl[valid_ndci] <- a0 + a1 * ndci[valid_ndci] + a2 * (ndci[valid_ndci]^2)
+  
+  # Validation: negative values -> NA
+  chl[chl < 0] <- NA_real_
+  
+  # Set unit of measurement and rounding
+  data$Mishra.CHL <- units::set_units(round(chl, 1), "mg/m3")
+  return(data)
+}
+
 
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
@@ -1194,6 +1491,14 @@ wisp_calc_Jiang_TSS <- function(data) {
 #' the `Novoa_TUR`values. Default is `FALSE`.
 #' @param legend_jiang_TSS A `logical`. If `TRUE`, the plot legend includes 
 #' the `Jiang_TSS`values. Default is `FALSE`.
+#' @param legend_gons_CHL A `logical`. If `TRUE`, the plot legend includes 
+#' the `Gons_CHL`values. Default is `FALSE`.
+#' @param legend_gons740_CHL A `logical`. If `TRUE`, the plot legend includes 
+#' the `Gons740_CHL`values. Default is `FALSE`.
+#' @param legend_NDCI A `logical`. If `TRUE`, the plot legend includes 
+#' the `NDCI`values. Default is `FALSE`.
+#' @param legend_mishra_CHL A `logical`. If `TRUE`, the plot legend includes 
+#' the `Mishra_CHL`values. Default is `FALSE`.
 #' @return description A plotly object with the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
@@ -1209,15 +1514,19 @@ wisp_calc_Jiang_TSS <- function(data) {
 #' ## Not run:
 #' wisp_plot_reflectance_data(
 #'   data = reflect_data_sr,
-#'   legend_TSM = FALSE,
+#'   legend_TSM = TRUE,
 #'   legend_Chla = TRUE,
-#'   legend_Kd = FALSE,
-#'   legend_cpc = FALSE
-#'   legend_scatt = FALSE
-#'   legend_ratio = FALSE
-#'   legend_novoa_SPM = FALSE
-#'   legend_novoa_TUR = FALSE
-#'   legend_jiang_TSS = FALSE
+#'   legend_Kd = TRUE,
+#'   legend_cpc = TRUE,
+#'   legend_scatt = FALSE,
+#'   legend_ratio = FALSE,
+#'   legend_novoa_SPM = FALSE,
+#'   legend_novoa_TUR = FALSE,
+#'   legend_jiang_TSS = FALSE,
+#'   legend_gons_CHL  = FALSE,
+#'   legend_gons740_CHL = FALSE,
+#'   legend_NDCI = FALSE,
+#'   legend_mishra_CHL = FALSE
 #' )
 #' }
 #' ## End (Not run)
@@ -1225,21 +1534,25 @@ wisp_calc_Jiang_TSS <- function(data) {
 ### wisp_plot_reflectance_data
 wisp_plot_reflectance_data <- function(
     data,
-    legend_TSM       = TRUE,
-    legend_Chla      = TRUE,
-    legend_Kd        = TRUE,
-    legend_cpc       = TRUE,
-    legend_scatt     = FALSE,
-    legend_ratio     = FALSE,
-    legend_novoa_SPM = FALSE,
-    legend_novoa_TUR = FALSE,
-    legend_jiang_TSS = FALSE
+    legend_TSM         = TRUE,
+    legend_Chla        = TRUE,
+    legend_Kd          = TRUE,
+    legend_cpc         = TRUE,
+    legend_scatt       = FALSE,
+    legend_ratio       = FALSE,
+    legend_novoa_SPM   = FALSE,
+    legend_novoa_TUR   = FALSE,
+    legend_jiang_TSS   = FALSE,
+    legend_gons_CHL    = FALSE,
+    legend_gons740_CHL = FALSE,
+    legend_NDCI        = FALSE,
+    legend_mishra_CHL  = FALSE
 ) {
  
   # Production of data information
   data <- data |>
     dplyr::mutate(
-      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss) {
+      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
         paste(
           c(
             if (legend_TSM && !is.null(tsm)) paste("TSM [g/m3]:", tsm),
@@ -1250,20 +1563,28 @@ wisp_plot_reflectance_data <- function(
             if (legend_ratio && !is.null(ratio)) paste("Ratio:", ratio),
             if (legend_novoa_SPM && !is.null(novoa_spm)) paste("Novoa_SPM [g/m3]:", novoa_spm),
             if (legend_novoa_TUR && !is.null(novoa_tur)) paste("Novoa_TUR [NTU]:", novoa_tur),
-            if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss)
+            if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss),
+            if (legend_gons_CHL && !is.null(gons_chl)) paste("Gons.CHL [mg/m3]:", gons_chl),
+            if (legend_gons740_CHL && !is.null(gons740_chl)) paste("Gons740.CHL [mg/m3]:", gons740_chl),
+            if (legend_NDCI && !is.null(ndci)) paste("NDCI:", ndci),
+            if (legend_mishra_CHL && !is.null(mishra_chl)) paste("Mishra.CHL [mg/m3]:", mishra_chl)
           ),
           collapse = "<br>"
         )
       },
-      tsm        = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else rep(NA, nrow(data)),
-      chla       = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else rep(NA, nrow(data)),
-      kd         = if ("waterquality.kd"      %in% names(data)) data$waterquality.kd else rep(NA, nrow(data)),
-      cpc        = if ("waterquality.cpc"     %in% names(data)) data$waterquality.cpc else rep(NA, nrow(data)),
-      scatt      = if ("scattering.peak"      %in% names(data)) data$scattering.peak else rep(NA, nrow(data)),
-      ratio      = if ("band.ratio"           %in% names(data)) data$band.ratio else rep(NA, nrow(data)),
-      novoa_spm  = if ("Novoa.SPM"            %in% names(data)) data$Novoa.SPM else rep(NA, nrow(data)),
-      novoa_tur  = if ("Novoa.TUR"            %in% names(data)) data$Novoa.TUR else rep(NA, nrow(data)),
-      jiang_tss  = if ("Jiang.TSS"            %in% names(data)) data$Jiang.TSS else rep(NA, nrow(data))
+      tsm         = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else rep(NA, nrow(data)),
+      chla        = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else rep(NA, nrow(data)),
+      kd          = if ("waterquality.kd"      %in% names(data)) data$waterquality.kd else rep(NA, nrow(data)),
+      cpc         = if ("waterquality.cpc"     %in% names(data)) data$waterquality.cpc else rep(NA, nrow(data)),
+      scatt       = if ("scattering.peak"      %in% names(data)) data$scattering.peak else rep(NA, nrow(data)),
+      ratio       = if ("band.ratio"           %in% names(data)) data$band.ratio else rep(NA, nrow(data)),
+      novoa_spm   = if ("Novoa.SPM"            %in% names(data)) data$Novoa.SPM else rep(NA, nrow(data)),
+      novoa_tur   = if ("Novoa.TUR"            %in% names(data)) data$Novoa.TUR else rep(NA, nrow(data)),
+      jiang_tss   = if ("Jiang.TSS"            %in% names(data)) data$Jiang.TSS else rep(NA, nrow(data)),
+      gons_chl    = if ("Gons.CHL"             %in% names(data)) data$Gons.CHL else rep(NA, nrow(data)),
+      gons740_chl = if ("Gons740.CHL"          %in% names(data)) data$Gons740.CHL else rep(NA, nrow(data)),
+      ndci        = if ("NDCI"                 %in% names(data)) data$NDCI else rep(NA, nrow(data)),
+      mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else rep(NA, nrow(data))
       )
     )
   
