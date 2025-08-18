@@ -7,10 +7,13 @@
 wisp_qc_reflectance_data(
   data,
   maxPeak = 0.05,
-  maxPeak_350 = 0.02,
+  maxPeak_blue = 0.02,
+  qa_threshold = 0.5,
+  qwip_threshold = 0.2,
   calc_scatt = TRUE,
   calc_SPM = TRUE,
   calc_TUR = TRUE,
+  calc_TSS = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -23,17 +26,27 @@ We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 Default is 0.05.}
 
-\item{maxPeak_350}{A \code{decimal}. Maximum magnitude 350nm values.
+\item{maxPeak_blue}{A \code{decimal}. Maximum magnitude 350 nm values.
 We recommend setting this parameter to: 0.02 (default)}
 
+\item{qa_threshold}{A \code{decimal}. Minimum threshold for Quality Assurance (QA).
+We recommend setting this parameter to: 0.5 (default)}
+
+\item{qwip_threshold}{A \code{decimal}. Maximum threshold for Quality Water Index Polynomial (QWIP).
+We recommend setting this parameter to: 0.2 (default)}
+
 \item{calc_scatt}{A \code{logical}. If \code{TRUE}, the function calculates the
-two parameters. Default is \code{TRUE}.}
+peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter
+to the second chlorophyll absorption peak (670-680 nm). Default is \code{TRUE}.}
 
 \item{calc_SPM}{A \code{logical}. If \code{TRUE}, the function calculates the
-NOVOA SPM concentrations. Default is \code{TRUE}.}
+SPM concentrations in according to Novoa et al., (2017). Default is \code{TRUE}.}
 
 \item{calc_TUR}{A \code{logical}. If \code{TRUE}, the function calculates the
-NOVOA TUR values Default is \code{TRUE}.}
+turbidity (FNU) in according to Novoa et al., (2017). Default is \code{TRUE}.}
+
+\item{calc_TSS}{A \code{logical}. If \code{TRUE}, the function calculates the
+TSS concentrations in according to Jiang et al., (2021). Default is \code{TRUE}.}
 
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
@@ -46,7 +59,8 @@ a message containing the reason behind the elimination of each anomalous spectra
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function removes all anomalous spectral signatures and explains the reason for each elimination
+This function removes all anomalous spectral signatures and
+explains the reason for each elimination
 }
 \examples{
 # example code
@@ -55,11 +69,16 @@ This function removes all anomalous spectral signatures and explains the reason 
 reflect_data_qc <- wisp_qc_reflectance_data(
   data = reflect_data,
   maxPeak = 0.05,
-  maxPeak_350 = 0.02,
+  maxPeak_blue = 0.02,
+  qa_threshold    = 0.5,
+  qwip_threshold  = 0.2,
   calc_scatt = TRUE,
   calc_SPM = FALSE,
   calc_TUR = TRUE,
-  save_csv = FALSE
+  calc_TSS = TRUE,
+  save_csv = FALSE,
+  out_dir = "outputs"
+  QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
 )
 }
 ## End (Not run)

@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/oggioniale/WISP.data",
   "issueTracker": "https://github.com/oggioniale/WISP.data/issues",
   "license": "`use_gpl3_license()`",
-  "version": "0.0.0.9000",
+  "version": "0.1.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -101,7 +101,7 @@
         }
       ],
       "name": "WISP.data",
-      "description": "R package version v0.0.0.9000"
+      "description": "R package version v0.1.0"
     }
   ]
 }

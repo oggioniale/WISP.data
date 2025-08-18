@@ -1,10 +1,10 @@
 Package: WISP.data
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Alessandro", "Oggioni", , "alessandro.oggioni@cnr.it", role = c("aut", "cre", "fnd"),
            comment = c(ORCID = "0000-0002-7997-219X")),
-    person("Nicola", "Ghirardi", , "nicola.ghirardi@cnr.it", role = c("aut"),
+    person("Nicola", "Ghirardi", , "nicola.ghirardi@cnr.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5006-9853"))
     )
 Description: What the package does (one paragraph).

@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{wisp_get_reflectance_multi_data}
 \alias{wisp_get_reflectance_multi_data}
-\title{Get data of reflectance (level2) from WISPstation for a multiple dates}
+\title{Get data of reflectance (level2) from WISPstation for multiple dates}
 \usage{
 wisp_get_reflectance_multi_data(
   version = "1.0",
@@ -40,12 +40,11 @@ Default is "outputs" within the working directory.}
 A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
 waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
-default, all the values of reflectance for each wevelength from 350 to 900
-nm.
+default, all the reflectance values from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function obtains the data of reflectance from WISPstation for a
+This function obtains the reflectance data from WISPstation for
 multiple dates.
 }
 \examples{
@@ -58,7 +57,8 @@ reflect_data <- wisp_get_reflectance_multi_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE
+  save_csv = FALSE,
+  out_dir = "outputs"
 )
 }
 ## End (Not run)
@@ -66,4 +66,6 @@ reflect_data <- wisp_get_reflectance_multi_data(
 }
 \author{
 Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+
+Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
 }

@@ -7,7 +7,7 @@ cff-version: 1.2.0
 message: 'To cite package "WISP.data" in publications use:'
 type: software
 title: 'WISP.data: What the Package Does (One Line, Title Case)'
-version: 0.0.0.9000
+version: 0.1.0
 abstract: What the package does (one paragraph).
 authors:
 - family-names: Oggioni
@@ -18,6 +18,20 @@ authors:
   given-names: Nicola
   email: nicola.ghirardi@cnr.it
   orcid: https://orcid.org/0000-0002-5006-9853
+preferred-citation:
+  type: generic
+  title: WISP.data
+  authors:
+  - family-names: Oggioni
+    given-names: Alessandro
+    email: alessandro.oggioni@cnr.it
+    orcid: https://orcid.org/0000-0002-7997-219X
+  - family-names: Ghirardi
+    given-names: Nicola
+    email: nicola.ghirardi@cnr.it
+    orcid: https://orcid.org/0000-0002-5006-9853
+  year: '2025'
+  notes: R package version v0.1.0
 repository-code: https://github.com/oggioniale/WISP.data
 url: https://github.com/oggioniale/WISP.data
 contact:
@@ -35,8 +49,65 @@ references:
   institution:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
-  year: '2024'
+  year: '2025'
   version: '>= 2.10'
+- type: software
+  title: knitr
+  abstract: 'knitr: A General-Purpose Package for Dynamic Report Generation in R'
+  notes: Suggests
+  url: https://yihui.org/knitr/
+  repository: https://CRAN.R-project.org/package=knitr
+  authors:
+  - family-names: Xie
+    given-names: Yihui
+    email: xie@yihui.name
+    orcid: https://orcid.org/0000-0003-0645-5666
+  year: '2025'
+  doi: 10.32614/CRAN.package.knitr
+- type: software
+  title: rmarkdown
+  abstract: 'rmarkdown: Dynamic Documents for R'
+  notes: Suggests
+  url: https://pkgs.rstudio.com/rmarkdown/
+  repository: https://CRAN.R-project.org/package=rmarkdown
+  authors:
+  - family-names: Allaire
+    given-names: JJ
+    email: jj@posit.co
+  - family-names: Xie
+    given-names: Yihui
+    email: xie@yihui.name
+    orcid: https://orcid.org/0000-0003-0645-5666
+  - family-names: Dervieux
+    given-names: Christophe
+    email: cderv@posit.co
+    orcid: https://orcid.org/0000-0003-4474-2498
+  - family-names: McPherson
+    given-names: Jonathan
+    email: jonathan@posit.co
+  - family-names: Luraschi
+    given-names: Javier
+  - family-names: Ushey
+    given-names: Kevin
+    email: kevin@posit.co
+  - family-names: Atkins
+    given-names: Aron
+    email: aron@posit.co
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@posit.co
+  - family-names: Cheng
+    given-names: Joe
+    email: joe@posit.co
+  - family-names: Chang
+    given-names: Winston
+    email: winston@posit.co
+  - family-names: Iannone
+    given-names: Richard
+    email: rich@posit.co
+    orcid: https://orcid.org/0000-0003-3925-190X
+  year: '2025'
+  doi: 10.32614/CRAN.package.rmarkdown
 - type: software
   title: shiny
   abstract: 'shiny: Web Application Framework for R'
@@ -74,6 +145,22 @@ references:
     given-names: Alan
   - family-names: Borges
     given-names: Barbara
-  year: '2024'
+  year: '2025'
   doi: 10.32614/CRAN.package.shiny
+- type: software
+  title: lifecycle
+  abstract: 'lifecycle: Manage the Life Cycle of your Package Functions'
+  notes: Imports
+  url: https://lifecycle.r-lib.org/
+  repository: https://CRAN.R-project.org/package=lifecycle
+  authors:
+  - family-names: Henry
+    given-names: Lionel
+    email: lionel@posit.co
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@posit.co
+    orcid: https://orcid.org/0000-0003-4757-117X
+  year: '2025'
+  doi: 10.32614/CRAN.package.lifecycle
 

@@ -14,7 +14,7 @@ WISPstation."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
     
     <a class="navbar-brand me-2" href="../index.html">WISP.data</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,12 @@ WISPstation.</p>
 <span>  legend_TSM <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  legend_Chla <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  legend_Kd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  legend_cpc <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  legend_cpc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  legend_scatt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_ratio <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_novoa_SPM <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_novoa_TUR <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_jiang_TSS <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -95,6 +100,31 @@ values. Default is <code>TRUE</code>.</p></dd>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>cpc</code>
 values. Default is <code>TRUE</code>.</p></dd>
 
+
+<dt>legend_scatt</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>scattering</code>
+values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt>legend_ratio</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes the <code>ratio</code>
+values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt>legend_novoa_SPM</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>Novoa_SPM</code>values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt>legend_novoa_TUR</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>Novoa_TUR</code>values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt>legend_jiang_TSS</dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>Jiang_TSS</code>values. Default is <code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -111,20 +141,7 @@ reflectance data.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example code</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="co">## Not run:</span></span></span>
-<span class="r-in"><span><span class="fu">wisp_plot_reflectance_data</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">reflect_data_sr</span>,</span></span>
-<span class="r-in"><span>  legend_TSM <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_Chla <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  legend_Kd <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_cpc <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
+    
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

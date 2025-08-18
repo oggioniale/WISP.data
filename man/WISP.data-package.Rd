@@ -19,10 +19,5 @@ Useful links:
 \author{
 \strong{Maintainer}: Alessandro Oggioni \email{alessandro.oggioni@cnr.it} (\href{https://orcid.org/0000-0002-7997-219X}{ORCID}) [funder]
 
-Authors:
-\itemize{
-  \item Nicola Ghirardi \email{nicola.ghirardi@cnr.it} (\href{https://orcid.org/0000-0002-5006-9853}{ORCID})
-}
-
 }
 \keyword{internal}
