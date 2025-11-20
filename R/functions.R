@@ -1549,106 +1549,88 @@ wisp_plot_reflectance_data <- function(
     legend_mishra_CHL  = FALSE
 ) {
   
-  # Production of data information
-  data <- data |>
-    dplyr::mutate(
-      products_info = mapply(function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
-        paste(
-          c(
-            if (legend_TSM && !is.null(tsm)) paste("TSM [g/m3]:", tsm),
-            if (legend_Chla && !is.null(chla)) paste("Chla [mg/m3]:", chla),
-            if (legend_Kd && !is.null(kd)) paste("Kd [1/m]:", kd),
-            if (legend_cpc && !is.null(cpc)) paste("Cpc [mg/m3]:", cpc),
-            if (legend_scatt && !is.null(scatt)) paste("Scatt [1/sr]:", scatt),
-            if (legend_ratio && !is.null(ratio)) paste("Ratio:", ratio),
-            if (legend_novoa_SPM && !is.null(novoa_spm)) paste("Novoa_SPM [g/m3]:", novoa_spm),
-            if (legend_novoa_TUR && !is.null(novoa_tur)) paste("Novoa_TUR [NTU]:", novoa_tur),
-            if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss),
-            if (legend_gons_CHL && !is.null(gons_chl)) paste("Gons.CHL [mg/m3]:", gons_chl),
-            if (legend_gons740_CHL && !is.null(gons740_chl)) paste("Gons740.CHL [mg/m3]:", gons740_chl),
-            if (legend_NDCI && !is.null(ndci)) paste("NDCI:", ndci),
-            if (legend_mishra_CHL && !is.null(mishra_chl)) paste("Mishra.CHL [mg/m3]:", mishra_chl)
-          ),
-          collapse = "<br>"
-        )
-      },
-      tsm         = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else rep(NA, nrow(data)),
-      chla        = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else rep(NA, nrow(data)),
-      kd          = if ("waterquality.kd"      %in% names(data)) data$waterquality.kd else rep(NA, nrow(data)),
-      cpc         = if ("waterquality.cpc"     %in% names(data)) data$waterquality.cpc else rep(NA, nrow(data)),
-      scatt       = if ("scattering.peak"      %in% names(data)) data$scattering.peak else rep(NA, nrow(data)),
-      ratio       = if ("band.ratio"           %in% names(data)) data$band.ratio else rep(NA, nrow(data)),
-      novoa_spm   = if ("Novoa.SPM"            %in% names(data)) data$Novoa.SPM else rep(NA, nrow(data)),
-      novoa_tur   = if ("Novoa.TUR"            %in% names(data)) data$Novoa.TUR else rep(NA, nrow(data)),
-      jiang_tss   = if ("Jiang.TSS"            %in% names(data)) data$Jiang.TSS else rep(NA, nrow(data)),
-      gons_chl    = if ("Gons.CHL"             %in% names(data)) data$Gons.CHL else rep(NA, nrow(data)),
-      gons740_chl = if ("Gons740.CHL"          %in% names(data)) data$Gons740.CHL else rep(NA, nrow(data)),
-      ndci        = if ("NDCI"                 %in% names(data)) data$NDCI else rep(NA, nrow(data)),
-      mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else rep(NA, nrow(data))
+  # Converti colonne con 'units' in numerico
+  units_cols <- names(data)[sapply(data, function(x) inherits(x, "units"))]
+  if(length(units_cols) > 0){
+    for(col in units_cols){
+      data[[col]] <- as.numeric(data[[col]])
+    }
+  }
+  
+  # Creazione della colonna products_info
+  data$products_info <- mapply(
+    function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
+      paste(
+        c(
+          if (legend_TSM && !is.null(tsm)) paste("TSM [g/m3]:", tsm),
+          if (legend_Chla && !is.null(chla)) paste("Chla [mg/m3]:", chla),
+          if (legend_Kd && !is.null(kd)) paste("Kd [1/m]:", kd),
+          if (legend_cpc && !is.null(cpc)) paste("Cpc [mg/m3]:", cpc),
+          if (legend_scatt && !is.null(scatt)) paste("Scatt [1/sr]:", scatt),
+          if (legend_ratio && !is.null(ratio)) paste("Ratio:", ratio),
+          if (legend_novoa_SPM && !is.null(novoa_spm)) paste("Novoa_SPM [g/m3]:", novoa_spm),
+          if (legend_novoa_TUR && !is.null(novoa_tur)) paste("Novoa_TUR [NTU]:", novoa_tur),
+          if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss),
+          if (legend_gons_CHL && !is.null(gons_chl)) paste("Gons.CHL [mg/m3]:", gons_chl),
+          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("Gons740.CHL [mg/m3]:", gons740_chl),
+          if (legend_NDCI && !is.null(ndci)) paste("NDCI:", ndci),
+          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("Mishra.CHL [mg/m3]:", mishra_chl)
+        ),
+        collapse = "<br>"
       )
-    )
+    },
+    tsm         = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else NA,
+    chla        = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else NA,
+    kd          = if ("waterquality.kd"      %in% names(data)) data$waterquality.kd else NA,
+    cpc         = if ("waterquality.cpc"     %in% names(data)) data$waterquality.cpc else NA,
+    scatt       = if ("scattering.peak"      %in% names(data)) data$scattering.peak else NA,
+    ratio       = if ("band.ratio"           %in% names(data)) data$band.ratio else NA,
+    novoa_spm   = if ("Novoa.SPM"            %in% names(data)) data$Novoa.SPM else NA,
+    novoa_tur   = if ("Novoa.TUR"            %in% names(data)) data$Novoa.TUR else NA,
+    jiang_tss   = if ("Jiang.TSS"            %in% names(data)) data$Jiang.TSS else NA,
+    gons_chl    = if ("Gons.CHL"             %in% names(data)) data$Gons.CHL else NA,
+    gons740_chl = if ("Gons740.CHL"          %in% names(data)) data$Gons740.CHL else NA,
+    ndci        = if ("NDCI"                 %in% names(data)) data$NDCI else NA,
+    mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA
+  )
   
-  # Data transformation
-  data_2 <- data |>
-    dplyr::select(
-      measurement.date, starts_with("nm_"), products_info
-    ) |>
-    tidyr::pivot_longer(
-      cols = starts_with("nm_"),
-      names_to = "wavelength",
-      values_to = "Rrs"
-    ) |>
-    dplyr::mutate(
-      wavelength = as.numeric(sub("nm_", "", wavelength)),
-      date_time_info = paste0(
-        "Date: ", substr(measurement.date, 1, 10),
-        "<br>Time [UTC]: ", substr(measurement.date, 12, 19)
-      ),
-      legend_info = paste(date_time_info, products_info, sep = "<br>")
-    )
+  # Selezione delle colonne nm_ e conversione in formato long
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  data_2 <- tidyr::pivot_longer(
+    data[, c("measurement.date", "products_info", nm_cols)],
+    cols = dplyr::all_of(nm_cols),   # <<< Qui la modifica per rimuovere il warning
+    names_to = "wavelength",
+    values_to = "Rrs"
+  )
+  data_2$wavelength <- as.numeric(sub("nm_", "", data_2$wavelength))
+  data_2$legend_info <- paste0(
+    "Date: ", substr(data_2$measurement.date,1,10),
+    " Time [UTC]: ", substr(data_2$measurement.date,12,19),
+    "<br>", data_2$products_info
+  )
   
-  # Color palette
+  # Palette colori
   num_colors <- length(unique(data_2$legend_info))
   color_palette <- viridis::viridis(num_colors)
   
-  # Plot title
-  length_dates <- length(data$measurement.date)
-  n_dates <- seq.Date(
-    from = as.Date(data$measurement.date[1]),
-    to = as.Date(data$measurement.date[length_dates]),
-    by = "day"
-  )
-  dates_text <- if (length(n_dates) > 1) {
-    paste0("<br>from date: ", n_dates[1], "<br>to date: ", n_dates[length(n_dates)])
-  } else {
-    paste0("<br>on the date: ", n_dates[1])
-  }
+  # Creazione plot ggplot
+  p <- ggplot2::ggplot(data_2, ggplot2::aes(x=wavelength, y=Rrs, color=legend_info, text=legend_info)) +
+    ggplot2::geom_line() +
+    ggplot2::scale_color_manual(values=color_palette) +
+    ggplot2::labs(
+      title = paste0("Acquired by: ", data$instrument.name[1]),
+      x = "Wavelength [nm]",
+      y = "Rrs [1/sr]",
+      color = "Time of acquisition"
+    ) +
+    ggplot2::theme_minimal()
   
-  # Plotly
-  fig <- plotly::plot_ly(
-    data_2,
-    x = ~wavelength,
-    y = ~Rrs,
-    color = ~legend_info,
-    text = ~legend_info,
-    hovertemplate = paste0(
-      "Wavelength: %{x} nm<br>",
-      "Rrs: %{y:.4f} [1/sr]<br>",
-      "%{text}<extra></extra>"
-    ),
-    colors = color_palette,
-    type = 'scatter',
-    mode = 'lines'
-  ) |>
-    plotly::layout(
-      title = paste0("Acquired by: ", data$instrument.name[1], dates_text),
-      xaxis = list(title = '<b>Wavelength [nm]<b>', dtick = 100),
-      yaxis = list(title = '<b>Rrs [1/sr]<b>'),
-      legend = list(title = list(text = '<b>Time of acquisition</b>'))
-    )
-  
-  fig
+  # Rende interattivo con tooltip
+  plotly::ggplotly(p, tooltip = "text")
 }
+
+
+
 
 #' Creates a plot of the trend of one or more water quality parameters
 #' @description `r lifecycle::badge("experimental")`
