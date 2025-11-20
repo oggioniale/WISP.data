@@ -1699,7 +1699,6 @@ wisp_trend_plot <- function(
     colors = NULL,
     title = NULL
 ) {
-  
   aggregate <- match.arg(aggregate)
   
   if (is.null(data) || nrow(data) == 0) stop("Il dataset 'data' è vuoto o NULL.")
@@ -1777,16 +1776,17 @@ wisp_trend_plot <- function(
   # Aggregazione
   if (aggregate != "none") {
     long_df$date <- as.Date(long_df$datetime)
-    long_df <- dplyr::group_by(long_df, param, date) %>%
-      dplyr::summarise(
-        mean_value = mean(value, na.rm = na.rm),
-        sd_value   = sd(value, na.rm = na.rm),
-        .groups = "drop"
-      )
+    grouped <- dplyr::group_by(long_df, param, date)
+    long_df <- dplyr::summarise(
+      grouped,
+      mean_value = mean(value, na.rm = na.rm),
+      sd_value   = sd(value, na.rm = na.rm),
+      .groups = "drop"
+    )
     long_df$datetime <- as.POSIXct(long_df$date)
   } else {
     long_df$mean_value <- long_df$value
-    long_df$sd_value <- NA
+    long_df$sd_value <- NA_real_
   }
   
   params_unique <- unique(long_df$param)
@@ -1815,7 +1815,7 @@ wisp_trend_plot <- function(
     }
     
     fig <- plotly::plot_ly(
-      sub,
+      data = sub,
       x = ~datetime,
       y = ~mean_value,
       type = "scatter",
@@ -1828,21 +1828,20 @@ wisp_trend_plot <- function(
       color = I(colors[i])
     )
     
-    # Ribbon SD
-    # Ribbon colore
-    fig <- fig %>%
-      plotly::add_ribbons(
+    # Aggiungi ribbon e punti upper/lower solo se sd_value non è tutto NA
+    if (!all(is.na(sub$sd_value))) {
+      fig <- plotly::add_ribbons(
+        fig,
         ymin = ~mean_value - sd_value,
         ymax = ~mean_value + sd_value,
         fillcolor = scales::alpha(colors[i], 0.15),
         line = list(color = 'transparent'),
         showlegend = FALSE,
-        hoverinfo = "skip"  # disattiva tooltip sul ribbon
+        hoverinfo = "skip"
       )
-    
-    # Punto upper (mean + SD)
-    fig <- fig %>%
-      plotly::add_trace(
+      
+      fig <- plotly::add_trace(
+        fig,
         x = ~datetime,
         y = ~mean_value + sd_value,
         type = "scatter",
@@ -1851,10 +1850,9 @@ wisp_trend_plot <- function(
         showlegend = FALSE,
         hovertemplate = paste0(param_label, " upper: %{y:.2f}<extra></extra>")
       )
-    
-    # Punto lower (mean - SD)
-    fig <- fig %>%
-      plotly::add_trace(
+      
+      fig <- plotly::add_trace(
+        fig,
         x = ~datetime,
         y = ~mean_value - sd_value,
         type = "scatter",
@@ -1863,8 +1861,9 @@ wisp_trend_plot <- function(
         showlegend = FALSE,
         hovertemplate = paste0(param_label, " lower: %{y:.2f}<extra></extra>")
       )
+    }
     
-    plots[[i]] <- fig %>% plotly::layout(yaxis = list(title = paste0("<b>", param_label, "</b>")))
+    plots[[i]] <- plotly::layout(fig, yaxis = list(title = paste0("<b>", param_label, "</b>")))
   }
   
   final_fig <- plotly::subplot(
@@ -1872,16 +1871,19 @@ wisp_trend_plot <- function(
     nrows = length(plots),
     shareX = TRUE,
     titleY = TRUE
-  ) %>%
-    plotly::layout(
-      title = ifelse(is.null(title),
-                     paste("Time trend:", paste(units_mapping[params_unique], collapse = ", ")),
-                     title),
-      xaxis = list(title = "<b>Time</b>")
-    )
+  )
+  
+  final_fig <- plotly::layout(
+    final_fig,
+    title = ifelse(is.null(title),
+                   paste("Time trend:", paste(units_mapping[params_unique], collapse = ", ")),
+                   title),
+    xaxis = list(title = "<b>Time</b>")
+  )
   
   return(final_fig)
 }
+
 
 
 
