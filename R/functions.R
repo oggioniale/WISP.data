@@ -100,7 +100,7 @@ wisp_get_reflectance_data <- function(
         REQUEST = "GetData",
         INSTRUMENT = station,
         TIME = paste(time_from, time_to, sep = ","),
-        INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,"
+        INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
       ) |> 
       httr2::req_auth_basic(userid, pwd) |>
       httr2::req_perform(verbosity = 3)
@@ -120,7 +120,7 @@ wisp_get_reflectance_data <- function(
           VERSION = version,
           REQUEST = "GetData",
           TIME = paste(time_from, time_to, sep = ","),
-          INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance,"
+          INCLUDE = "measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance"
         ) |> 
         httr2::req_auth_basic(userid, pwd) |>
         httr2::req_perform(verbosity = 3)
@@ -1650,18 +1650,247 @@ wisp_plot_reflectance_data <- function(
   fig
 }
 
-# #' Creates a plot of the trend of one or more parameters
-# #' @description `r lifecycle::badge("experimental")`
-# #' This function creates a graph related to the time trend of one or
-# #' more water quality parameters associated with spectral signatures filtered
-# #' and corrected by sunglint
-# #' @param sr_data A `tibble` from wisp_sr_reflectance_data() function.
-# #' @return
-# #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-# #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-# #' @importFrom
-# #' @export
-# #' @examples
-# #' # example code
-# #' \dontrun{
-# #' ### wisp_trend_plot
+#' Creates a plot of the trend of one or more water quality parameters
+#' @description `r lifecycle::badge("experimental")`
+#' This function creates an interactive graph of the time trend of one or
+#' more water quality parameters associated with spectral signatures 
+#' @param data A `tibble` containing water quality parameters and spectral
+#' signatures. 
+#' @param params A character vector specifying which parameters to plot.
+#' Default is `c("TSM", "Chla")`.
+#' @param datetime_col A `character`. Name of the column with datetime 
+#' values. Default is `"measurement.date"`.
+#' @param instrument_col A `character`. Name of the column with instrument 
+#' identifiers. Default is `"instrument.name"`.
+#' @param aggregate A `character` specifying whether to aggregate data.
+#' Options are `"none"` (plot all available values), `"daily_mean"` (plot the daily mean) 
+#' or `"daily_median"` (plot the daily median). Default is `"none"`.
+#' @param smooth A `logical`. If `TRUE`, adds loess smoothing lines to the plot. Default is `FALSE`.
+#' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. Default is `TRUE`.
+#' @param colors A `character` vector of colors for each parameter. Default uses `viridis` palette.
+#' @param title A `character`. Optional title for the plot. Default is `NULL`.
+#' @return An interactive `plotly` object showing the time trend of the selected parameters,
+#' with optional ribbons for standard deviation.
+#' @author Alessandro Oggioni, PhD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, PhD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom plotly plot_ly add_lines add_ribbons subplot layout
+#' @importFrom dplyr group_by summarise
+#' @importFrom lubridate as_datetime
+#' @importFrom viridis viridis
+#' @importFrom scales alpha
+#' @export
+#' @examples
+#' # Example usage
+#' \dontrun{
+#' fig_trend <- wisp_trend_plot(
+#'   data = reflect_data_sr,
+#'   params = c("TSM", "Chla", "Novoa_SPM"),
+#'   aggregate = "daily_mean",
+#' )
+#' fig_trend
+#' }
+wisp_trend_plot <- function(
+    data,
+    params = c("TSM", "Chla"),
+    datetime_col = "measurement.date",
+    instrument_col = "instrument.name",
+    aggregate = c("none", "daily_mean", "daily_median"),
+    na.rm = TRUE,
+    colors = NULL,
+    title = NULL
+) {
+  
+  aggregate <- match.arg(aggregate)
+  
+  if (is.null(data) || nrow(data) == 0) stop("Il dataset 'data' è vuoto o NULL.")
+  if (!datetime_col %in% names(data)) stop("Colonna datetime non trovata: ", datetime_col)
+  
+  mapping <- list(
+    TSM           = "waterquality.tsm",
+    Chla          = "waterquality.chla",
+    Kd            = "waterquality.kd",
+    cpc           = "waterquality.cpc",
+    scatt         = "scattering.peak",
+    ratio         = "band.ratio",
+    Novoa_SPM     = "Novoa.SPM",
+    Novoa_TUR     = "Novoa.TUR",
+    Jiang_TSS     = "Jiang.TSS",
+    Gons_CHL      = "Gons.CHL",
+    Gons740_CHL   = "Gons740.CHL",
+    NDCI          = "NDCI",
+    Mishra_CHL    = "Mishra.CHL"
+  )
+  
+  units_mapping <- c(
+    TSM           = "TSM [g/m3]",
+    Chla          = "Chla [mg/m3]",
+    Kd            = "Kd [1/m]",
+    cpc           = "cpc [mg/m3]",
+    scatt         = "scatt [1/sr]",
+    ratio         = "ratio",
+    Novoa_SPM     = "Novoa_SPM [g/m3]",
+    Novoa_TUR     = "Novoa_TUR [NTU]",
+    Jiang_TSS     = "Jiang_TSS [g/m3]",
+    Gons_CHL      = "Gons_CHL [mg/m3]",
+    Gons740_CHL   = "Gons740_CHL [mg/m3]",
+    NDCI          = "NDCI",
+    Mishra_CHL    = "Mishra_CHL [mg/m3]"
+  )
+  
+  requested <- unique(params)
+  valid <- requested[requested %in% names(mapping)]
+  if (length(valid) == 0) stop("Nessun parametro valido richiesto.")
+  
+  cols <- unlist(mapping[valid])
+  present <- cols %in% names(data)
+  if (!all(present)) warning("Alcuni parametri non presenti nel dataset: ",
+                             paste(valid[!present], collapse = ", "))
+  
+  cols <- cols[present]
+  valid <- valid[present]
+  
+  drop_units_safe <- function(x) {
+    if (inherits(x, "units")) as.numeric(units::drop_units(x)) else as.numeric(x)
+  }
+  
+  datetime <- lubridate::as_datetime(data[[datetime_col]])
+  instrument <- if (instrument_col %in% names(data)) as.character(data[[instrument_col]]) else rep(NA_character_, nrow(data))
+  
+  long_df <- data.frame(stringsAsFactors = FALSE)
+  for (i in seq_along(valid)) {
+    param <- valid[i]
+    col <- cols[i]
+    values <- drop_units_safe(data[[col]])
+    tmp <- data.frame(
+      datetime = datetime,
+      instrument = instrument,
+      param = param,
+      value = values,
+      stringsAsFactors = FALSE
+    )
+    long_df <- rbind(long_df, tmp)
+  }
+  
+  long_df <- long_df[!is.na(long_df$value), ]
+  if (nrow(long_df) == 0) stop("Nessun valore valido dopo filtraggio NA.")
+  
+  # Aggregazione
+  if (aggregate != "none") {
+    long_df$date <- as.Date(long_df$datetime)
+    long_df <- dplyr::group_by(long_df, param, date) %>%
+      dplyr::summarise(
+        mean_value = mean(value, na.rm = na.rm),
+        sd_value   = sd(value, na.rm = na.rm),
+        .groups = "drop"
+      )
+    long_df$datetime <- as.POSIXct(long_df$date)
+  } else {
+    long_df$mean_value <- long_df$value
+    long_df$sd_value <- NA
+  }
+  
+  params_unique <- unique(long_df$param)
+  if (is.null(colors)) colors <- viridis::viridis(length(params_unique))
+  
+  plots <- list()
+  for (i in seq_along(params_unique)) {
+    p <- params_unique[i]
+    sub <- long_df[long_df$param == p, , drop = FALSE]
+    param_label <- units_mapping[p]
+    
+    # Tooltip linea centrale
+    if (aggregate == "none") {
+      hover_text <- paste0(
+        "Date: ", format(sub$datetime, "%Y-%m-%d"), "<br>",
+        "Time: ", format(sub$datetime, "%H:%M:%S"), "<br>",
+        param_label, ": ", round(sub$mean_value, 2),
+        ifelse(!all(is.na(sub$sd_value)), paste0(" ± ", round(sub$sd_value, 2)), "")
+      )
+    } else {
+      hover_text <- paste0(
+        "Date: ", format(sub$datetime, "%Y-%m-%d"), "<br>",
+        param_label, ": ", round(sub$mean_value, 2),
+        ifelse(!all(is.na(sub$sd_value)), paste0(" ± ", round(sub$sd_value, 2)), "")
+      )
+    }
+    
+    fig <- plotly::plot_ly(
+      sub,
+      x = ~datetime,
+      y = ~mean_value,
+      type = "scatter",
+      mode = "lines+markers",
+      name = param_label,
+      text = hover_text,
+      hoverinfo = "text",
+      line = list(width = 2),
+      marker = list(size = 6),
+      color = I(colors[i])
+    )
+    
+    # Ribbon SD
+    # Ribbon colore
+    fig <- fig %>%
+      plotly::add_ribbons(
+        ymin = ~mean_value - sd_value,
+        ymax = ~mean_value + sd_value,
+        fillcolor = scales::alpha(colors[i], 0.15),
+        line = list(color = 'transparent'),
+        showlegend = FALSE,
+        hoverinfo = "skip"  # disattiva tooltip sul ribbon
+      )
+    
+    # Punto upper (mean + SD)
+    fig <- fig %>%
+      plotly::add_trace(
+        x = ~datetime,
+        y = ~mean_value + sd_value,
+        type = "scatter",
+        mode = "markers",
+        marker = list(size = 6, color = 'transparent'),
+        showlegend = FALSE,
+        hovertemplate = paste0(param_label, " upper: %{y:.2f}<extra></extra>")
+      )
+    
+    # Punto lower (mean - SD)
+    fig <- fig %>%
+      plotly::add_trace(
+        x = ~datetime,
+        y = ~mean_value - sd_value,
+        type = "scatter",
+        mode = "markers",
+        marker = list(size = 6, color = 'transparent'),
+        showlegend = FALSE,
+        hovertemplate = paste0(param_label, " lower: %{y:.2f}<extra></extra>")
+      )
+    
+    plots[[i]] <- fig %>% plotly::layout(yaxis = list(title = paste0("<b>", param_label, "</b>")))
+  }
+  
+  final_fig <- plotly::subplot(
+    plots,
+    nrows = length(plots),
+    shareX = TRUE,
+    titleY = TRUE
+  ) %>%
+    plotly::layout(
+      title = ifelse(is.null(title),
+                     paste("Time trend:", paste(units_mapping[params_unique], collapse = ", ")),
+                     title),
+      xaxis = list(title = "<b>Time</b>")
+    )
+  
+  return(final_fig)
+}
+
+
+
+
+
+
+
+
+
+
+
+
