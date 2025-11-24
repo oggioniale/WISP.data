@@ -997,7 +997,6 @@ wisp_sr_reflectance_data <- function(
   return(corrected_data)
 }
 
-
 #' @noRd
 #' @keywords internal
 ### wisp_calc_scatt
@@ -1466,7 +1465,6 @@ wisp_calc_Mishra_CHL <- function(data) {
   return(data)
 }
 
-
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("experimental")`
 #' This function return a plotly of each spectral signature measured by a
@@ -1648,13 +1646,16 @@ wisp_plot_reflectance_data <- function(
 #'   ribbon for the Standard Deviation (SD) (requires data for multiple days).
 #'   \item \code{"daily_median"}: Calculates and plots the daily median 
 #'   (requires data for multiple days).} Default is `"none"`.
-#' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. Default is `TRUE`.
-#' @param colors A `character` vector of colors for each parameter. Default uses `viridis` palette.
+#' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. 
+#' Default is `TRUE`.
+#' @param colors A `character` vector of colors for each parameter. Default uses 
+#' `viridis` palette.
 #' @param title A `character`. Optional title for the plot. Default is `NULL`.
 #' @param return_long_df A `logical`. If \code{TRUE}, the function returns the 
-#' long format dataframe used for plotting instead of the \code{plotly} object. Default is \code{FALSE}.
-#' @return An interactive `plotly` object showing the temporal trend of the selected parameters,
-#' with optional ribbons for standard deviation.
+#' long format dataframe used for plotting instead of the \code{plotly} object. 
+#' Default is \code{FALSE}.
+#' @return An interactive `plotly` object showing the temporal trend of the 
+#' selected parameters, with optional ribbons for standard deviation.
 #' @author Alessandro Oggioni, PhD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, PhD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom plotly ggplotly
