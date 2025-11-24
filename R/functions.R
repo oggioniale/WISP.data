@@ -134,12 +134,12 @@ wisp_get_reflectance_data <- function(
       
       if (df_no_station$measurement.id[2] == "-1") {
         reflectance_data_tbl <- NULL
-        message("\n----\nThank you for your request, but the instrument does not acquire data on this date.\n----\n")
+        message("\n----\n⚠️ Thank you for your request, but the instrument does not acquire data on this date.\n----\n")
       } else {
         reflectance_data_tbl <- NULL
         new_station <- df_no_station$instrument.name[2]
         message(paste0(
-          "\n----\nThank you for your request. Data for the requested station is not available, but we know there is data for the same date from this station: ",
+          "\n----\n⚠️ Thank you for your request. Data for the requested station is not available, but we know there is data for the same date from this station: ",
           new_station,
           ".\n",
           "Maybe you're interested in these?\n\nResubmit the request by entering this value ",
@@ -189,7 +189,7 @@ wisp_get_reflectance_data <- function(
     }
   } else {
     reflectance_data_tbl <- NULL
-    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use function: wisp_get_reflectance_multi_data()\n----\n")
+    message("\n----\n⚠️ Please check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use function: wisp_get_reflectance_multi_data()\n----\n")
   }
   # output
   return(reflectance_data_tbl)
@@ -271,7 +271,7 @@ wisp_get_reflectance_multi_data <- function(
       )
     }, error = function(e) {
       message(sprintf(
-        "\n----\nSkipping %s: %s\n----\n",
+        "\n----\n⚠️ Skipping %s: %s\n----\n",
         as.character(date),
         e$message
       ))
@@ -417,7 +417,7 @@ wisp_qc_reflectance_data <- function(
     closest_idx <- which.min(abs(band_wavelengths - 350))
     blue_ref_band <- candidate_bands[closest_idx]
   } else {
-    stop("No band between 350 and 450 nm available for QC4.")
+    stop("⚠️ No band between 350 and 450 nm available for QC4.")
   }
   removed_QC4 <- data[which(
     (data[[blue_ref_band]] > pmax(data$nm_555,
@@ -646,7 +646,7 @@ wisp_qc_reflectance_data <- function(
   message("----\n")
   
   if (final_nrow == 0) {
-    message("Thank you for your request, but the QC operation removed all the spectral signatures available on this date.")
+    message("⚠️ Thank you for your request, but the QC operation removed all the spectral signatures available on this date.")
     return(NULL)
   }
   
@@ -825,7 +825,7 @@ wisp_sr_reflectance_data <- function(
     out_dir      = "outputs"
 ) {
   if (!"QC" %in% names(qc_data)) {
-    message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
+    message("\n----\n⚠️ This function is not executable on this dataset. Try after QC.\n----\n")
     return(invisible(NULL))
   }
   
@@ -1042,7 +1042,7 @@ wisp_calc_Novoa_SPM <- function(data) {
     } else if (wave == 865) {
       return(list(A = 2971.93, C = 0.2115))
     } else {
-      stop("Wavelength not supported")
+      stop("⚠️ Wavelength not supported")
     }
   }
   
@@ -1141,7 +1141,7 @@ wisp_calc_Novoa_TUR <- function(data) {
     } else if (wave == 865) {
       return(list(A = 2109.35, C = 0.2115))
     } else {
-      stop("Wavelength not supported")
+      stop("⚠️ Wavelength not supported")
     }
   }
   
@@ -1311,7 +1311,7 @@ wisp_calc_Gons_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
+    warning("⚠️ wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
     data$Gons.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1362,7 +1362,7 @@ wisp_calc_Gons740_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
+    warning("⚠️ wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
     data$Gons740.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1412,7 +1412,7 @@ wisp_calc_NDCI <- function(data) {
   
   # If bands are missing, return NA
   if (length(cols_670) == 0 || length(cols_705) == 0) {
-    warning("wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
+    warning("⚠️ wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
     data$NDCI <- units::set_units(rep(NA_real_, nrow(data)), "1")
     return(data)
   }
@@ -1442,7 +1442,7 @@ wisp_calc_Mishra_CHL <- function(data) {
   
   # Check if NDCI column is present
   if (!"NDCI" %in% names(data)) {
-    stop("Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
+    stop("⚠️ Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
   }
   
   # Coefficients derived from Mishra and Mishra (2012)
@@ -1499,14 +1499,15 @@ wisp_calc_Mishra_CHL <- function(data) {
 #' the `NDCI`values. Default is `FALSE`.
 #' @param legend_mishra_CHL A `logical`. If `TRUE`, the plot legend includes 
 #' the `Mishra_CHL`values. Default is `FALSE`.
-#' @return description A plotly object with the spectral signatures of the
+#' @return an interactive plot showing the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr select mutate
+#' @importFrom dplyr all_of
 #' @importFrom tidyr pivot_longer
 #' @importFrom viridis viridis
-#' @importFrom plotly plot_ly layout
+#' @importFrom ggplot2 ggplot aes geom_line scale_color_manual labs theme_minimal
+#' @importFrom plotly ggplotly
 #' @export
 #' @examples
 #' # example code
@@ -1549,7 +1550,7 @@ wisp_plot_reflectance_data <- function(
     legend_mishra_CHL  = FALSE
 ) {
   
-  # Converti colonne con 'units' in numerico
+  # Convert columns with ‘units’ to numeric
   units_cols <- names(data)[sapply(data, function(x) inherits(x, "units"))]
   if(length(units_cols) > 0){
     for(col in units_cols){
@@ -1557,7 +1558,7 @@ wisp_plot_reflectance_data <- function(
     }
   }
   
-  # Creazione della colonna products_info
+  # Creation of the 'products_info' column
   data$products_info <- mapply(
     function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
       paste(
@@ -1594,11 +1595,11 @@ wisp_plot_reflectance_data <- function(
     mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA
   )
   
-  # Selezione delle colonne nm_ e conversione in formato long
+  # Selecting 'nm_ columns' and converting them to 'long' format
   nm_cols <- grep("^nm_", names(data), value = TRUE)
   data_2 <- tidyr::pivot_longer(
     data[, c("measurement.date", "products_info", nm_cols)],
-    cols = dplyr::all_of(nm_cols),   # <<< Qui la modifica per rimuovere il warning
+    cols = dplyr::all_of(nm_cols),   
     names_to = "wavelength",
     values_to = "Rrs"
   )
@@ -1609,11 +1610,11 @@ wisp_plot_reflectance_data <- function(
     "<br>", data_2$products_info
   )
   
-  # Palette colori
+  # Color palette
   num_colors <- length(unique(data_2$legend_info))
   color_palette <- viridis::viridis(num_colors)
   
-  # Creazione plot ggplot
+  # Creating the graph with 'ggplot'
   p <- ggplot2::ggplot(data_2, ggplot2::aes(x=wavelength, y=Rrs, color=legend_info, text=legend_info)) +
     ggplot2::geom_line() +
     ggplot2::scale_color_manual(values=color_palette) +
@@ -1621,18 +1622,13 @@ wisp_plot_reflectance_data <- function(
       title = paste0("Acquired by: ", data$instrument.name[1]),
       x = "Wavelength [nm]",
       y = "Rrs [1/sr]",
-      color = "Time of acquisition"
+      color = "<b>Time of acquisition<b>"
     ) +
     ggplot2::theme_minimal()
-  
-  # Rende interattivo con tooltip
   plotly::ggplotly(p, tooltip = "text")
 }
 
-
-
-
-#' Creates a plot of the trend of one or more water quality parameters
+#' Creates a temporal trend plot of one or more water quality parameters
 #' @description `r lifecycle::badge("experimental")`
 #' This function creates an interactive graph of the time trend of one or
 #' more water quality parameters associated with spectral signatures 
@@ -1645,21 +1641,28 @@ wisp_plot_reflectance_data <- function(
 #' @param instrument_col A `character`. Name of the column with instrument 
 #' identifiers. Default is `"instrument.name"`.
 #' @param aggregate A `character` specifying whether to aggregate data.
-#' Options are `"none"` (plot all available values), `"daily_mean"` (plot the daily mean) 
-#' or `"daily_median"` (plot the daily median). Default is `"none"`.
-#' @param smooth A `logical`. If `TRUE`, adds loess smoothing lines to the plot. Default is `FALSE`.
+#' Options are:
+#' \itemize{
+#'   \item \code{"none"}: Plots all available values (requires data for only one day).
+#'   \item \code{"daily_mean"}: Calculates and plots the daily average, including a 
+#'   ribbon for the Standard Deviation (SD) (requires data for multiple days).
+#'   \item \code{"daily_median"}: Calculates and plots the daily median 
+#'   (requires data for multiple days).} Default is `"none"`.
 #' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. Default is `TRUE`.
 #' @param colors A `character` vector of colors for each parameter. Default uses `viridis` palette.
 #' @param title A `character`. Optional title for the plot. Default is `NULL`.
-#' @return An interactive `plotly` object showing the time trend of the selected parameters,
+#' @param return_long_df A `logical`. If \code{TRUE}, the function returns the 
+#' long format dataframe used for plotting instead of the \code{plotly} object. Default is \code{FALSE}.
+#' @return An interactive `plotly` object showing the temporal trend of the selected parameters,
 #' with optional ribbons for standard deviation.
 #' @author Alessandro Oggioni, PhD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, PhD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom plotly plot_ly add_lines add_ribbons subplot layout
-#' @importFrom dplyr group_by summarise
+#' @importFrom plotly ggplotly
+#' @importFrom dplyr group_by reframe
 #' @importFrom lubridate as_datetime
 #' @importFrom viridis viridis
-#' @importFrom scales alpha
+#' @importFrom stats sd setNames
+#' @importFrom units drop_units
 #' @export
 #' @examples
 #' # Example usage
@@ -1679,54 +1682,69 @@ wisp_trend_plot <- function(
     aggregate = c("none", "daily_mean", "daily_median"),
     na.rm = TRUE,
     colors = NULL,
-    title = NULL
+    title = NULL,
+    return_long_df = FALSE
 ) {
   aggregate <- match.arg(aggregate)
   
-  if (is.null(data) || nrow(data) == 0) stop("Il dataset 'data' è vuoto o NULL.")
-  if (!datetime_col %in% names(data)) stop("Colonna datetime non trovata: ", datetime_col)
+  if (is.null(data) || nrow(data) == 0) stop("⚠️ The ‘data’ dataset is empty or NULL.")
+  if (!datetime_col %in% names(data)) stop("⚠️ Datetime column not found: ", datetime_col)
   
   mapping <- list(
-    TSM           = "waterquality.tsm",
-    Chla          = "waterquality.chla",
-    Kd            = "waterquality.kd",
-    cpc           = "waterquality.cpc",
-    scatt         = "scattering.peak",
-    ratio         = "band.ratio",
-    Novoa_SPM     = "Novoa.SPM",
-    Novoa_TUR     = "Novoa.TUR",
-    Jiang_TSS     = "Jiang.TSS",
-    Gons_CHL      = "Gons.CHL",
-    Gons740_CHL   = "Gons740.CHL",
-    NDCI          = "NDCI",
-    Mishra_CHL    = "Mishra.CHL"
+    TSM         = "waterquality.tsm",
+    Chla        = "waterquality.chla",
+    Kd          = "waterquality.kd",
+    cpc         = "waterquality.cpc",
+    scatt       = "scattering.peak",
+    ratio       = "band.ratio",
+    Novoa_SPM   = "Novoa.SPM",
+    Novoa_TUR   = "Novoa.TUR",
+    Jiang_TSS   = "Jiang.TSS",
+    Gons_CHL    = "Gons.CHL",
+    Gons740_CHL = "Gons740.CHL",
+    NDCI        = "NDCI",
+    Mishra_CHL  = "Mishra.CHL"
+  )
+  
+  # 1. Available parameters
+  available_params <- names(mapping)
+  message(
+    "----------------------------------------------------------------------\n",
+    "✅ Parameters available for ‘params’: ",
+    paste(available_params, collapse = ", ")
+  )
+  
+  # Available aggregation methods
+  message(
+    "✅ Aggregation methods ('aggregate'):\n",
+    " - 'none': Plot all available values (requires only one day).\n",
+    " - 'daily_mean': Plot the daily average and standard deviation (requires multiple days).\n",
+    " - 'daily_median': Plot the daily median (requires multiple days)\n",
+    "----------------------------------------------------------------------"
   )
   
   units_mapping <- c(
-    TSM           = "TSM [g/m3]",
-    Chla          = "Chla [mg/m3]",
-    Kd            = "Kd [1/m]",
-    cpc           = "cpc [mg/m3]",
-    scatt         = "scatt [1/sr]",
-    ratio         = "ratio",
-    Novoa_SPM     = "Novoa_SPM [g/m3]",
-    Novoa_TUR     = "Novoa_TUR [NTU]",
-    Jiang_TSS     = "Jiang_TSS [g/m3]",
-    Gons_CHL      = "Gons_CHL [mg/m3]",
-    Gons740_CHL   = "Gons740_CHL [mg/m3]",
-    NDCI          = "NDCI",
-    Mishra_CHL    = "Mishra_CHL [mg/m3]"
+    TSM         = "TSM [g/m3]",
+    Chla        = "Chla [mg/m3]",
+    Kd          = "Kd [1/m]",
+    cpc         = "cpc [mg/m3]",
+    scatt       = "scatt [1/sr]",
+    ratio       = "ratio",
+    Novoa_SPM   = "Novoa_SPM [g/m3]",
+    Novoa_TUR   = "Novoa_TUR [NTU]",
+    Jiang_TSS   = "Jiang.TSS",
+    Gons_CHL    = "Gons.CHL [mg/m3]",
+    Gons740_CHL = "Gons740.CHL [mg/m3]",
+    NDCI        = "NDCI",
+    Mishra_CHL  = "Mishra_CHL [mg/m3]"
   )
   
   requested <- unique(params)
   valid <- requested[requested %in% names(mapping)]
-  if (length(valid) == 0) stop("Nessun parametro valido richiesto.")
-  
+  if (length(valid) == 0) stop("⚠️ No valid parameters required.")
   cols <- unlist(mapping[valid])
   present <- cols %in% names(data)
-  if (!all(present)) warning("Alcuni parametri non presenti nel dataset: ",
-                             paste(valid[!present], collapse = ", "))
-  
+  if (!all(present)) warning("⚠️ Some parameters not present in the dataset: ", paste(valid[!present], collapse = ", "))
   cols <- cols[present]
   valid <- valid[present]
   
@@ -1735,8 +1753,21 @@ wisp_trend_plot <- function(
   }
   
   datetime <- lubridate::as_datetime(data[[datetime_col]])
+  dates_vec <- as.Date(datetime)
+  unique_dates <- unique(dates_vec[!is.na(dates_vec)])
+  n_unique_dates <- length(unique_dates)
+  
+  if (aggregate == "none" && n_unique_dates > 1) {
+    stop("⚠️ Please note: you are requesting multiple days. Try changing the 'aggregate' or requesting a single day.")
+  }
+  if (aggregate %in% c("daily_mean", "daily_median") && n_unique_dates == 1) {
+    stop("⚠️ Please note: you are requesting only one day. Try changing the 'aggregate' or requesting multiple days.")
+  }
+  
+  requested_day_label <- if (aggregate == "none" && n_unique_dates == 1) format(unique_dates, "%Y-%m-%d") else NULL
   instrument <- if (instrument_col %in% names(data)) as.character(data[[instrument_col]]) else rep(NA_character_, nrow(data))
   
+  # Creating long_df with tooltip
   long_df <- data.frame(stringsAsFactors = FALSE)
   for (i in seq_along(valid)) {
     param <- valid[i]
@@ -1749,132 +1780,138 @@ wisp_trend_plot <- function(
       value = values,
       stringsAsFactors = FALSE
     )
+    tmp$main_text <- paste0(
+      "Date: ", format(tmp$datetime, "%Y-%m-%d"),
+      "<br>Time: ", format(tmp$datetime, "%H:%M:%S"),
+      "<br>", units_mapping[param], ": ", format(round(tmp$value, 2), nsmall=2)
+    )
     long_df <- rbind(long_df, tmp)
   }
   
   long_df <- long_df[!is.na(long_df$value), ]
-  if (nrow(long_df) == 0) stop("Nessun valore valido dopo filtraggio NA.")
+  if (nrow(long_df) == 0) stop("⚠️ No valid value after filtering NA.")
   
-  # Aggregazione
+  # Aggregation if requested
   if (aggregate != "none") {
     long_df$date <- as.Date(long_df$datetime)
     grouped <- dplyr::group_by(long_df, param, date)
-    long_df <- dplyr::summarise(
-      grouped,
-      mean_value = mean(value, na.rm = na.rm),
-      sd_value   = sd(value, na.rm = na.rm),
-      .groups = "drop"
-    )
+    
+    if (aggregate == "daily_mean") {
+      long_df <- dplyr::reframe(
+        grouped,
+        mean_value = mean(value, na.rm = na.rm),
+        sd_value   = stats::sd(value, na.rm = na.rm),
+        main_text  = paste0(
+          "Date: ", date,
+          "<br>Mean: ", round(mean(value, na.rm = na.rm), 2),
+          " ± SD: ", round(stats::sd(value, na.rm = na.rm), 2)
+        )
+      )
+    } else if (aggregate == "daily_median") {
+      long_df <- dplyr::reframe(
+        grouped,
+        mean_value = stats::median(value, na.rm = na.rm),
+        sd_value   = NA_real_,
+        main_text  = paste0(
+          "Date: ", date,
+          "<br>Median: ", round(stats::median(value, na.rm = na.rm), 2)
+        )
+      )
+    }
+    
     long_df$datetime <- as.POSIXct(long_df$date)
   } else {
     long_df$mean_value <- long_df$value
     long_df$sd_value <- NA_real_
   }
   
-  params_unique <- unique(long_df$param)
-  if (is.null(colors)) colors <- viridis::viridis(length(params_unique))
+  if (return_long_df) return(long_df)
   
-  plots <- list()
-  for (i in seq_along(params_unique)) {
-    p <- params_unique[i]
-    sub <- long_df[long_df$param == p, , drop = FALSE]
-    param_label <- units_mapping[p]
-    
-    # Tooltip linea centrale
-    if (aggregate == "none") {
-      hover_text <- paste0(
-        "Date: ", format(sub$datetime, "%Y-%m-%d"), "<br>",
-        "Time: ", format(sub$datetime, "%H:%M:%S"), "<br>",
-        param_label, ": ", round(sub$mean_value, 2),
-        ifelse(!all(is.na(sub$sd_value)), paste0(" ± ", round(sub$sd_value, 2)), "")
-      )
-    } else {
-      hover_text <- paste0(
-        "Date: ", format(sub$datetime, "%Y-%m-%d"), "<br>",
-        param_label, ": ", round(sub$mean_value, 2),
-        ifelse(!all(is.na(sub$sd_value)), paste0(" ± ", round(sub$sd_value, 2)), "")
-      )
-    }
-    
-    fig <- plotly::plot_ly(
-      data = sub,
-      x = ~datetime,
-      y = ~mean_value,
-      type = "scatter",
-      mode = "lines+markers",
-      name = param_label,
-      text = hover_text,
-      hoverinfo = "text",
-      line = list(width = 2),
-      marker = list(size = 6),
-      color = I(colors[i])
-    )
-    
-    # Aggiungi ribbon e punti upper/lower solo se sd_value non è tutto NA
-    if (!all(is.na(sub$sd_value))) {
-      fig <- plotly::add_ribbons(
-        fig,
-        ymin = ~mean_value - sd_value,
-        ymax = ~mean_value + sd_value,
-        fillcolor = scales::alpha(colors[i], 0.15),
-        line = list(color = 'transparent'),
-        showlegend = FALSE,
-        hoverinfo = "skip"
-      )
-      
-      fig <- plotly::add_trace(
-        fig,
-        x = ~datetime,
-        y = ~mean_value + sd_value,
-        type = "scatter",
-        mode = "markers",
-        marker = list(size = 6, color = 'transparent'),
-        showlegend = FALSE,
-        hovertemplate = paste0(param_label, " upper: %{y:.2f}<extra></extra>")
-      )
-      
-      fig <- plotly::add_trace(
-        fig,
-        x = ~datetime,
-        y = ~mean_value - sd_value,
-        type = "scatter",
-        mode = "markers",
-        marker = list(size = 6, color = 'transparent'),
-        showlegend = FALSE,
-        hovertemplate = paste0(param_label, " lower: %{y:.2f}<extra></extra>")
-      )
-    }
-    
-    plots[[i]] <- plotly::layout(fig, yaxis = list(title = paste0("<b>", param_label, "</b>")))
+  # Colors and factor params
+  params_unique <- as.character(unique(long_df$param))
+  long_df$param <- factor(long_df$param, levels=params_unique)
+  if (is.null(colors)) colors <- viridis::viridis(length(params_unique))
+  colors_map <- stats::setNames(colors[seq_along(params_unique)], params_unique)
+  legend_labels <- units_mapping[levels(long_df$param)]
+  
+  # X label title (single day)
+  x_label <- if (aggregate=="none" && !is.null(requested_day_label)) paste0("<b>", requested_day_label, "</b>") else "<b>Time</b>"
+  
+  # Plot
+  p <- ggplot2::ggplot(long_df, ggplot2::aes(
+    x = datetime,
+    y = mean_value,
+    color = param,
+    group = param,
+    text = main_text
+  )) +
+    ggplot2::geom_line(size=0.8) +
+    ggplot2::geom_point(size=2) +
+    ggplot2::scale_color_manual(values=colors_map, labels=legend_labels) +
+    ggplot2::facet_wrap(~ param, ncol=1, scales="free_y", labeller=ggplot2::as_labeller(units_mapping)) +
+    ggplot2::labs(x = x_label, y=NULL, color=NULL, title = ifelse(is.null(title), "<b>Time trend</b>", title)) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(strip.text = ggplot2::element_text(face="bold"),
+                   plot.title = ggplot2::element_text(hjust=0.5),
+                   legend.position="top")
+  
+  # X label values (multiple days)
+  if (aggregate %in% c("daily_mean", "daily_median")) {
+    p <- p + ggplot2::scale_x_datetime(date_breaks = "1 day", date_labels = "%b %d")
   }
   
-  final_fig <- plotly::subplot(
-    plots,
-    nrows = length(plots),
-    shareX = TRUE,
-    titleY = TRUE
-  )
+  # Ribbon SD and secondary markers 
+  is_daily_mean <- aggregate == "daily_mean"
   
-  final_fig <- plotly::layout(
-    final_fig,
-    title = ifelse(is.null(title),
-                   paste("Time trend:", paste(units_mapping[params_unique], collapse = ", ")),
-                   title),
-    xaxis = list(title = "<b>Time</b>")
-  )
+  if (is_daily_mean && any(!is.na(long_df$sd_value))) {
+    ribbon_df <- long_df[!is.na(long_df$sd_value), , drop = FALSE]
+    ribbon_df$fill_col <- colors_map[as.character(ribbon_df$param)]
+    
+    p <- p + ggplot2::geom_ribbon(
+      data = ribbon_df,
+      ggplot2::aes(
+        x = datetime,
+        ymin = mean_value - sd_value,
+        ymax = mean_value + sd_value,
+        group = param
+      ),
+      fill = ribbon_df$fill_col,
+      alpha = 0.2,
+      inherit.aes = FALSE,
+      show.legend = FALSE
+    )
+    
+    has_sd_idx <- !is.na(long_df$sd_value)
+    upper_df <- long_df[has_sd_idx, , drop = FALSE]
+    lower_df <- long_df[has_sd_idx, , drop = FALSE]
+    
+    upper_df$y <- upper_df$mean_value + upper_df$sd_value
+    upper_df$text_sd <- paste0(upper_df$main_text, "<br>Upper SD limit: ", round(upper_df$y, 2))
+    
+    lower_df$y <- lower_df$mean_value - lower_df$sd_value
+    lower_df$text_sd <- paste0(lower_df$main_text, "<br>Lower SD limit: ", round(lower_df$y, 2))
+    
+    # Warning suppression
+    p <- p +
+      suppressWarnings(ggplot2::geom_point(
+        data = upper_df,
+        ggplot2::aes(x = datetime, y = y, text = text_sd, group = param, color = param),
+        inherit.aes = FALSE,
+        size = 1,
+        alpha = 0.01, 
+        show.legend = FALSE
+      )) +
+      suppressWarnings(ggplot2::geom_point(
+        data = lower_df,
+        ggplot2::aes(x = datetime, y = y, text = text_sd, group = param, color = param),
+        inherit.aes = FALSE,
+        size = 1,
+        alpha = 0.01, 
+        show.legend = FALSE
+      ))
+  }
   
-  return(final_fig)
+  # Render plotly
+  plotly::ggplotly(p, tooltip="text")
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
