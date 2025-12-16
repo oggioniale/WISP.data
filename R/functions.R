@@ -1711,16 +1711,16 @@ wisp_trend_plot <- function(
   available_params <- names(mapping)
   message(
     "----------------------------------------------------------------------\n",
-    "✅ Parameters available for ‘params’: ",
+    "Parameters available for `params`: ",
     paste(available_params, collapse = ", ")
   )
   
   # Available aggregation methods
   message(
-    "✅ Aggregation methods ('aggregate'):\n",
-    " - 'none': Plot all available values (requires only one day).\n",
-    " - 'daily_mean': Plot the daily average and standard deviation (requires multiple days).\n",
-    " - 'daily_median': Plot the daily median (requires multiple days)\n",
+    "Aggregation methods (`aggregate`):\n",
+    " - 'none': Plot all available values (requires only one day in `wisp_get_reflectance_data()`).\n",
+    " - 'daily_mean': Plot the daily average and standard deviation (requires multiple days in `wisp_get_reflectance_data()`).\n",
+    " - 'daily_median': Plot the daily median (requires multiple days in `wisp_get_reflectance_data()`)\n",
     "----------------------------------------------------------------------"
   )
   
@@ -1733,7 +1733,7 @@ wisp_trend_plot <- function(
     ratio       = "ratio",
     Novoa_SPM   = "Novoa_SPM [g/m3]",
     Novoa_TUR   = "Novoa_TUR [NTU]",
-    Jiang_TSS   = "Jiang.TSS",
+    Jiang_TSS   = "Jiang.TSS [g/m3]",
     Gons_CHL    = "Gons.CHL [mg/m3]",
     Gons740_CHL = "Gons740.CHL [mg/m3]",
     NDCI        = "NDCI",
