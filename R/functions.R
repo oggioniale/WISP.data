@@ -112,7 +112,9 @@ wisp_get_reflectance_data <- function(
     df$level2.reflectance <- gsub("\\[|\\]", "", df$level2.reflectance)
     df$level2.reflectance <- strsplit(df$level2.reflectance, ",")
     
-    if (df$measurement.id[2] == "-1") {
+    if (df$measurement.id[2] == "-1" ||
+        all(df$level2.reflectance[-1] %in% c("None", NA))
+      ) {
       # check if the exist data for other station in the same data provided
       response_no_station <- httr2::request("https://wispcloud.waterinsight.nl/api/query") |> 
         httr2::req_url_query(
@@ -132,9 +134,17 @@ wisp_get_reflectance_data <- function(
       df_no_station$level2.reflectance <- gsub("\\[|\\]", "", df_no_station$level2.reflectance)
       df_no_station$level2.reflectance <- strsplit(df_no_station$level2.reflectance, ",")
       
-      if (df_no_station$measurement.id[2] == "-1") {
+      if (df_no_station$measurement.id[2] == "-1" ||
+          all(df$level2.reflectance[-1] %in% c("None", NA))
+        ) {
         reflectance_data_tbl <- NULL
-        message("\n----\n⚠️ Thank you for your request, but the instrument does not acquire data on this date.\n----\n")
+        message(
+          "\n----\n⚠️ Thank you for your request, but the instrument does not acquire data on ",
+          start_date,
+          ".\nIf you requested data for more than one date, only the data for ", start_date, " will be missing in the result.\n",
+          "If you requested data for only one date, your result will be empty.",
+          "\n----\n"
+        )
       } else {
         reflectance_data_tbl <- NULL
         new_station <- df_no_station$instrument.name[2]
@@ -226,6 +236,17 @@ wisp_get_reflectance_data <- function(
 #' reflect_data <- wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
+#'   station = "WISPstation012",
+#'   userid = userid,
+#'   pwd = pwd,
+#'   save_csv = FALSE,
+#'   out_dir = "outputs"
+#' )
+#' 
+#' # NA data on 2024-09-01
+#' reflect_data <- wisp_get_reflectance_multi_data(
+#'   time_from = "2024-08-31T09:00",
+#'   time_to = "2024-09-02T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
@@ -360,10 +381,9 @@ wisp_get_reflectance_multi_data <- function(
 #'   calc_gons = TRUE,
 #'   calc_gons740 = TRUE,
 #'   calc_NDCI = TRUE,
-#'   calc_mishra = TRUE,
+#'   calc_mishra = FALSE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
-#'   QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
 #' )
 #' }
 #' ## End (Not run)
@@ -803,7 +823,7 @@ wisp_qc_reflectance_data <- function(
 #'   calc_gons  = TRUE,
 #'   calc_gons740 = TRUE,
 #'   calc_NDCI = TRUE,
-#'   calc_mishra = TRUE,
+#'   calc_mishra = FALSE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -1671,7 +1691,7 @@ wisp_plot_reflectance_data <- function(
 #' fig_trend <- wisp_trend_plot(
 #'   data = reflect_data_sr,
 #'   params = c("TSM", "Chla", "Novoa_SPM"),
-#'   aggregate = "daily_mean",
+#'   aggregate = "none",
 #' )
 #' fig_trend
 #' }
