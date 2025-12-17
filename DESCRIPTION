@@ -2,11 +2,21 @@ Package: WISP.data
 Title: Managing WISPstation Hyperspectral Data
 Version: 0.1.0
 Authors@R: c(
-    person("Alessandro", "Oggioni", , "alessandro.oggioni@cnr.it", role = c("aut", "cre", "fnd"),
-           comment = c(ORCID = "0000-0002-7997-219X")),
-    person("Nicola", "Ghirardi", , "nicola.ghirardi@cnr.it", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-5006-9853"))
+    person(
+      given = "Alessandro",
+      family = "Oggioni",
+      email = "alessandro.oggioni@cnr.it",
+      role = c("aut", "cre", "fnd"),
+      comment = c(ORCID = "0000-0002-7997-219X")
+    ),
+    person(
+      given = "Nicola",
+      family = "Ghirardi",
+      email = "nicola.ghirardi@cnr.it",
+      role = c("aut"),
+      comment = c(ORCID = "0000-0002-5006-9853")
     )
+  )
 Description: R package for downloading, performing quality control (QC), and visualizing data from the WISP station.
 License: `use_gpl3_license()`
 URL: https://github.com/oggioniale/WISP.data
