@@ -331,11 +331,11 @@ wisp_get_reflectance_multi_data <- function(
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
 #' Default is 0.05.
 #' @param maxPeak_blue A `decimal`. Maximum magnitude 350 nm values.
-#' We recommend setting this parameter to: 0.02 (default)
+#' We recommend setting this parameter to: 0.02 (default). 
 #' @param qa_threshold A `decimal`. Minimum threshold for Quality Assurance (QA).
-#' We recommend setting this parameter to: 0.5 (default)
+#' We recommend setting this parameter to: 0.5 (default). To make QC more stringent, raise the threshold.
 #' @param qwip_threshold A `decimal`. Maximum threshold for Quality Water Index Polynomial (QWIP).
-#' We recommend setting this parameter to: 0.2 (default)
+#' We recommend setting this parameter to: 0.2 (default). To make QC more stringent, decrease the threshold.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
@@ -663,10 +663,10 @@ wisp_qc_reflectance_data <- function(
     message(qc, " ", qc_descriptions[qc])
   }
   
-  message("----\n")
+  message("----\n") 
   
   if (final_nrow == 0) {
-    message("⚠️ Thank you for your request, but the QC operation removed all the spectral signatures available on this date.")
+    message("\n----\n⚠️ Thank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
     return(NULL)
   }
   
@@ -1646,6 +1646,123 @@ wisp_plot_reflectance_data <- function(
   plotly::ggplotly(p, tooltip = "text")
 }
 
+
+#' Comparison plot of Raw vs QC vs SR reflectance data
+#' @description `r lifecycle::badge("experimental")`
+#' This function creates an interactive side-by-side comparison of different 
+#' processing levels of WISPstation reflectance data using plotly.
+#' @param raw_data A `tibble`. The original data obtained by `wisp_get_reflectance_data()`.
+#' @param qc_data A `tibble`. The data after `wisp_qc_reflectance_data()` operations. 
+#' Default is `NULL`.
+#' @param sr_data A `tibble`. The data after `wisp_sr_reflectance_data()` operations. 
+#' Default is `NULL`.
+#' @param raw_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
+#' for the raw data plot (legend). Default is `NULL`.
+#' @param qc_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
+#' for the QC data plot (legend). Default is `NULL`.
+#' @param sr_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
+#' for the SR data plot (legend). Default is `NULL`.
+#' @return A `plotly` subplot object comparing the spectral signatures. If only 
+#' `raw_data` is provided or valid, a single plot is returned.
+#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @importFrom plotly subplot layout
+#' @export
+#' @examples
+#' # example code
+#' \dontrun{
+#' ## Not run:
+#' custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
+#' custom_qc <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+#' custom_sr <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+#'
+#' wisp_plot_comparison(
+#'   raw_data = reflect_data,
+#'   qc_data  = reflect_data_qc,
+#'   sr_data  = reflect_data_sr,
+#'   raw_args = custom_raw,
+#'   qc_args  = custom_qc,
+#'   sr_args  = custom_sr
+#' )
+#' }
+#' ## End (Not run)
+#'
+### wisp_plot_comparison
+wisp_plot_comparison <- function(
+    raw_data, 
+    qc_data = NULL, 
+    sr_data = NULL,
+    raw_args = NULL,
+    qc_args  = NULL,
+    sr_args  = NULL
+) {
+  
+  # Default settings for displaying the legend
+  default_raw <- list(
+    legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = TRUE, legend_cpc = TRUE)
+  
+  default_derived <- list(
+    legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = TRUE, legend_cpc = TRUE,
+    legend_scatt = TRUE, legend_ratio = TRUE, legend_novoa_SPM = TRUE,
+    legend_novoa_TUR = TRUE, legend_jiang_TSS = TRUE, legend_gons_CHL = TRUE,
+    legend_gons740_CHL = TRUE, legend_NDCI = TRUE, legend_mishra_CHL = TRUE
+  )
+  
+  # Assigning parameters
+  r_params  <- if (is.null(raw_args)) default_raw else raw_args
+  qc_params <- if (is.null(qc_args)) default_derived else qc_args
+  sr_params <- if (is.null(sr_args)) default_derived else sr_args
+  
+  # Generation of individual plots
+  fig1 <- do.call(wisp_plot_reflectance_data, c(list(data = raw_data), r_params))
+  
+  fig2 <- if (!is.null(qc_data) && nrow(qc_data) > 0) {
+    do.call(wisp_plot_reflectance_data, c(list(data = qc_data), qc_params))
+  } else NULL
+  
+  fig3 <- if (!is.null(sr_data) && nrow(sr_data) > 0) {
+    do.call(wisp_plot_reflectance_data, c(list(data = sr_data), sr_params))
+  } else NULL
+  
+  # Assembly of plots
+  plot_list <- Filter(Negate(is.null), list(fig1, fig2, fig3))
+  
+  if (length(plot_list) == 1) {
+    message("\n----\n⚠️ The only valid plot is the one referring to RAW.\n----\n")
+  }
+  
+  plot_title <- if (length(plot_list) == 3) {
+    "<b>Reflectance comparison: Raw vs QC vs SR<b>"
+  } else {
+    "<b>Reflectance: Raw<b>"
+  }
+  
+  final_plot <- if (length(plot_list) > 1) {
+    plotly::subplot(plot_list, nrows = 1, shareX = TRUE, shareY = TRUE)
+  } else {
+    fig1
+  }
+  
+  # Layout and axis titles
+  final_plot <- final_plot |>
+    plotly::layout(
+      title = plot_title,
+      xaxis = list(title = "<b>Wavelength [nm]<b>", titlefont = list(size = 14)),
+      yaxis = list(title = "<b>Rrs [1/sr]<b>", titlefont = list(size = 14))
+    )
+  
+  if (length(plot_list) >= 2) {
+    final_plot <- final_plot |> 
+      plotly::layout(xaxis2 = list(title = "<b>Wavelength [nm]<b>", titlefont = list(size = 14)))
+  }
+  if (length(plot_list) >= 3) {
+    final_plot <- final_plot |> 
+      plotly::layout(xaxis3 = list(title = "<b>Wavelength [nm]<b>", titlefont = list(size = 14)))
+  }
+  
+  return(final_plot)
+}
+
 #' Creates a temporal trend plot of one or more water quality parameters
 #' @description `r lifecycle::badge("experimental")`
 #' This function creates an interactive graph of the time trend of one or
@@ -1730,7 +1847,7 @@ wisp_trend_plot <- function(
   # 1. Available parameters
   available_params <- names(mapping)
   message(
-    "----------------------------------------------------------------------\n",
+    "\n----------------------------------------------------------------------\n",
     "Parameters available for `params`: ",
     paste(available_params, collapse = ", ")
   )
@@ -1741,7 +1858,7 @@ wisp_trend_plot <- function(
     " - 'none': Plot all available values (requires only one day in `wisp_get_reflectance_data()`).\n",
     " - 'daily_mean': Plot the daily average and standard deviation (requires multiple days in `wisp_get_reflectance_data()`).\n",
     " - 'daily_median': Plot the daily median (requires multiple days in `wisp_get_reflectance_data()`)\n",
-    "----------------------------------------------------------------------"
+    "----------------------------------------------------------------------\n"
   )
   
   units_mapping <- c(
@@ -1782,7 +1899,8 @@ wisp_trend_plot <- function(
     stop("⚠️ Please note: you are requesting multiple days. Try changing the 'aggregate' or requesting a single day.")
   }
   if (aggregate %in% c("daily_mean", "daily_median") && n_unique_dates == 1) {
-    stop("⚠️ Please note: you are requesting only one day. Try changing the 'aggregate' or requesting multiple days.")
+    stop("⚠️ Please note: you are requesting only one day. Try changing the 'aggregate' or requesting multiple days. 
+     If, on the other hand, you requested multiple days, it means that QC removed all the spectral signatures in some of them.")
   }
   
   requested_day_label <- if (aggregate == "none" && n_unique_dates == 1) format(unique_dates, "%Y-%m-%d") else NULL
