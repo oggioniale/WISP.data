@@ -1684,6 +1684,7 @@ wisp_plot_reflectance_data <- function(
 #'   qc_args  = custom_qc,
 #'   sr_args  = custom_sr
 #' )
+#' print(fig_comparison)
 #' }
 #' ## End (Not run)
 #'
@@ -1765,7 +1766,7 @@ wisp_plot_comparison <- function(
 
 #' Creates a temporal trend plot of one or more water quality parameters
 #' @description `r lifecycle::badge("experimental")`
-#' This function creates an interactive graph of the time trend of one or
+#' This function creates an interactive plot of the time trend of one or
 #' more water quality parameters associated with spectral signatures 
 #' @param data A `tibble` containing water quality parameters and spectral
 #' signatures. 
@@ -1783,6 +1784,10 @@ wisp_plot_comparison <- function(
 #'   ribbon for the Standard Deviation (SD) (requires data for multiple days).
 #'   \item \code{"daily_median"}: Calculates and plots the daily median 
 #'   (requires data for multiple days).} Default is `"none"`.
+#' @param merge_plot A `logical`. If \code{TRUE}, parameters that share the same 
+#' unit of measurement will be merged into a single plot. The function will 
+#' throw an error if no common units are found among the requested \code{params}. 
+#' Default is \code{FALSE}.
 #' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. 
 #' Default is `TRUE`.
 #' @param colors A `character` vector of colors for each parameter. Default uses 
@@ -1796,21 +1801,35 @@ wisp_plot_comparison <- function(
 #' @author Alessandro Oggioni, PhD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, PhD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom plotly ggplotly
-#' @importFrom dplyr group_by reframe
+#' @importFrom dplyr group_by reframe summarise
 #' @importFrom lubridate as_datetime
 #' @importFrom viridis viridis
-#' @importFrom stats sd setNames
+#' @importFrom stats sd setNames median
 #' @importFrom units drop_units
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_ribbon scale_color_manual 
+#' scale_fill_manual facet_wrap labs theme_minimal theme element_text element_blank 
+#' as_labeller scale_x_datetime
 #' @export
 #' @examples
 #' # Example usage
 #' \dontrun{
+#' # Standard plot with facets for each parameter
 #' fig_trend <- wisp_trend_plot(
-#'   data = reflect_data_sr,
-#'   params = c("TSM", "Chla", "Novoa_SPM"),
-#'   aggregate = "none",
+#'    data = reflect_data_sr,
+#'    params = c("TSM", "Chla"),
+#'    aggregate = "none",
+#'    merge_plot = FALSE
 #' )
-#' fig_trend
+#' print(fig_trend)
+#' 
+#' # Merged plot for parameters with common units 
+#' fig_merged <- wisp_trend_plot(
+#'    data = reflect_data_sr,
+#'    params = c("TSM", "Novoa_SPM"),
+#'    aggregate = "daily_mean",
+#'    merge_plot = TRUE
+#' )
+#' print(fig_trend)
 #' }
 wisp_trend_plot <- function(
     data,
@@ -1818,6 +1837,7 @@ wisp_trend_plot <- function(
     datetime_col = "measurement.date",
     instrument_col = "instrument.name",
     aggregate = c("none", "daily_mean", "daily_median"),
+    merge_plot = FALSE,
     na.rm = TRUE,
     colors = NULL,
     title = NULL,
@@ -1844,17 +1864,24 @@ wisp_trend_plot <- function(
     Mishra_CHL  = "Mishra.CHL"
   )
   
+  # Mapping for grouping units of measurement
+  unit_groups_map <- c(
+    TSM = "[g/m3]", Novoa_SPM = "[g/m3]", Jiang_TSS = "[g/m3]",
+    Chla = "[mg/m3]", cpc = "[mg/m3]", Gons_CHL = "[mg/m3]", Gons740_CHL = "[mg/m3]", Mishra_CHL = "[mg/m3]",
+    Kd = "[1/m]", scatt = "[1/sr]", Novoa_TUR = "[NTU]", ratio = "ratio", NDCI = "NDCI"
+  )
+  
   # 1. Available parameters
   available_params <- names(mapping)
   message(
     "\n----------------------------------------------------------------------\n",
-    "Parameters available for `params`: ",
+    "Parameters available (`params`): ",
     paste(available_params, collapse = ", ")
   )
   
   # Available aggregation methods
   message(
-    "Aggregation methods (`aggregate`):\n",
+    "\nAggregation methods (`aggregate`):\n",
     " - 'none': Plot all available values (requires only one day in `wisp_get_reflectance_data()`).\n",
     " - 'daily_mean': Plot the daily average and standard deviation (requires multiple days in `wisp_get_reflectance_data()`).\n",
     " - 'daily_median': Plot the daily median (requires multiple days in `wisp_get_reflectance_data()`)\n",
@@ -1880,6 +1907,12 @@ wisp_trend_plot <- function(
   requested <- unique(params)
   valid <- requested[requested %in% names(mapping)]
   if (length(valid) == 0) stop("⚠️ No valid parameters required.")
+  if (merge_plot) {
+    relevant_units <- unit_groups_map[valid]
+    if (length(unique(relevant_units)) == length(relevant_units)) {
+      stop("⚠️ Please note: you are requesting to merge plots with parameters that do not have any common units of measurement. Try changing the 'params' or set 'merge_plot = FALSE'.")
+    }
+  }
   cols <- unlist(mapping[valid])
   present <- cols %in% names(data)
   if (!all(present)) warning("⚠️ Some parameters not present in the dataset: ", paste(valid[!present], collapse = ", "))
@@ -1916,7 +1949,9 @@ wisp_trend_plot <- function(
       datetime = datetime,
       instrument = instrument,
       param = param,
+      unit_group = unit_groups_map[param],
       value = values,
+      row.names = NULL, 
       stringsAsFactors = FALSE
     )
     tmp$main_text <- paste0(
@@ -1933,7 +1968,7 @@ wisp_trend_plot <- function(
   # Aggregation if requested
   if (aggregate != "none") {
     long_df$date <- as.Date(long_df$datetime)
-    grouped <- dplyr::group_by(long_df, param, date)
+    grouped <- dplyr::group_by(long_df, param, unit_group, date)
     
     if (aggregate == "daily_mean") {
       long_df <- dplyr::reframe(
@@ -1942,6 +1977,7 @@ wisp_trend_plot <- function(
         sd_value   = stats::sd(value, na.rm = na.rm),
         main_text  = paste0(
           "Date: ", date,
+          "<br>Param: ", param,
           "<br>Mean: ", round(mean(value, na.rm = na.rm), 2),
           " ± SD: ", round(stats::sd(value, na.rm = na.rm), 2)
         )
@@ -1953,11 +1989,11 @@ wisp_trend_plot <- function(
         sd_value   = NA_real_,
         main_text  = paste0(
           "Date: ", date,
+          "<br>Param: ", param,
           "<br>Median: ", round(stats::median(value, na.rm = na.rm), 2)
         )
       )
     }
-    
     long_df$datetime <- as.POSIXct(long_df$date)
   } else {
     long_df$mean_value <- long_df$value
@@ -1966,14 +2002,28 @@ wisp_trend_plot <- function(
   
   if (return_long_df) return(long_df)
   
-  # Colors and factor params
+  # Colors and factor parameters
   params_unique <- as.character(unique(long_df$param))
   long_df$param <- factor(long_df$param, levels=params_unique)
   if (is.null(colors)) colors <- viridis::viridis(length(params_unique))
   colors_map <- stats::setNames(colors[seq_along(params_unique)], params_unique)
   legend_labels <- units_mapping[levels(long_df$param)]
   
-  # X label title (single day)
+  # Dynamic facet title logic (Merge vs Parameter)
+  if (merge_plot) {
+    df_grouped <- dplyr::group_by(long_df, unit_group)
+    facet_titles <- dplyr::summarise(
+      df_grouped, 
+      title_str = paste0(paste(unique(as.character(param)), collapse = " vs "), " ", unique(unit_group)), 
+      .groups = "drop"
+    )
+    long_df$facet_var <- long_df$unit_group
+    facet_labeller <- ggplot2::as_labeller(stats::setNames(facet_titles$title_str, facet_titles$unit_group))
+  } else {
+    long_df$facet_var <- long_df$param
+    facet_labeller <- ggplot2::as_labeller(units_mapping)
+  }
+  
   x_label <- if (aggregate=="none" && !is.null(requested_day_label)) paste0("<b>", requested_day_label, "</b>") else "<b>Time</b>"
   
   # Plot
@@ -1987,24 +2037,22 @@ wisp_trend_plot <- function(
     ggplot2::geom_line(size=0.8) +
     ggplot2::geom_point(size=2) +
     ggplot2::scale_color_manual(values=colors_map, labels=legend_labels) +
-    ggplot2::facet_wrap(~ param, ncol=1, scales="free_y", labeller=ggplot2::as_labeller(units_mapping)) +
+    ggplot2::facet_wrap(~ facet_var, ncol=1, scales="free_y", labeller=facet_labeller) +
     ggplot2::labs(x = x_label, y=NULL, color=NULL, title = ifelse(is.null(title), "<b>Time trend</b>", title)) +
     ggplot2::theme_minimal() +
     ggplot2::theme(strip.text = ggplot2::element_text(face="bold"),
                    plot.title = ggplot2::element_text(hjust=0.5),
                    legend.position="top")
   
-  # X label values (multiple days)
   if (aggregate %in% c("daily_mean", "daily_median")) {
     p <- p + ggplot2::scale_x_datetime(date_breaks = "1 day", date_labels = "%b %d")
   }
   
-  # Ribbon SD and secondary markers 
+  # Ribbon SD and secondary markers
   is_daily_mean <- aggregate == "daily_mean"
   
   if (is_daily_mean && any(!is.na(long_df$sd_value))) {
     ribbon_df <- long_df[!is.na(long_df$sd_value), , drop = FALSE]
-    ribbon_df$fill_col <- colors_map[as.character(ribbon_df$param)]
     
     p <- p + ggplot2::geom_ribbon(
       data = ribbon_df,
@@ -2012,13 +2060,14 @@ wisp_trend_plot <- function(
         x = datetime,
         ymin = mean_value - sd_value,
         ymax = mean_value + sd_value,
-        group = param
+        group = param,
+        fill = param 
       ),
-      fill = ribbon_df$fill_col,
       alpha = 0.2,
       inherit.aes = FALSE,
       show.legend = FALSE
-    )
+    ) +
+      ggplot2::scale_fill_manual(values=colors_map)
     
     has_sd_idx <- !is.na(long_df$sd_value)
     upper_df <- long_df[has_sd_idx, , drop = FALSE]
@@ -2030,7 +2079,6 @@ wisp_trend_plot <- function(
     lower_df$y <- lower_df$mean_value - lower_df$sd_value
     lower_df$text_sd <- paste0(lower_df$main_text, "<br>Lower SD limit: ", round(lower_df$y, 2))
     
-    # Warning suppression
     p <- p +
       suppressWarnings(ggplot2::geom_point(
         data = upper_df,
@@ -2050,7 +2098,20 @@ wisp_trend_plot <- function(
       ))
   }
   
-  # Render plotly
-  plotly::ggplotly(p, tooltip="text")
+  # Conversion and legend cleanup
+  gp <- plotly::ggplotly(p, tooltip="text")
+  
+  for (i in seq_along(gp$x$data)) {
+    if (!is.null(gp$x$data[[i]]$name)) {
+      clean_name <- gsub(",\\d+\\)$", "", gp$x$data[[i]]$name)
+      clean_name <- gsub("^\\(", "", clean_name)
+      gp$x$data[[i]]$name <- clean_name
+      gp$x$data[[i]]$legendgroup <- clean_name
+      if (any(duplicated(sapply(gp$x$data[1:i], function(x) x$name)))) {
+        gp$x$data[[i]]$showlegend <- FALSE
+      }
+    }
+  }
+  
+  return(gp)
 }
-
