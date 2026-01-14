@@ -1581,19 +1581,19 @@ wisp_plot_reflectance_data <- function(
     function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
       paste(
         c(
-          if (legend_TSM && !is.null(tsm)) paste("TSM [g/m3]:", tsm),
-          if (legend_Chla && !is.null(chla)) paste("Chla [mg/m3]:", chla),
-          if (legend_Kd && !is.null(kd)) paste("Kd [1/m]:", kd),
-          if (legend_cpc && !is.null(cpc)) paste("Cpc [mg/m3]:", cpc),
-          if (legend_scatt && !is.null(scatt)) paste("Scatt [1/sr]:", scatt),
-          if (legend_ratio && !is.null(ratio)) paste("Ratio:", ratio),
-          if (legend_novoa_SPM && !is.null(novoa_spm)) paste("Novoa_SPM [g/m3]:", novoa_spm),
-          if (legend_novoa_TUR && !is.null(novoa_tur)) paste("Novoa_TUR [NTU]:", novoa_tur),
-          if (legend_jiang_TSS && !is.null(jiang_tss)) paste("Jiang_TSS [g/m3]:", jiang_tss),
-          if (legend_gons_CHL && !is.null(gons_chl)) paste("Gons.CHL [mg/m3]:", gons_chl),
-          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("Gons740.CHL [mg/m3]:", gons740_chl),
-          if (legend_NDCI && !is.null(ndci)) paste("NDCI:", ndci),
-          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("Mishra.CHL [mg/m3]:", mishra_chl)
+          if (legend_TSM && !is.null(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
+          if (legend_Chla && !is.null(chla)) paste("<b>Chla [mg/m3]:</b>", chla),
+          if (legend_Kd && !is.null(kd)) paste("<b>Kd [1/m]:</b>", kd),
+          if (legend_cpc && !is.null(cpc)) paste("<b>Cpc [mg/m3]:</b>", cpc),
+          if (legend_scatt && !is.null(scatt)) paste("<b>Scatt [1/sr]:</b>", scatt),
+          if (legend_ratio && !is.null(ratio)) paste("<b>Ratio:</b>", ratio),
+          if (legend_novoa_SPM && !is.null(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
+          if (legend_novoa_TUR && !is.null(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
+          if (legend_jiang_TSS && !is.null(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
+          if (legend_gons_CHL && !is.null(gons_chl)) paste("<b>Gons.CHL [mg/m3]:</b>", gons_chl),
+          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("<b>Gons740.CHL [mg/m3]:</b>", gons740_chl),
+          if (legend_NDCI && !is.null(ndci)) paste("<b>NDCI:</b>", ndci),
+          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("<b>Mishra.CHL [mg/m3]:</b>", mishra_chl)
         ),
         collapse = "<br>"
       )
@@ -1613,7 +1613,9 @@ wisp_plot_reflectance_data <- function(
     mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA
   )
   
-  # Selecting 'nm_ columns' and converting them to 'long' format
+  instr_name <- if("instrument.name" %in% names(data)) data$instrument.name[1] else "Unknown"
+  
+  # Data preparation
   nm_cols <- grep("^nm_", names(data), value = TRUE)
   data_2 <- tidyr::pivot_longer(
     data[, c("measurement.date", "products_info", nm_cols)],
@@ -1622,27 +1624,36 @@ wisp_plot_reflectance_data <- function(
     values_to = "Rrs"
   )
   data_2$wavelength <- as.numeric(sub("nm_", "", data_2$wavelength))
-  data_2$legend_info <- paste0(
-    "Date: ", substr(data_2$measurement.date,1,10),
-    " Time [UTC]: ", substr(data_2$measurement.date,12,19),
+  
+  # Legend on the right
+  data_2$color_group <- paste0(
+    "<b>Date:</b> ", substr(data_2$measurement.date, 1, 10),
+    "<br><b>Time [UTC]:</b> ", substr(data_2$measurement.date, 12, 19),
     "<br>", data_2$products_info
   )
   
-  # Color palette
-  num_colors <- length(unique(data_2$legend_info))
+  # Interactive legend (Tooltip)
+  data_2$tooltip_text <- paste0(
+    data_2$color_group, "<br>", 
+    "<b>Wavelength:</b> ", data_2$wavelength, " nm<br>",
+    "<b>Rrs:</b> ", round(data_2$Rrs, 6), " [1/sr]"
+  )
+  
+  num_colors <- length(unique(data_2$color_group))
   color_palette <- viridis::viridis(num_colors)
   
-  # Creating the graph with 'ggplot'
-  p <- ggplot2::ggplot(data_2, ggplot2::aes(x=wavelength, y=Rrs, color=legend_info, text=legend_info)) +
-    ggplot2::geom_line() +
+  # Plot generation
+  p <- ggplot2::ggplot(data_2, ggplot2::aes(x=wavelength, y=Rrs, color=color_group, text=tooltip_text)) +
+    ggplot2::geom_line(ggplot2::aes(group = measurement.date)) + 
     ggplot2::scale_color_manual(values=color_palette) +
     ggplot2::labs(
-      title = paste0("Acquired by: ", data$instrument.name[1]),
+      title = paste0("Acquired by: ", instr_name),
       x = "Wavelength [nm]",
       y = "Rrs [1/sr]",
-      color = "<b>Time of acquisition<b>"
+      color = "Time of acquisition"
     ) +
     ggplot2::theme_minimal()
+  
   plotly::ggplotly(p, tooltip = "text")
 }
 
