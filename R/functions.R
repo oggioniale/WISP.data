@@ -353,6 +353,8 @@ wisp_get_reflectance_multi_data <- function(
 #' Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is `TRUE`.
 #' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
+#' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
+#' angle and the dominant wavelength. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -382,7 +384,7 @@ wisp_get_reflectance_multi_data <- function(
 #'   calc_gons740 = TRUE,
 #'   calc_NDCI = TRUE,
 #'   calc_mishra = FALSE,
-#'   calc_dom_wave  = TRUE,
+#'   calc_dom_wave = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -768,9 +770,9 @@ wisp_qc_reflectance_data <- function(
     reflectance_data_filtered <- dplyr::relocate(
       reflectance_data_filtered,
       hue_angle, dominant_wavelength,
-      .after = dplyr::last_col()
+      .after = all_of("waterquality.cpc")
     )
-  }  
+  }
   
   # create output csv file
   if (save_csv) {
@@ -809,6 +811,8 @@ wisp_qc_reflectance_data <- function(
 #' Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is `TRUE`.
 #' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
+#' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
+#' angle and the dominant wavelength. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -834,6 +838,7 @@ wisp_qc_reflectance_data <- function(
 #'   calc_gons740 = TRUE,
 #'   calc_NDCI = TRUE,
 #'   calc_mishra = FALSE,
+#'   calc_dom_wave = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -1018,7 +1023,7 @@ wisp_sr_reflectance_data <- function(
     corrected_data <- dplyr::relocate(
       corrected_data,
       hue_angle, dominant_wavelength,
-      .after = dplyr::last_col()
+      .after = all_of("waterquality.cpc")
     )
   }
   
@@ -1511,7 +1516,7 @@ wisp_calc_Mishra_CHL <- function(data) {
 ### wisp_calc_dom_wave
 wisp_calc_dom_wave <- function(data) {
   
-  # 1. Matrice CIE 1931 (380-780 nm)
+  # CIE 1931 matrix (380-780 nm)
   cie_matrix <- matrix(c(
     380,0.0014,0.0000,0.0065, 385,0.0022,0.0001,0.0105, 390,0.0042,0.0001,0.0201,
     395,0.0076,0.0002,0.0362, 400,0.0143,0.0004,0.0679, 405,0.0232,0.0006,0.1102,
@@ -1578,12 +1583,11 @@ wisp_calc_dom_wave <- function(data) {
   
   spec_cols <- grep("^nm_", colnames(data), value = TRUE)
   
-  # Utilizzo del pipe nativo |> invece di %>%
   data <- data |>
     dplyr::rowwise() |>
     dplyr::mutate(
       res_dom = list(calc_single_row(dplyr::c_across(dplyr::all_of(spec_cols)))),
-      hue_angle = res_dom[1],
+      hue_angle = round(res_dom[1], 1),
       dominant_wavelength = res_dom[2]
     ) |>
     dplyr::ungroup() |>
@@ -1626,6 +1630,10 @@ wisp_calc_dom_wave <- function(data) {
 #' the `NDCI`values. Default is `FALSE`.
 #' @param legend_mishra_CHL A `logical`. If `TRUE`, the plot legend includes 
 #' the `Mishra_CHL`values. Default is `FALSE`.
+#' @param legend_hue_angle A `logical`. If `TRUE`, the plot legend includes 
+#' the `Hue_Angle`values. Default is `FALSE`.
+#' @param legend_dom_wavelength A `logical`. If `TRUE`, the plot legend includes 
+#' the `Dominant_Wavelength`values. Default is `FALSE`.
 #' @return an interactive plot showing the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
@@ -1654,7 +1662,9 @@ wisp_calc_dom_wave <- function(data) {
 #'   legend_gons_CHL  = FALSE,
 #'   legend_gons740_CHL = FALSE,
 #'   legend_NDCI = FALSE,
-#'   legend_mishra_CHL = FALSE
+#'   legend_mishra_CHL = FALSE,
+#'   legend_hue_angle = FALSE, 
+#'   legend_dom_wavelength = FALSE   
 #' )
 #' }
 #' ## End (Not run)
@@ -1662,19 +1672,21 @@ wisp_calc_dom_wave <- function(data) {
 ### wisp_plot_reflectance_data
 wisp_plot_reflectance_data <- function(
     data,
-    legend_TSM         = TRUE,
-    legend_Chla        = TRUE,
-    legend_Kd          = TRUE,
-    legend_cpc         = TRUE,
-    legend_scatt       = FALSE,
-    legend_ratio       = FALSE,
-    legend_novoa_SPM   = FALSE,
-    legend_novoa_TUR   = FALSE,
-    legend_jiang_TSS   = FALSE,
-    legend_gons_CHL    = FALSE,
-    legend_gons740_CHL = FALSE,
-    legend_NDCI        = FALSE,
-    legend_mishra_CHL  = FALSE
+    legend_TSM            = TRUE,
+    legend_Chla           = TRUE,
+    legend_Kd             = TRUE,
+    legend_cpc            = TRUE,
+    legend_scatt          = FALSE,
+    legend_ratio          = FALSE,
+    legend_novoa_SPM      = FALSE,
+    legend_novoa_TUR      = FALSE,
+    legend_jiang_TSS      = FALSE,
+    legend_gons_CHL       = FALSE,
+    legend_gons740_CHL    = FALSE,
+    legend_NDCI           = FALSE,
+    legend_mishra_CHL     = FALSE,
+    legend_hue_angle      = FALSE, 
+    legend_dom_wavelength = FALSE   
 ) {
   
   # Convert columns with ‘units’ to numeric
@@ -1687,7 +1699,7 @@ wisp_plot_reflectance_data <- function(
   
   # Creation of the 'products_info' column
   data$products_info <- mapply(
-    function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl) {
+    function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl, hue, dom_wv) {
       paste(
         c(
           if (legend_TSM && !is.null(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
@@ -1699,10 +1711,12 @@ wisp_plot_reflectance_data <- function(
           if (legend_novoa_SPM && !is.null(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
           if (legend_novoa_TUR && !is.null(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
           if (legend_jiang_TSS && !is.null(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
-          if (legend_gons_CHL && !is.null(gons_chl)) paste("<b>Gons.CHL [mg/m3]:</b>", gons_chl),
-          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("<b>Gons740.CHL [mg/m3]:</b>", gons740_chl),
+          if (legend_gons_CHL && !is.null(gons_chl)) paste("<b>Gons_CHL [mg/m3]:</b>", gons_chl),
+          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
           if (legend_NDCI && !is.null(ndci)) paste("<b>NDCI:</b>", ndci),
-          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("<b>Mishra.CHL [mg/m3]:</b>", mishra_chl)
+          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
+          if (legend_hue_angle && !is.null(hue) && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
+          if (legend_dom_wavelength && !is.null(dom_wv) && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv)
         ),
         collapse = "<br>"
       )
@@ -1719,7 +1733,9 @@ wisp_plot_reflectance_data <- function(
     gons_chl    = if ("Gons.CHL"             %in% names(data)) data$Gons.CHL else NA,
     gons740_chl = if ("Gons740.CHL"          %in% names(data)) data$Gons740.CHL else NA,
     ndci        = if ("NDCI"                 %in% names(data)) data$NDCI else NA,
-    mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA
+    mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA,
+    hue         = if ("hue_angle"            %in% names(data)) data$hue_angle else NA,      
+    dom_wv      = if ("dominant_wavelength"  %in% names(data)) data$dominant_wavelength else NA 
   )
   
   instr_name <- if("instrument.name" %in% names(data)) data$instrument.name[1] else "Unknown"
@@ -1969,26 +1985,29 @@ wisp_trend_plot <- function(
   if (!datetime_col %in% names(data)) stop("⚠️ Datetime column not found: ", datetime_col)
   
   mapping <- list(
-    TSM         = "waterquality.tsm",
-    Chla        = "waterquality.chla",
-    Kd          = "waterquality.kd",
-    cpc         = "waterquality.cpc",
-    scatt       = "scattering.peak",
-    ratio       = "band.ratio",
-    Novoa_SPM   = "Novoa.SPM",
-    Novoa_TUR   = "Novoa.TUR",
-    Jiang_TSS   = "Jiang.TSS",
-    Gons_CHL    = "Gons.CHL",
-    Gons740_CHL = "Gons740.CHL",
-    NDCI        = "NDCI",
-    Mishra_CHL  = "Mishra.CHL"
+    TSM          = "waterquality.tsm",
+    Chla         = "waterquality.chla",
+    Kd           = "waterquality.kd",
+    cpc          = "waterquality.cpc",
+    scatt        = "scattering.peak",
+    ratio        = "band.ratio",
+    Novoa_SPM    = "Novoa.SPM",
+    Novoa_TUR    = "Novoa.TUR",
+    Jiang_TSS    = "Jiang.TSS",
+    Gons_CHL     = "Gons.CHL",
+    Gons740_CHL  = "Gons740.CHL",
+    NDCI         = "NDCI",
+    Mishra_CHL   = "Mishra.CHL",
+    Hue_Angle    = "hue_angle",           
+    Dom_Wave     = "dominant_wavelength"  
   )
   
   # Mapping for grouping units of measurement
   unit_groups_map <- c(
     TSM = "[g/m3]", Novoa_SPM = "[g/m3]", Jiang_TSS = "[g/m3]",
     Chla = "[mg/m3]", cpc = "[mg/m3]", Gons_CHL = "[mg/m3]", Gons740_CHL = "[mg/m3]", Mishra_CHL = "[mg/m3]",
-    Kd = "[1/m]", scatt = "[1/sr]", Novoa_TUR = "[NTU]", ratio = "ratio", NDCI = "NDCI"
+    Kd = "[1/m]", scatt = "[1/sr]", Novoa_TUR = "[NTU]", ratio = "ratio", NDCI = "NDCI",
+    Hue_Angle = "[deg]", Dom_Wave = "[nm]"
   )
   
   # 1. Available parameters
@@ -2021,7 +2040,9 @@ wisp_trend_plot <- function(
     Gons_CHL    = "Gons.CHL [mg/m3]",
     Gons740_CHL = "Gons740.CHL [mg/m3]",
     NDCI        = "NDCI",
-    Mishra_CHL  = "Mishra_CHL [mg/m3]"
+    Mishra_CHL  = "Mishra_CHL [mg/m3]",
+    Hue_Angle   = "Hue Angle [deg]",      
+    Dom_Wave    = "Dom. Wavelength [nm]" 
   )
   
   requested <- unique(params)
@@ -2074,10 +2095,14 @@ wisp_trend_plot <- function(
       row.names = NULL, 
       stringsAsFactors = FALSE
     )
+    
+    val_rounded <- if(param == "Dom_Wave") round(tmp$value, 1) else round(tmp$value, 2)
+    nsmall_val  <- if(param == "Dom_Wave") 1 else 2
+    
     tmp$main_text <- paste0(
       "Date: ", format(tmp$datetime, "%Y-%m-%d"),
       "<br>Time: ", format(tmp$datetime, "%H:%M:%S"),
-      "<br>", units_mapping[param], ": ", format(round(tmp$value, 2), nsmall=2)
+      "<br>", units_mapping[param], ": ", format(val_rounded, nsmall = nsmall_val)
     )
     long_df <- rbind(long_df, tmp)
   }
