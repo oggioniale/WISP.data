@@ -333,9 +333,11 @@ wisp_get_reflectance_multi_data <- function(
 #' @param maxPeak_blue A `decimal`. Maximum magnitude 350 nm values.
 #' We recommend setting this parameter to: 0.02 (default). 
 #' @param qa_threshold A `decimal`. Minimum threshold for Quality Assurance (QA).
-#' We recommend setting this parameter to: 0.5 (default). To make QC more stringent, raise the threshold.
+#' We recommend setting this parameter to: 0.5 (default). 
+#' To make QC more stringent, raise the threshold.
 #' @param qwip_threshold A `decimal`. Maximum threshold for Quality Water Index Polynomial (QWIP).
-#' We recommend setting this parameter to: 0.2 (default). To make QC more stringent, decrease the threshold.
+#' We recommend setting this parameter to: 0.2 (default). 
+#' To make QC more stringent, decrease the threshold.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
@@ -355,6 +357,17 @@ wisp_get_reflectance_multi_data <- function(
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
 #' angle and the dominant wavelength. Default is `TRUE`.
+#' @param calc_OWT A `logical`. If `TRUE`, the function calculates the Optical 
+#' Water Type classification (OWT_class), the membership score (OWT_score) and 
+#' the spectral similarity (OWT_similarity). In addition, it adds a column with 
+#' the description of the corresponding OWT class. "OWT_class" represents the optical 
+#' category to which the analyzed spectral signature belongs. "OWT_score" it is 
+#' a value between 0 and 1 that indicates how “faithful” the spectral signature 
+#' in situ is exclusively to that OWT class compared to the others. "OWT_similarity" 
+#' indicates how closely the shape of the in situ spectral signature resembles 
+#' the shape of the OWT reference (Values above 0.95 indicate that the data is 
+#' very reliable, while values below 0.85 indicate that the shape of the spectral 
+#' signature is abnormal.). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -383,8 +396,9 @@ wisp_get_reflectance_multi_data <- function(
 #'   calc_gons = TRUE,
 #'   calc_gons740 = TRUE,
 #'   calc_NDCI = TRUE,
-#'   calc_mishra = FALSE,
+#'   calc_mishra = TRUE,
 #'   calc_dom_wave = TRUE,
+#'   calc_OWT = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -407,6 +421,7 @@ wisp_qc_reflectance_data <- function(
     calc_NDCI      = TRUE,
     calc_mishra    = TRUE,
     calc_dom_wave  = TRUE,
+    calc_OWT       = TRUE, 
     save_csv       = FALSE,
     out_dir        = "outputs"
 ) {
@@ -773,6 +788,11 @@ wisp_qc_reflectance_data <- function(
       .after = all_of("waterquality.cpc")
     )
   }
+  if (calc_OWT) {
+    reflectance_data_filtered <- wisp_calc_OWT_class(reflectance_data_filtered)
+    reflectance_data_filtered <- reflectance_data_filtered |> 
+      dplyr::relocate(OWT_class, OWT_description, OWT_score, OWT_similarity, .after = QWIP_score)
+  }
   
   # create output csv file
   if (save_csv) {
@@ -791,8 +811,10 @@ wisp_qc_reflectance_data <- function(
 
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
 #' @description `r lifecycle::badge("experimental")`
-#' This function applies the algorithm of Jiang et al., (2020) for removing
-#' sunglint from spectral signatures
+#' This function applies the algorithm of Jiang et al. (2020) for removing
+#' sunglint from spectral signatures. It calculates an offset value, 
+#' represented by the **delta** column, based on the Relative Height Water (RHW) 
+#' in the NIR region to correct the surface reflectance.
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
@@ -813,6 +835,17 @@ wisp_qc_reflectance_data <- function(
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
 #' angle and the dominant wavelength. Default is `TRUE`.
+#' @param calc_OWT A `logical`. If `TRUE`, the function calculates the Optical 
+#' Water Type classification (OWT_class), the membership score (OWT_score) and 
+#' the spectral similarity (OWT_similarity). In addition, it adds a column with 
+#' the description of the corresponding OWT class. "OWT_class" represents the optical 
+#' category to which the analyzed spectral signature belongs. "OWT_score" it is 
+#' a value between 0 and 1 that indicates how “faithful” the spectral signature 
+#' in situ is exclusively to that OWT class compared to the others. "OWT_similarity" 
+#' indicates how closely the shape of the in situ spectral signature resembles 
+#' the shape of the OWT reference (Values above 0.95 indicate that the data is 
+#' very reliable, while values below 0.85 indicate that the shape of the spectral 
+#' signature is abnormal.). Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
@@ -839,6 +872,7 @@ wisp_qc_reflectance_data <- function(
 #'   calc_NDCI = TRUE,
 #'   calc_mishra = FALSE,
 #'   calc_dom_wave = TRUE,
+#'   calc_OWT = TRUE,
 #'   save_csv = FALSE,
 #'   out_dir = "outputs"
 #' )
@@ -857,6 +891,7 @@ wisp_sr_reflectance_data <- function(
     calc_NDCI     = TRUE,
     calc_mishra   = TRUE,
     calc_dom_wave = TRUE,
+    calc_OWT      = TRUE, 
     save_csv      = FALSE,
     out_dir       = "outputs"
 ) {
@@ -936,7 +971,8 @@ wisp_sr_reflectance_data <- function(
     "Jiang.TSS", "ref_band", "a", "bbp",      
     "Gons.CHL", "Gons740.CHL",                
     "NDCI", "Mishra.CHL",                     
-    "hue_angle", "dominant_wavelength"        
+    "hue_angle", "dominant_wavelength",
+    "OWT_class", "OWT_score", "OWT_similarity"
   )
   corrected_data <- corrected_data |>
     dplyr::select(-dplyr::any_of(indices_to_remove))
@@ -1026,6 +1062,11 @@ wisp_sr_reflectance_data <- function(
       .after = all_of("waterquality.cpc")
     )
   }
+  if (calc_OWT) {
+    corrected_data <- wisp_calc_OWT_class(corrected_data)
+    corrected_data <- corrected_data |> 
+      dplyr::relocate(OWT_class, OWT_description, OWT_score, OWT_similarity, .after = QWIP_score)
+  }
   
   # create output csv file
   if (save_csv) {
@@ -1042,6 +1083,8 @@ wisp_sr_reflectance_data <- function(
   # Output
   return(corrected_data)
 }
+
+
 
 #' @noRd
 #' @keywords internal
@@ -1547,54 +1590,343 @@ wisp_calc_dom_wave <- function(data) {
     770,0.0001,0.0000,0.0000, 775,0.0001,0.0000,0.0000, 780,0.0000,0.0000,0.0000
   ), ncol = 4, byrow = TRUE)
   
-  cie_data <- as.data.frame(cie_matrix)
-  colnames(cie_data) <- c("wavelength", "x", "y", "z")
+  # 1 nm interpolation
+  wv_fine <- 380:780
+  cie_x_f <- approx(cie_matrix[,1], cie_matrix[,2], xout = wv_fine)$y
+  cie_y_f <- approx(cie_matrix[,1], cie_matrix[,3], xout = wv_fine)$y
+  cie_z_f <- approx(cie_matrix[,1], cie_matrix[,4], xout = wv_fine)$y
   
+  # White Point
   x_w <- 1/3
   y_w <- 1/3
   
-  locus_x <- cie_data$x / (cie_data$x + cie_data$y + cie_data$z)
-  locus_y <- cie_data$y / (cie_data$x + cie_data$y + cie_data$z)
+  # Calculation of chromatic coordinates 
+  sum_locus <- cie_x_f + cie_y_f + cie_z_f
+  locus_x <- cie_x_f / sum_locus
+  locus_y <- cie_y_f / sum_locus
+  
+  # Locus angles relative to the white point
   locus_angles <- (atan2(locus_y - y_w, locus_x - x_w) * 180 / pi) %% 360
   
-  calc_single_row <- function(row_reflectance) {
-    wv_input <- 350:900
+  # Single row function
+  calc_single_row <- function(row_reflectance, wv_input) {
     row_reflectance <- as.numeric(row_reflectance)
     
-    r_interp <- approx(x = wv_input, y = row_reflectance, xout = cie_data$wavelength)$y
+    # Interpolate observed reflectance on the CIE 1 nm grid
+    r_interp <- approx(x = wv_input, y = row_reflectance, xout = wv_fine)$y
     r_interp[is.na(r_interp)] <- 0
+    r_interp[r_interp < 0] <- 0
     
-    X <- sum(r_interp * cie_data$x)
-    Y <- sum(r_interp * cie_data$y)
-    Z <- sum(r_interp * cie_data$z)
+    # Calculation of tristimulus values (X, Y, Z)
+    X <- sum(r_interp * cie_x_f)
+    Y <- sum(r_interp * cie_y_f)
+    Z <- sum(r_interp * cie_z_f)
     
     sum_XYZ <- X + Y + Z
     if (is.na(sum_XYZ) || sum_XYZ == 0) return(c(NA, NA))
     
+    # Chromatic coordinates of the sample
     x_s <- X / sum_XYZ
     y_s <- Y / sum_XYZ
     
+    # Sample angle
     alpha <- (atan2(y_s - y_w, x_s - x_w) * 180 / pi) %% 360
-    idx_dom <- which.min(abs(locus_angles - alpha))
-    lambda_dom <- cie_data$wavelength[idx_dom]
+    
+    # Find the wavelength on the locus with the closest angle
+    angle_diff <- abs(locus_angles - alpha)
+    angle_diff <- pmin(angle_diff, 360 - angle_diff)
+    
+    idx_dom <- which.min(angle_diff)
+    lambda_dom <- wv_fine[idx_dom]
     
     return(c(alpha, lambda_dom))
   }
   
   spec_cols <- grep("^nm_", colnames(data), value = TRUE)
+  wv_available <- as.numeric(gsub("nm_", "", spec_cols))
   
-  data <- data |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      res_dom = list(calc_single_row(dplyr::c_across(dplyr::all_of(spec_cols)))),
-      hue_angle = round(res_dom[1], 1),
-      dominant_wavelength = res_dom[2]
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::select(-res_dom)
+  res <- t(apply(data[, spec_cols], 1, calc_single_row, wv_input = wv_available))
+  
+  data$hue_angle <- round(res[, 1], 1)
+  data$dominant_wavelength <- round(res[, 2], 0)
   
   return(data)
 }
+
+#' @noRd
+#' @keywords internal
+### wisp_calc_OWT_class
+wisp_calc_OWT_class <- function(data) {
+  
+  # Standard OWT spectral signatures
+  # Standard OWT spectral signatures
+  owt_string <- "wavelen;1;2;3a;3b;4a;4b;5a;5b;6;7
+400;0.017993;0.006752;0.003844;0.011794;0.00336;0.009152;0.002714;0.00262;0.008908;0.000067
+402;0.017635;0.006785;0.003876;0.011847;0.003404;0.009229;0.0027;0.002605;0.00907;0.000068
+404;0.01728;0.006816;0.003908;0.011887;0.003448;0.009297;0.002682;0.002586;0.009234;0.00007
+406;0.016982;0.006852;0.00394;0.011923;0.003491;0.00936;0.002663;0.002564;0.0094;0.000072
+408;0.016699;0.006887;0.003972;0.011955;0.003536;0.009421;0.002642;0.002541;0.009568;0.000074
+410;0.01643;0.006924;0.004006;0.011987;0.003581;0.009481;0.002621;0.002518;0.009737;0.000076
+412;0.016192;0.006965;0.004043;0.012032;0.003628;0.009549;0.002603;0.002499;0.00991;0.000078
+414;0.015943;0.007004;0.004082;0.012083;0.003677;0.009623;0.002589;0.002484;0.010086;0.000081
+416;0.015662;0.007041;0.004122;0.012144;0.003729;0.009706;0.002578;0.002473;0.010264;0.000083
+418;0.015366;0.007075;0.004165;0.012212;0.003782;0.009795;0.002571;0.002467;0.010446;0.000085
+420;0.015066;0.007109;0.00421;0.012288;0.003838;0.009891;0.002567;0.002464;0.01063;0.000088
+422;0.014754;0.007141;0.004255;0.012365;0.003894;0.009989;0.002563;0.002462;0.010818;0.000091
+424;0.014439;0.007171;0.004301;0.012441;0.003952;0.010088;0.002559;0.00246;0.011007;0.000094
+426;0.014091;0.007194;0.004347;0.012509;0.00401;0.010183;0.002554;0.002456;0.011198;0.000097
+428;0.013727;0.007211;0.004392;0.012573;0.004068;0.010276;0.002547;0.00245;0.011392;0.0001
+430;0.013324;0.007219;0.004437;0.012632;0.004127;0.01037;0.00254;0.002444;0.011588;0.000103
+432;0.012876;0.007214;0.00448;0.012687;0.004187;0.010466;0.002535;0.002439;0.011786;0.000106
+434;0.012384;0.007193;0.004524;0.012745;0.004249;0.010567;0.002532;0.002439;0.011987;0.00011
+436;0.011837;0.007153;0.004568;0.012815;0.004314;0.010685;0.002537;0.002448;0.012191;0.000113
+438;0.011262;0.007096;0.004613;0.012906;0.004383;0.010827;0.002552;0.002469;0.0124;0.000117
+440;0.010617;0.007006;0.004657;0.013012;0.004456;0.010993;0.002579;0.002505;0.012612;0.000121
+442;0.009982;0.006901;0.004702;0.013149;0.004535;0.011193;0.00262;0.002558;0.01283;0.000125
+444;0.00945;0.006809;0.004754;0.013325;0.004618;0.011424;0.002674;0.002628;0.013053;0.000129
+446;0.00894;0.006706;0.004805;0.013517;0.004706;0.011677;0.002736;0.002709;0.01328;0.000134
+448;0.008498;0.006611;0.004859;0.013726;0.004796;0.011947;0.002806;0.002801;0.013509;0.000138
+450;0.008146;0.006537;0.004917;0.013947;0.004888;0.01222;0.002876;0.002895;0.013741;0.000143
+452;0.007854;0.006477;0.004975;0.014157;0.004979;0.012482;0.002941;0.002984;0.013974;0.000148
+454;0.007645;0.006447;0.005037;0.014371;0.00507;0.012735;0.003001;0.003067;0.014208;0.000152
+456;0.007481;0.006432;0.005101;0.014582;0.00516;0.012981;0.003056;0.003142;0.014443;0.000157
+458;0.007332;0.006422;0.005164;0.014784;0.00525;0.013219;0.003106;0.003208;0.014679;0.000162
+460;0.007206;0.006419;0.005227;0.014986;0.00534;0.013455;0.003154;0.003269;0.014916;0.000167
+462;0.007081;0.006415;0.00529;0.015188;0.005431;0.013693;0.003201;0.003325;0.015156;0.000173
+464;0.00694;0.006398;0.00535;0.015387;0.005522;0.013939;0.003252;0.003382;0.015397;0.000178
+466;0.006804;0.006382;0.005411;0.015598;0.005616;0.014197;0.003306;0.00344;0.015642;0.000184
+468;0.006644;0.006348;0.005469;0.015809;0.005711;0.014469;0.003366;0.003502;0.015888;0.00019
+470;0.00648;0.006305;0.005527;0.016031;0.005808;0.014758;0.003431;0.003569;0.016138;0.000196
+472;0.006318;0.00626;0.005584;0.016265;0.005908;0.015063;0.003503;0.003641;0.01639;0.000202
+474;0.00615;0.006205;0.00564;0.016496;0.006009;0.015376;0.003578;0.003715;0.016644;0.000208
+476;0.005985;0.006146;0.005693;0.016722;0.006111;0.015689;0.003654;0.00379;0.0169;0.000215
+478;0.005818;0.00608;0.005743;0.016935;0.006211;0.016;0.003729;0.003863;0.017157;0.000221
+480;0.005648;0.006005;0.005788;0.017127;0.00631;0.0163;0.003802;0.003933;0.017414;0.000228
+482;0.005481;0.005927;0.005829;0.017298;0.006408;0.016589;0.003872;0.003999;0.017672;0.000235
+484;0.005303;0.005834;0.005863;0.017439;0.006504;0.016864;0.00394;0.004062;0.017929;0.000242
+486;0.005119;0.005731;0.005891;0.017555;0.006598;0.017131;0.004006;0.004124;0.018187;0.000249
+488;0.004925;0.005612;0.00591;0.017647;0.006691;0.017395;0.004074;0.004191;0.018446;0.000256
+490;0.004698;0.005455;0.005914;0.017693;0.006782;0.017658;0.004149;0.004266;0.018706;0.000263
+492;0.00446;0.00528;0.005907;0.017716;0.006873;0.017931;0.004233;0.004354;0.018968;0.00027
+494;0.004214;0.005085;0.00589;0.017719;0.006966;0.018222;0.004332;0.004462;0.019232;0.000278
+496;0.003959;0.00487;0.00586;0.017701;0.00706;0.018538;0.00445;0.004594;0.019499;0.000286
+498;0.003704;0.00464;0.005818;0.01766;0.007156;0.018879;0.004588;0.004753;0.019769;0.000294
+500;0.003451;0.004399;0.005762;0.017588;0.007251;0.019237;0.004745;0.00494;0.02004;0.000302
+502;0.003195;0.004143;0.00569;0.017475;0.007346;0.019616;0.004925;0.005159;0.020314;0.00031
+504;0.002924;0.003856;0.005587;0.01727;0.007436;0.020002;0.00513;0.005415;0.020589;0.000319
+506;0.002675;0.00358;0.005473;0.017024;0.007523;0.020385;0.005353;0.005704;0.020865;0.000328
+508;0.002431;0.003299;0.005336;0.016693;0.0076;0.020747;0.005594;0.006026;0.021139;0.000337
+510;0.002221;0.003049;0.005201;0.016361;0.007677;0.021105;0.005853;0.006382;0.021413;0.000346
+512;0.002061;0.002856;0.005093;0.016099;0.007759;0.021465;0.006119;0.006755;0.021688;0.000356
+514;0.001924;0.002689;0.004995;0.015861;0.007841;0.021819;0.006394;0.00715;0.021963;0.000365
+516;0.001829;0.002573;0.004935;0.01574;0.007937;0.022204;0.006679;0.007564;0.022242;0.000375
+518;0.001772;0.002506;0.004919;0.015762;0.00805;0.02263;0.006973;0.00799;0.022525;0.000386
+520;0.001732;0.002461;0.004922;0.015841;0.00817;0.023061;0.007267;0.008415;0.022809;0.000397
+522;0.001706;0.002435;0.00494;0.015959;0.008294;0.023483;0.007553;0.00882;0.023092;0.000408
+524;0.001683;0.002414;0.004962;0.016082;0.008417;0.023888;0.007831;0.009209;0.023375;0.000419
+526;0.001656;0.002386;0.004973;0.016155;0.008532;0.024247;0.008092;0.00957;0.023655;0.000431
+528;0.001631;0.002361;0.004985;0.016218;0.008643;0.024575;0.008334;0.009898;0.023932;0.000443
+530;0.001602;0.00233;0.004986;0.016235;0.008744;0.024858;0.008555;0.010188;0.024206;0.000455
+532;0.00157;0.002294;0.00498;0.016219;0.008839;0.025113;0.008762;0.010448;0.024478;0.000467
+534;0.001535;0.002253;0.004964;0.016163;0.008925;0.025333;0.008955;0.010677;0.024747;0.00048
+536;0.001497;0.002209;0.004941;0.016078;0.009005;0.025522;0.009132;0.010875;0.025013;0.000493
+538;0.001456;0.002159;0.004907;0.015955;0.009076;0.025683;0.0093;0.011049;0.025276;0.000506
+540;0.001411;0.002101;0.004861;0.015787;0.009138;0.025812;0.009458;0.011204;0.025536;0.000519
+542;0.001364;0.002042;0.004809;0.015596;0.009192;0.025918;0.009608;0.011343;0.025793;0.000532
+544;0.001313;0.001974;0.00474;0.015346;0.009233;0.025983;0.009746;0.011467;0.026046;0.000546
+546;0.001262;0.001907;0.004669;0.015091;0.009271;0.026036;0.009881;0.01158;0.026297;0.00056
+548;0.001212;0.00184;0.004593;0.014816;0.009302;0.026068;0.010011;0.011681;0.026544;0.000574
+550;0.001164;0.001775;0.004516;0.014542;0.00933;0.026089;0.010136;0.011769;0.02679;0.000588
+552;0.001125;0.001721;0.004455;0.014323;0.009367;0.026138;0.010264;0.011853;0.027037;0.000603
+554;0.00109;0.001674;0.004402;0.014127;0.009406;0.026187;0.010384;0.01192;0.027284;0.000618
+556;0.001063;0.00164;0.004366;0.013988;0.009455;0.026258;0.010498;0.011968;0.027532;0.000634
+558;0.001041;0.001611;0.00434;0.013879;0.009509;0.026334;0.010604;0.011993;0.02778;0.00065
+560;0.001016;0.001579;0.004304;0.013735;0.009552;0.026373;0.010684;0.01199;0.028023;0.000667
+562;0.000994;0.001549;0.004273;0.013603;0.009594;0.026404;0.010738;0.011954;0.028264;0.000683
+564;0.000969;0.001516;0.004234;0.013443;0.009627;0.026412;0.010775;0.011902;0.028502;0.0007
+566;0.000941;0.001478;0.004185;0.013254;0.009652;0.026405;0.010802;0.011841;0.028736;0.000717
+568;0.00091;0.001434;0.004123;0.013026;0.009664;0.026378;0.010813;0.011773;0.028966;0.000735
+570;0.000875;0.001383;0.004048;0.012759;0.009661;0.026337;0.010806;0.0117;0.029191;0.000752
+572;0.000839;0.001329;0.003966;0.012482;0.009652;0.02632;0.010795;0.011637;0.029416;0.00077
+574;0.000794;0.001262;0.003855;0.012119;0.009614;0.026257;0.010775;0.011585;0.029631;0.000788
+576;0.000747;0.001189;0.003726;0.011699;0.009554;0.026155;0.01075;0.011547;0.029839;0.000805
+578;0.000696;0.00111;0.003578;0.011219;0.009469;0.025998;0.010724;0.011529;0.030035;0.000822
+580;0.000643;0.001028;0.00341;0.010674;0.009352;0.025756;0.010684;0.011517;0.030216;0.000838
+582;0.00059;0.000944;0.003226;0.01007;0.009199;0.025385;0.010601;0.011478;0.030376;0.000853
+584;0.000538;0.000863;0.003034;0.009438;0.009018;0.024914;0.010495;0.011427;0.030518;0.000867
+586;0.00049;0.000788;0.002842;0.008808;0.008818;0.024368;0.010374;0.011372;0.030642;0.00088
+588;0.000444;0.000715;0.002645;0.00816;0.008589;0.023722;0.010236;0.011314;0.030743;0.000892
+590;0.000398;0.000642;0.002435;0.007475;0.008317;0.022931;0.010061;0.011242;0.03081;0.000901
+592;0.000358;0.000577;0.002237;0.00683;0.008035;0.022095;0.009872;0.011159;0.030856;0.000909
+594;0.000319;0.000515;0.002038;0.006187;0.007724;0.021169;0.009662;0.011077;0.030869;0.000914
+596;0.000286;0.000463;0.001864;0.00563;0.007429;0.020287;0.009457;0.010995;0.030873;0.000919
+598;0.000258;0.000419;0.001713;0.005146;0.007152;0.019449;0.009248;0.010903;0.030868;0.000924
+600;0.000236;0.000383;0.001587;0.004748;0.006909;0.018704;0.009048;0.010796;0.030868;0.000929
+602;0.00022;0.000358;0.001496;0.00446;0.006727;0.018137;0.008882;0.010682;0.0309;0.000937
+604;0.000208;0.000338;0.001427;0.00424;0.006586;0.017685;0.008732;0.010546;0.030954;0.000946
+606;0.0002;0.000327;0.001388;0.004115;0.006513;0.017424;0.008617;0.010393;0.031056;0.00096
+608;0.000195;0.00032;0.001364;0.004035;0.006473;0.017252;0.008515;0.01022;0.03118;0.000975
+610;0.000193;0.000316;0.001354;0.003998;0.006468;0.017176;0.008436;0.010041;0.031332;0.000993
+612;0.000191;0.000314;0.00135;0.003982;0.006479;0.017139;0.008365;0.009858;0.031494;0.001012
+614;0.000189;0.000311;0.001343;0.003954;0.006479;0.017073;0.008284;0.009676;0.031644;0.00103
+616;0.000187;0.000309;0.001338;0.003935;0.006487;0.017028;0.00821;0.009507;0.031799;0.00105
+618;0.000185;0.000306;0.001331;0.003907;0.006486;0.016963;0.008131;0.009351;0.031944;0.001068
+620;0.000182;0.000303;0.001319;0.003867;0.006474;0.016867;0.008044;0.009205;0.032077;0.001086
+622;0.000179;0.000299;0.001308;0.003827;0.00646;0.016767;0.007955;0.00907;0.032205;0.001104
+624;0.000177;0.000295;0.001295;0.003786;0.006445;0.016665;0.007866;0.008947;0.032329;0.001122
+626;0.000174;0.000291;0.001283;0.003744;0.006428;0.016563;0.007779;0.00884;0.03245;0.00114
+628;0.000171;0.000287;0.001271;0.003707;0.006415;0.016475;0.007707;0.008761;0.032573;0.001159
+630;0.000169;0.000284;0.001259;0.003668;0.0064;0.016391;0.007651;0.008713;0.032693;0.001177
+632;0.000166;0.000279;0.001246;0.003625;0.006381;0.016299;0.007602;0.008684;0.032808;0.001196
+634;0.000163;0.000275;0.001233;0.003583;0.006363;0.016214;0.007565;0.008672;0.032921;0.001215
+636;0.000161;0.000271;0.001219;0.003541;0.006343;0.01613;0.007536;0.008669;0.033031;0.001233
+638;0.000158;0.000267;0.001205;0.003497;0.00632;0.016045;0.007514;0.008673;0.033137;0.001252
+640;0.000155;0.000262;0.001189;0.003449;0.006293;0.015952;0.007496;0.008684;0.033235;0.00127
+642;0.000152;0.000258;0.001172;0.003398;0.006262;0.015854;0.007482;0.008701;0.033328;0.001288
+644;0.000148;0.000253;0.001154;0.003345;0.006227;0.015745;0.007464;0.008719;0.033415;0.001306
+646;0.000145;0.000247;0.001133;0.003281;0.006181;0.015604;0.007438;0.008738;0.033487;0.001322
+648;0.000141;0.000241;0.001109;0.003207;0.006122;0.015419;0.007386;0.008739;0.03354;0.001336
+650;0.000137;0.000234;0.001081;0.00312;0.006047;0.015177;0.007292;0.008703;0.033568;0.001347
+652;0.000131;0.000225;0.001044;0.003008;0.00594;0.014839;0.007142;0.008609;0.033552;0.001353
+654;0.000126;0.000216;0.001006;0.00289;0.00582;0.014447;0.006935;0.008435;0.033509;0.001356
+656;0.00012;0.000206;0.000964;0.002758;0.005678;0.013979;0.006654;0.008158;0.033424;0.001354
+658;0.000114;0.000197;0.000923;0.002631;0.005534;0.013491;0.006322;0.007786;0.03332;0.001348
+660;0.00011;0.000189;0.000889;0.002523;0.005406;0.013028;0.005956;0.007337;0.033219;0.001343
+662;0.000106;0.000183;0.00086;0.00243;0.005292;0.012596;0.005587;0.006857;0.033124;0.001338
+664;0.000103;0.000178;0.00084;0.002362;0.005209;0.012239;0.005247;0.006394;0.033061;0.001336
+666;0.0001;0.000175;0.000824;0.002306;0.00514;0.01192;0.004937;0.005971;0.033013;0.001336
+668;0.000099;0.000172;0.000813;0.002264;0.005089;0.011659;0.004676;0.005612;0.032989;0.001339
+670;0.000097;0.00017;0.000803;0.00223;0.005048;0.011446;0.00447;0.005331;0.032984;0.001344
+672;0.000096;0.000168;0.000794;0.002199;0.005012;0.011273;0.004319;0.005132;0.03299;0.001351
+674;0.000095;0.000166;0.000787;0.002177;0.004988;0.01116;0.004224;0.005008;0.03302;0.001362
+676;0.000093;0.000164;0.000779;0.002156;0.004965;0.011086;0.004184;0.004961;0.033061;0.001374
+678;0.000092;0.000162;0.00077;0.002135;0.004942;0.011053;0.004203;0.005;0.033113;0.001388
+680;0.00009;0.000159;0.00076;0.002115;0.004921;0.011063;0.004288;0.00514;0.033177;0.001404
+682;0.000088;0.000156;0.000749;0.002096;0.004903;0.011124;0.004452;0.00541;0.03326;0.001424
+684;0.000087;0.000153;0.000738;0.002076;0.004886;0.011222;0.0047;0.005833;0.033356;0.001447
+686;0.000085;0.000149;0.000725;0.002054;0.004866;0.011346;0.005035;0.006433;0.033458;0.001472
+688;0.000083;0.000145;0.000711;0.002028;0.004843;0.011467;0.00544;0.007233;0.033559;0.0015
+690;0.00008;0.000141;0.000694;0.001988;0.004804;0.011529;0.005872;0.008232;0.033631;0.001525
+692;0.000078;0.000136;0.000677;0.001944;0.004756;0.011548;0.006302;0.009386;0.033684;0.001549
+694;0.000075;0.000132;0.000657;0.001888;0.004691;0.011492;0.006704;0.010699;0.033697;0.001568
+696;0.000072;0.000126;0.000634;0.001824;0.004608;0.011362;0.007056;0.012157;0.03367;0.001583
+698;0.000068;0.00012;0.000607;0.001745;0.004496;0.011123;0.0073;0.013631;0.033574;0.001587
+700;0.000064;0.000113;0.000575;0.001649;0.004349;0.010769;0.007419;0.015094;0.033396;0.00158
+702;0.00006;0.000107;0.000542;0.001553;0.004193;0.010368;0.007443;0.016484;0.033177;0.001566
+704;0.000056;0.0001;0.000508;0.001451;0.004017;0.009902;0.007357;0.01773;0.032893;0.001543
+706;0.000052;0.000092;0.000473;0.001346;0.003825;0.009388;0.007174;0.018804;0.032546;0.00151
+708;0.000048;0.000085;0.000437;0.001242;0.003625;0.008845;0.006915;0.019692;0.032144;0.00147
+710;0.000044;0.000078;0.000403;0.001141;0.003419;0.008286;0.006595;0.020373;0.03169;0.001424
+712;0.000041;0.000072;0.000369;0.001043;0.003212;0.007724;0.006236;0.020848;0.031189;0.001372
+714;0.000037;0.000066;0.000338;0.000952;0.003011;0.007181;0.005861;0.021134;0.030658;0.001317
+716;0.000034;0.00006;0.000309;0.000869;0.002815;0.006659;0.00548;0.02124;0.030099;0.00126
+718;0.000031;0.000055;0.000283;0.000792;0.00263;0.006166;0.005106;0.021181;0.029521;0.001202
+720;0.000028;0.00005;0.000258;0.000721;0.002451;0.005696;0.004738;0.020971;0.028916;0.001144
+722;0.000025;0.000045;0.000234;0.000652;0.002268;0.005222;0.004359;0.020583;0.028242;0.00108
+724;0.000023;0.000041;0.000213;0.000591;0.002099;0.00479;0.004006;0.020106;0.027564;0.001018
+726;0.000021;0.000037;0.000192;0.000533;0.001934;0.004372;0.003661;0.019495;0.02684;0.000955
+728;0.000019;0.000034;0.000175;0.000484;0.001787;0.004005;0.003355;0.018852;0.02614;0.000896
+730;0.000017;0.000031;0.000161;0.000443;0.001662;0.0037;0.003099;0.018247;0.025501;0.000845
+732;0.000016;0.000028;0.000148;0.000409;0.001552;0.003433;0.002873;0.017653;0.024897;0.000799
+734;0.000015;0.000027;0.000139;0.000383;0.001469;0.003235;0.002706;0.017192;0.024422;0.000764
+736;0.000014;0.000025;0.000133;0.000366;0.001413;0.003102;0.002595;0.01689;0.024095;0.000741
+738;0.000014;0.000025;0.000129;0.000354;0.001373;0.003007;0.002516;0.01668;0.02386;0.000726
+740;0.000013;0.000024;0.000126;0.000347;0.001349;0.00295;0.002469;0.016577;0.023726;0.000718
+742;0.000013;0.000024;0.000124;0.000342;0.001333;0.002915;0.00244;0.016531;0.02365;0.000714
+744;0.000013;0.000023;0.000123;0.000339;0.001322;0.002889;0.00242;0.016509;0.023601;0.000711
+746;0.000013;0.000023;0.000123;0.000337;0.001318;0.002878;0.002411;0.016527;0.023594;0.000712
+748;0.000013;0.000023;0.000122;0.000337;0.001315;0.002872;0.002408;0.01656;0.023604;0.000714
+750;0.000013;0.000023;0.000122;0.000336;0.001316;0.002873;0.00241;0.016608;0.023631;0.000717
+752;0.000013;0.000023;0.000122;0.000337;0.001318;0.002879;0.002417;0.016671;0.023674;0.000722
+754;0.000013;0.000023;0.000123;0.000338;0.001322;0.002889;0.002426;0.016739;0.023725;0.000727
+756;0.000013;0.000023;0.000123;0.00034;0.001328;0.002903;0.002439;0.016822;0.02379;0.000733
+758;0.000013;0.000023;0.000124;0.000341;0.001335;0.002918;0.002453;0.016905;0.023857;0.000739
+760;0.000013;0.000023;0.000125;0.000343;0.001342;0.002936;0.00247;0.016997;0.023933;0.000746
+762;0.000013;0.000024;0.000126;0.000347;0.001354;0.002962;0.002494;0.017114;0.024031;0.000755
+764;0.000013;0.000024;0.000127;0.000351;0.001368;0.002996;0.002524;0.017255;0.024148;0.000766
+766;0.000013;0.000024;0.000129;0.000355;0.001384;0.003034;0.002558;0.017412;0.024278;0.000777
+768;0.000013;0.000024;0.000131;0.000361;0.001403;0.003079;0.002598;0.01759;0.024426;0.000791
+770;0.000014;0.000025;0.000133;0.000367;0.001425;0.003131;0.002644;0.017788;0.024589;0.000805
+772;0.000014;0.000025;0.000136;0.000374;0.00145;0.00319;0.002696;0.018009;0.024769;0.000822
+774;0.000014;0.000026;0.000139;0.000382;0.001477;0.003255;0.002754;0.018248;0.024962;0.00084
+776;0.000014;0.000026;0.000142;0.000391;0.001506;0.003323;0.002814;0.018494;0.02516;0.000858
+778;0.000015;0.000027;0.000145;0.0004;0.001536;0.003394;0.002878;0.018749;0.025364;0.000878
+780;0.000015;0.000027;0.000148;0.000409;0.001569;0.003472;0.002947;0.01902;0.025578;0.000899
+782;0.000015;0.000028;0.000152;0.000419;0.001602;0.003551;0.003017;0.019293;0.025792;0.000921
+784;0.000016;0.000029;0.000155;0.000429;0.001636;0.003631;0.003089;0.019565;0.026003;0.000942
+786;0.000016;0.000029;0.000159;0.000439;0.001668;0.00371;0.003159;0.01983;0.026207;0.000964
+788;0.000016;0.00003;0.000162;0.000448;0.001698;0.003781;0.003222;0.020063;0.026386;0.000984
+790;0.000016;0.00003;0.000165;0.000456;0.001725;0.003846;0.00328;0.020278;0.026551;0.001002
+792;0.000017;0.000031;0.000167;0.000463;0.001747;0.0039;0.003329;0.020457;0.026688;0.001018
+794;0.000017;0.000031;0.000169;0.000469;0.001765;0.003942;0.003368;0.020598;0.026798;0.001032
+796;0.000017;0.000031;0.000171;0.000472;0.001777;0.003971;0.003394;0.020697;0.026877;0.001042
+798;0.000017;0.000031;0.000171;0.000474;0.001783;0.003984;0.003407;0.020748;0.02692;0.001048
+800;0.000017;0.000031;0.000171;0.000473;0.001781;0.003979;0.003403;0.02074;0.026922;0.00105
+"
+  
+  # Descrizioni testuali delle classi
+  descriptions <- c(
+    "1"  = "Extremely clear and oligotrophic indigo-blue waters with high reflectance in the short visible wavelengths",
+    "2"  = "Blue waters with a low presence of detritus and CDOM",
+    "3a" = "Turquoise waters with a moderate presence of phytoplankton, detritus, and CDOM.",
+    "3b" = "Turquoise waters with a moderate presence of phytoplankton, detritus, and CDOM (characterized by a strong scattering and little absorbing particles like in the case of Coccolithophore blooms)",
+    "4a" = "Greenish water found in coastal and inland environments, with high biomass (reflectance in short wavelengths is usually depressed by the absorption of particles and CDOM)",
+    "4b" = "Greenish water found in coastal and inland environments, with high biomass (exhibits phytoplankton blooms with high scattering coefficients, e.g., Coccolithophore bloom)",
+    "5a" = "Green eutrophic water, with significantly high phytoplankton biomass (exhibits a bimodal reflectance shape with typical peaks at ~560 and ~709 nm)",
+    "5b" = "Green hyper-eutrophic water, with significantly high phytoplankton biomass (exhibits a reflectance plateau in the Near Infrared Region)",
+    "6"  = "Bright brown water with high detritus concentrations, which has a high reflectance determined by scattering",
+    "7"  = "Dark brown to black water with very high CDOM concentration, which has low reflectance in the entire visible range and is dominated by absorption"
+  )
+  
+  standard_owt_ref <- read.csv(text = owt_string, sep = ";", check.names = FALSE)
+  
+  # Identify the wavelengths common between the WISPstation and the OWT references
+  nm_cols <- grep("^nm_", colnames(data), value = TRUE)
+  wv_data <- gsub("nm_", "", nm_cols)
+  wv_ref <- as.character(standard_owt_ref$wavelen)
+  wv_common_num <- intersect(wv_data, wv_ref)
+  wv_common_cols <- paste0("nm_", wv_common_num)
+  
+  if (length(wv_common_num) < 10) {
+    warning("⚠️ Few common bands found. OWT results potentially uncertain.")
+  }
+  
+  m_obs <- as.matrix(data[, wv_common_cols])
+  m_ref <- t(as.matrix(standard_owt_ref[standard_owt_ref$wavelen %in% wv_common_num, -1])) 
+  owt_labels <- rownames(m_ref)
+  
+  # Normalization of spectral signatures
+  norm_v <- function(m) {
+    m[m < 0] <- 0
+    divisor <- sqrt(rowSums(m^2))
+    divisor[divisor == 0] <- 1
+    return(m / divisor)
+  }
+  
+  m_obs_n <- norm_v(m_obs)
+  m_ref_n <- norm_v(m_ref)
+  
+  # Probability calculation (Fuzzy Membership)
+  # Calculation of the scalar product (Cosine Similarity)
+  sim_matrix <- m_obs_n %*% t(m_ref_n)
+  
+  # Softmax to obtain Membership Grades
+  p <- 25
+  exp_sim <- exp(sim_matrix * p)
+  membership_matrix <- exp_sim / rowSums(exp_sim)
+  
+  # Assigning results
+  max_idx <- apply(membership_matrix, 1, which.max)
+  selected_classes <- owt_labels[max_idx]
+  
+  data$OWT_class <- selected_classes
+  data$OWT_description <- descriptions[selected_classes]
+  data$OWT_score <- round(apply(membership_matrix, 1, max), 3)
+  data$OWT_similarity <- round(apply(sim_matrix, 1, max), 3)
+  
+  return(data)
+}
+
 
 
 
@@ -1634,6 +1966,10 @@ wisp_calc_dom_wave <- function(data) {
 #' the `Hue_Angle`values. Default is `FALSE`.
 #' @param legend_dom_wavelength A `logical`. If `TRUE`, the plot legend includes 
 #' the `Dominant_Wavelength`values. Default is `FALSE`.
+#' @param legend_OWT_class A `logical`. If `TRUE`, the plot legend includes 
+#' the `OWT_class`. Default is `FALSE`.
+#' @param legend_OWT_score A `logical`. If `TRUE`, the plot legend includes 
+#' the `OWT_score` (membership grade). Default is `FALSE`.
 #' @return an interactive plot showing the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
@@ -1664,7 +2000,9 @@ wisp_calc_dom_wave <- function(data) {
 #'   legend_NDCI = FALSE,
 #'   legend_mishra_CHL = FALSE,
 #'   legend_hue_angle = FALSE, 
-#'   legend_dom_wavelength = FALSE   
+#'   legend_dom_wavelength = FALSE,
+#'   legend_OWT_class = FALSE,
+#'   legend_OWT_score = FALSE  
 #' )
 #' }
 #' ## End (Not run)
@@ -1686,7 +2024,9 @@ wisp_plot_reflectance_data <- function(
     legend_NDCI           = FALSE,
     legend_mishra_CHL     = FALSE,
     legend_hue_angle      = FALSE, 
-    legend_dom_wavelength = FALSE   
+    legend_dom_wavelength = FALSE,
+    legend_OWT_class      = FALSE,
+    legend_OWT_score      = FALSE
 ) {
   
   # Convert columns with ‘units’ to numeric
@@ -1699,24 +2039,27 @@ wisp_plot_reflectance_data <- function(
   
   # Creation of the 'products_info' column
   data$products_info <- mapply(
-    function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, gons_chl, gons740_chl, ndci, mishra_chl, hue, dom_wv) {
+    function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, 
+             gons_chl, gons740_chl, ndci, mishra_chl, hue, dom_wv, owt_c, owt_s) {
       paste(
         c(
-          if (legend_TSM && !is.null(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
-          if (legend_Chla && !is.null(chla)) paste("<b>Chla [mg/m3]:</b>", chla),
-          if (legend_Kd && !is.null(kd)) paste("<b>Kd [1/m]:</b>", kd),
-          if (legend_cpc && !is.null(cpc)) paste("<b>Cpc [mg/m3]:</b>", cpc),
-          if (legend_scatt && !is.null(scatt)) paste("<b>Scatt [1/sr]:</b>", scatt),
-          if (legend_ratio && !is.null(ratio)) paste("<b>Ratio:</b>", ratio),
-          if (legend_novoa_SPM && !is.null(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
-          if (legend_novoa_TUR && !is.null(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
-          if (legend_jiang_TSS && !is.null(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
-          if (legend_gons_CHL && !is.null(gons_chl)) paste("<b>Gons_CHL [mg/m3]:</b>", gons_chl),
-          if (legend_gons740_CHL && !is.null(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
-          if (legend_NDCI && !is.null(ndci)) paste("<b>NDCI:</b>", ndci),
-          if (legend_mishra_CHL && !is.null(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
-          if (legend_hue_angle && !is.null(hue) && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
-          if (legend_dom_wavelength && !is.null(dom_wv) && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv)
+          if (legend_TSM && !is.na(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
+          if (legend_Chla && !is.na(chla)) paste("<b>Chla [mg/m3]:</b>", chla),
+          if (legend_Kd && !is.na(kd)) paste("<b>Kd [1/m]:</b>", kd),
+          if (legend_cpc && !is.na(cpc)) paste("<b>Cpc [mg/m3]:</b>", cpc),
+          if (legend_scatt && !is.na(scatt)) paste("<b>Scatt [1/sr]:</b>", scatt),
+          if (legend_ratio && !is.na(ratio)) paste("<b>Ratio:</b>", ratio),
+          if (legend_novoa_SPM && !is.na(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
+          if (legend_novoa_TUR && !is.na(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
+          if (legend_jiang_TSS && !is.na(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
+          if (legend_gons_CHL && !is.na(gons_chl)) paste("<b>Gons_CHL [mg/m3]:</b>", gons_chl),
+          if (legend_gons740_CHL && !is.na(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
+          if (legend_NDCI && !is.na(ndci)) paste("<b>NDCI:</b>", ndci),
+          if (legend_mishra_CHL && !is.na(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
+          if (legend_hue_angle && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
+          if (legend_dom_wavelength && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv),
+          if (legend_OWT_class && !is.na(owt_c)) paste("<b>OWT Class:</b>", owt_c),
+          if (legend_OWT_score && !is.na(owt_s)) paste("<b>OWT Score:</b>", owt_s)
         ),
         collapse = "<br>"
       )
@@ -1735,7 +2078,9 @@ wisp_plot_reflectance_data <- function(
     ndci        = if ("NDCI"                 %in% names(data)) data$NDCI else NA,
     mishra_chl  = if ("Mishra.CHL"           %in% names(data)) data$Mishra.CHL else NA,
     hue         = if ("hue_angle"            %in% names(data)) data$hue_angle else NA,      
-    dom_wv      = if ("dominant_wavelength"  %in% names(data)) data$dominant_wavelength else NA 
+    dom_wv      = if ("dominant_wavelength"  %in% names(data)) data$dominant_wavelength else NA,
+    owt_c       = if ("OWT_class"            %in% names(data)) data$OWT_class else NA,
+    owt_s       = if ("OWT_score"            %in% names(data)) data$OWT_score else NA
   )
   
   instr_name <- if("instrument.name" %in% names(data)) data$instrument.name[1] else "Unknown"
@@ -1759,7 +2104,8 @@ wisp_plot_reflectance_data <- function(
   
   # Interactive legend (Tooltip)
   data_2$tooltip_text <- paste0(
-    data_2$color_group, "<br>", 
+    data_2$color_group, 
+    "<br><br>", 
     "<b>Wavelength:</b> ", data_2$wavelength, " nm<br>",
     "<b>Rrs:</b> ", round(data_2$Rrs, 6), " [1/sr]"
   )
@@ -1842,7 +2188,8 @@ wisp_plot_comparison <- function(
     legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = TRUE, legend_cpc = TRUE,
     legend_scatt = TRUE, legend_ratio = TRUE, legend_novoa_SPM = TRUE,
     legend_novoa_TUR = TRUE, legend_jiang_TSS = TRUE, legend_gons_CHL = TRUE,
-    legend_gons740_CHL = TRUE, legend_NDCI = TRUE, legend_mishra_CHL = TRUE
+    legend_gons740_CHL = TRUE, legend_NDCI = TRUE, legend_mishra_CHL = TRUE,
+    legend_OWT_class = TRUE, legend_OWT_score = TRUE
   )
   
   # Assigning parameters
