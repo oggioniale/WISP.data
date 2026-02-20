@@ -4,14 +4,14 @@
 \alias{wisp_runApp}
 \title{Run shiny app for get and visualize WISP data}
 \usage{
-wisp_runApp(...)
+wisp_runApp(stations = c("WISPstation012", "WISPstation013"))
 }
 \arguments{
 \item{...}{other params passed to \code{shiny::runApp}}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function run the Shiny App
+This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 }
 \examples{
 # example code

@@ -14,6 +14,10 @@ wisp_qc_reflectance_data(
   calc_SPM = TRUE,
   calc_TUR = TRUE,
   calc_TSS = TRUE,
+  calc_gons = TRUE,
+  calc_gons740 = TRUE,
+  calc_NDCI = TRUE,
+  calc_mishra = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -48,6 +52,18 @@ turbidity (FNU) in according to Novoa et al., (2017). Default is \code{TRUE}.}
 \item{calc_TSS}{A \code{logical}. If \code{TRUE}, the function calculates the
 TSS concentrations in according to Jiang et al., (2021). Default is \code{TRUE}.}
 
+\item{calc_gons}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Gons et al. (2002) algorithm (NIR ~782 nm). Default is \code{TRUE}.}
+
+\item{calc_gons740}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Gons et al. (2002) algorithm (NIR ~740 nm). Default is \code{TRUE}.}
+
+\item{calc_NDCI}{A \code{logical}. If \code{TRUE}, the function calculates The Normalised
+Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is \code{TRUE}.}
+
+\item{calc_mishra}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Mishra and Mishra (2012) algorithm. Default is \code{TRUE}.}
+
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
 \item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
@@ -73,12 +89,15 @@ reflect_data_qc <- wisp_qc_reflectance_data(
   qa_threshold    = 0.5,
   qwip_threshold  = 0.2,
   calc_scatt = TRUE,
-  calc_SPM = FALSE,
+  calc_SPM = TRUE,
   calc_TUR = TRUE,
   calc_TSS = TRUE,
+  calc_gons = TRUE,
+  calc_gons740 = TRUE,
+  calc_NDCI = TRUE,
+  calc_mishra = FALSE,
   save_csv = FALSE,
   out_dir = "outputs"
-  QA_ref_csv = "path/QA_raw_data_nRrs_Wei2016.csv"
 )
 }
 ## End (Not run)

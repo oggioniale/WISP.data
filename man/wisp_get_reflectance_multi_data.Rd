@@ -60,6 +60,17 @@ reflect_data <- wisp_get_reflectance_multi_data(
   save_csv = FALSE,
   out_dir = "outputs"
 )
+
+# NA data on 2024-09-01
+reflect_data <- wisp_get_reflectance_multi_data(
+  time_from = "2024-08-31T09:00",
+  time_to = "2024-09-02T14:00",
+  station = "WISPstation012",
+  userid = userid,
+  pwd = pwd,
+  save_csv = FALSE,
+  out_dir = "outputs"
+)
 }
 ## End (Not run)
 

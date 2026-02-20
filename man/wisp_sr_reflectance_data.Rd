@@ -10,6 +10,10 @@ wisp_sr_reflectance_data(
   calc_SPM = TRUE,
   calc_TUR = TRUE,
   calc_TSS = TRUE,
+  calc_gons = TRUE,
+  calc_gons740 = TRUE,
+  calc_NDCI = TRUE,
+  calc_mishra = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -29,6 +33,18 @@ turbidity (FNU) in according to Novoa et al., (2017). Default is \code{TRUE}.}
 
 \item{calc_TSS}{A \code{logical}. If \code{TRUE}, the function calculates the
 TSS concentrations in according to Jiang et al., (2021). Default is \code{TRUE}.}
+
+\item{calc_gons}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Gons et al. (2002) algorithm (NIR ~782 nm). Default is \code{TRUE}.}
+
+\item{calc_gons740}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Gons et al. (2002) algorithm (NIR ~740 nm). Default is \code{TRUE}.}
+
+\item{calc_NDCI}{A \code{logical}. If \code{TRUE}, the function calculates The Normalised
+Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is \code{TRUE}.}
+
+\item{calc_mishra}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
+using Mishra and Mishra (2012) algorithm. Default is \code{TRUE}.}
 
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
@@ -55,6 +71,10 @@ reflect_data_sr <- wisp_sr_reflectance_data(
   calc_SPM = TRUE,
   calc_TUR = TRUE,
   calc_TSS = TRUE,
+  calc_gons  = TRUE,
+  calc_gons740 = TRUE,
+  calc_NDCI = TRUE,
+  calc_mishra = FALSE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
