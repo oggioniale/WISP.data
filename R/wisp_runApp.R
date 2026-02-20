@@ -1,6 +1,6 @@
 #' Run shiny app for get and visualize WISP data
 #' @description `r lifecycle::badge("experimental")`
-#' This function run the Shiny App
+#' This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @param ... other params passed to `shiny::runApp`
 #' @import shiny
@@ -13,7 +13,7 @@
 #' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
 #' 
 ### wisp_runApp
-wisp_runApp_test <- function(
+wisp_runApp <- function(
     stations = c("WISPstation012", "WISPstation013")
 ) {
   
