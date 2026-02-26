@@ -32,8 +32,8 @@ for the QC data plot (legend). Default is \code{NULL}.}
 for the SR data plot (legend). Default is \code{NULL}.}
 }
 \value{
-A \code{plotly} subplot object comparing the spectral signatures. If only
-\code{raw_data} is provided or valid, a single plot is returned.
+A \code{plotly} subplot object comparing the spectral signatures (Raw vs QC
+vs SR). If only \code{raw_data} is provided or valid, a single plot is returned.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{wisp_sr_reflectance_data}
 \alias{wisp_sr_reflectance_data}
-\title{SUNGLINT Removal (SR) for WISPstation reflectance data}
+\title{Sky-glint Removal (SR) for WISPstation reflectance data}
 \usage{
 wisp_sr_reflectance_data(
   qc_data,
@@ -71,13 +71,13 @@ significantly from the typical range of that class. Default is \code{TRUE}.}
 Default is "outputs" within the working directory.}
 }
 \value{
-A tibble with the spectral signatures after the SR operation and,
-if parameter \code{save_out_sr} is \code{TRUE}, the function saves the reflectance data
-in a CSV file.
+A \code{tibble} with the spectral signatures after the SR operation
+and all the extra parameters that were requested. If parameter save_csv is
+\code{TRUE}, the function saves the reflectance data in a CSV file.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function implements a Sky Glint Removal algorithm based on the methodology
+This function implements a sky-glint Removal algorithm based on the methodology
 proposed by Jiang et al. (2020). The function operates on spectra that have
 already been filtered through the Quality Control process and applies a
 correction to obtain glint-corrected remote sensing reflectance.

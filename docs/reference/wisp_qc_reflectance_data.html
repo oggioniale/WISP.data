@@ -184,8 +184,11 @@ Default is "outputs" within the working directory.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>tibble</code> with the spectral signatures that have passed QC operation. In addition,
-a message containing the reason behind the elimination of each anomalous spectral signature</p>
+    <p>A <code>tibble</code> with the spectral signatures that have passed QC operation
+and all the extra parameters that were requested. In addition, a message
+containing the reason behind the elimination of each anomalous spectral signature.
+If parameter save_csv is <code>TRUE</code>, the function saves the reflectance data
+in a CSV file.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

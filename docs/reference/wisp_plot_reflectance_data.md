@@ -136,7 +136,7 @@ wisp_plot_reflectance_data(
 
 ## Value
 
-an interactive plot showing the spectral signatures of the reflectance
+An interactive plot showing the spectral signatures of the reflectance
 data.
 
 ## Author

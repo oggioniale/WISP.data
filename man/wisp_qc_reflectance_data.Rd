@@ -91,8 +91,11 @@ significantly from the typical range of that class. Default is \code{TRUE}.}
 Default is "outputs" within the working directory.}
 }
 \value{
-A \code{tibble} with the spectral signatures that have passed QC operation. In addition,
-a message containing the reason behind the elimination of each anomalous spectral signature
+A \code{tibble} with the spectral signatures that have passed QC operation
+and all the extra parameters that were requested. In addition, a message
+containing the reason behind the elimination of each anomalous spectral signature.
+If parameter save_csv is \code{TRUE}, the function saves the reflectance data
+in a CSV file.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}

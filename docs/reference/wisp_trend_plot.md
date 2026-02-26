@@ -1,4 +1,4 @@
-# Creates a temporal trend plot of one or more water quality parameters
+# Create a temporal trend plot of one or more parameters
 
 **\[stable\]** This function generates interactive temporal plots for
 one or more parameters. It is designed to handle both high-frequency

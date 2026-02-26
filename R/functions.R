@@ -385,8 +385,11 @@ wisp_get_reflectance_multi_data <- function(
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
-#' @return A `tibble` with the spectral signatures that have passed QC operation. In addition,
-#' a message containing the reason behind the elimination of each anomalous spectral signature
+#' @return A `tibble` with the spectral signatures that have passed QC operation 
+#' and all the extra parameters that were requested. In addition, a message 
+#' containing the reason behind the elimination of each anomalous spectral signature.
+#' If parameter save_csv is `TRUE`, the function saves the reflectance data 
+#' in a CSV file.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr filter if_all all_of rowwise ungroup mutate across
@@ -823,9 +826,9 @@ wisp_qc_reflectance_data <- function(
   return(reflectance_data_filtered)
 }
 
-#' SUNGLINT Removal (SR) for WISPstation reflectance data
+#' Sky-glint Removal (SR) for WISPstation reflectance data
 #' @description `r lifecycle::badge("stable")`
-#' This function implements a Sky Glint Removal algorithm based on the methodology 
+#' This function implements a sky-glint Removal algorithm based on the methodology 
 #' proposed by Jiang et al. (2020). The function operates on spectra that have 
 #' already been filtered through the Quality Control process and applies a 
 #' correction to obtain glint-corrected remote sensing reflectance. 
@@ -868,9 +871,9 @@ wisp_qc_reflectance_data <- function(
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
 #' Default is "outputs" within the working directory.
-#' @return A tibble with the spectral signatures after the SR operation and,
-#' if parameter `save_out_sr` is `TRUE`, the function saves the reflectance data
-#' in a CSV file.
+#' @return A `tibble` with the spectral signatures after the SR operation 
+#' and all the extra parameters that were requested. If parameter save_csv is 
+#' `TRUE`, the function saves the reflectance data in a CSV file.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr mutate select all_of across
@@ -2319,7 +2322,7 @@ wisp_calc_OWT_class <- function(data) {
 #' the `OWT_score` (membership grade). Default is `FALSE`.
 #' @param legend_OWT_z_dist A `logical`. If `TRUE`, the plot legend includes 
 #' the `OWT_z_dist` (statistical distance). Default is `FALSE`.
-#' @return an interactive plot showing the spectral signatures of the
+#' @return An interactive plot showing the spectral signatures of the
 #' reflectance data.
 #' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
@@ -2502,8 +2505,8 @@ wisp_plot_reflectance_data <- function(
 #' for the QC data plot (legend). Default is `NULL`.
 #' @param sr_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
 #' for the SR data plot (legend). Default is `NULL`.
-#' @return A `plotly` subplot object comparing the spectral signatures. If only 
-#' `raw_data` is provided or valid, a single plot is returned.
+#' @return A `plotly` subplot object comparing the spectral signatures (Raw vs QC
+#' vs SR). If only `raw_data` is provided or valid, a single plot is returned.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom plotly subplot layout
@@ -2605,7 +2608,7 @@ wisp_plot_comparison <- function(
   return(final_plot)
 }
 
-#' Creates a temporal trend plot of one or more water quality parameters
+#' Create a temporal trend plot of one or more parameters
 #' @description `r lifecycle::badge("stable")`
 #' This function generates interactive temporal plots for one or more parameters. 
 #' It is designed to handle both high-frequency measurements within a single day 

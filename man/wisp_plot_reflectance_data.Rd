@@ -85,7 +85,7 @@ the \code{OWT_score} (membership grade). Default is \code{FALSE}.}
 the \code{OWT_z_dist} (statistical distance). Default is \code{FALSE}.}
 }
 \value{
-an interactive plot showing the spectral signatures of the
+An interactive plot showing the spectral signatures of the
 reflectance data.
 }
 \description{

@@ -139,9 +139,11 @@ wisp_qc_reflectance_data(
 
 ## Value
 
-A `tibble` with the spectral signatures that have passed QC operation.
-In addition, a message containing the reason behind the elimination of
-each anomalous spectral signature
+A `tibble` with the spectral signatures that have passed QC operation
+and all the extra parameters that were requested. In addition, a message
+containing the reason behind the elimination of each anomalous spectral
+signature. If parameter save_csv is `TRUE`, the function saves the
+reflectance data in a CSV file.
 
 ## Author
 

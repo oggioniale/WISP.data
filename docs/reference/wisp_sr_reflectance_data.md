@@ -1,6 +1,6 @@
-# SUNGLINT Removal (SR) for WISPstation reflectance data
+# Sky-glint Removal (SR) for WISPstation reflectance data
 
-**\[stable\]** This function implements a Sky Glint Removal algorithm
+**\[stable\]** This function implements a sky-glint Removal algorithm
 based on the methodology proposed by Jiang et al. (2020). The function
 operates on spectra that have already been filtered through the Quality
 Control process and applies a correction to obtain glint-corrected
@@ -111,9 +111,9 @@ wisp_sr_reflectance_data(
 
 ## Value
 
-A tibble with the spectral signatures after the SR operation and, if
-parameter `save_out_sr` is `TRUE`, the function saves the reflectance
-data in a CSV file.
+A `tibble` with the spectral signatures after the SR operation and all
+the extra parameters that were requested. If parameter save_csv is
+`TRUE`, the function saves the reflectance data in a CSV file.
 
 ## Author
 

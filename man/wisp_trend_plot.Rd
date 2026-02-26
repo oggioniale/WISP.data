@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{wisp_trend_plot}
 \alias{wisp_trend_plot}
-\title{Creates a temporal trend plot of one or more water quality parameters}
+\title{Create a temporal trend plot of one or more parameters}
 \usage{
 wisp_trend_plot(
   data,

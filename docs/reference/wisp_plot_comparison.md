@@ -58,8 +58,9 @@ wisp_plot_comparison(
 
 ## Value
 
-A `plotly` subplot object comparing the spectral signatures. If only
-`raw_data` is provided or valid, a single plot is returned.
+A `plotly` subplot object comparing the spectral signatures (Raw vs QC
+vs SR). If only `raw_data` is provided or valid, a single plot is
+returned.
 
 ## Author
 
