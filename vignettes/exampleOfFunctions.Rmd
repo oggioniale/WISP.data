@@ -39,20 +39,21 @@ will save the quality checked reflectance data as a .csv file in
 the 'output' folder within the working directory.
 
 User-configurable Parameters:
-•	maxPeak (numeric): maximum allowed reflectance peak threshold. Default: 0.05;
-•	maxPeak_blue (numeric): maximum allowed threshold for the blue spectral region. Default: 0.02;
-•	qa_threshold (numeric): maximum threshold for the QA index. Default: 0.5;
-•	qwip_threshold (numeric): minimum threshold for the QWIP index. Default: 0.2;
-•	calc_scatt (logical): if TRUE, computes scattering parameters and band ratios;
-•	calc_SPM (logical): if TRUE, computes SPM concentration according to Novoa et al. (2017);
-•	calc_TUR (logical): if TRUE, computes TUR concentration according to Novoa et al. (2017);
-•	calc_TSS (logical): if TRUE, computes SPM concentration according to Jiang et al. (2021);
-•	calc_gons (logical): if TRUE, computes CHL concentration according to Gons et al. (2002); 
-•	calc_gons740 (logical): if TRUE, computes CHL concentration according to Gons et al. (2002);
-•	calc_NDCI (logical): if TRUE, computes NDCI index according to Mishra et al. (2012);
-•	calc_mishra (logical): if TRUE, computes CHL concentration according to Mishra et al. (2012);
-•	calc_dom_wave (logical): if TRUE, computes dominant wavelength and Hue Angle;
-•	calc_OWT (logical): if TRUE, computes Optical Water Type classification.
+
+- **maxPeak** (numeric): maximum allowed reflectance peak threshold. Default: 0.05
+- **maxPeak_blue** (numeric): maximum allowed threshold for the blue region. Default: 0.02
+- **qa_threshold** (numeric): maximum threshold for the QA index. Default: 0.5
+- **qwip_threshold** (numeric): minimum threshold for the QWIP index. Default: 0.2
+- **calc_scatt** (logical): if `TRUE`, computes scattering parameters and band ratios
+- **calc_SPM** (logical): if `TRUE`, computes SPM concentration according to Novoa et al. (2017)
+- **calc_TUR** (logical): if `TRUE`, computes TUR concentration according to Novoa et al. (2017)
+- **calc_TSS** (logical): if `TRUE`, computes SPM concentration according to Jiang et al. (2021)
+- **calc_gons** (logical): if `TRUE`, computes CHL concentration according to Gons et al. (2002)
+- **calc_gons740** (logical): if `TRUE`, computes CHL concentration according to Gons et al. (2002)
+- **calc_NDCI** (logical): if `TRUE`, computes NDCI index according to Mishra et al. (2012)
+- **calc_mishra** (logical): if `TRUE`, computes CHL concentration according to Mishra et al. (2012)
+- **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength and Hue Angle
+- **calc_OWT** (logical): if `TRUE`, computes Optical Water Type classification
 
 ```{r echo = TRUE, results = 'hide', warning=FALSE, message=FALSE}
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
@@ -144,16 +145,17 @@ will save the reflectance data with the sunglint removed as a .csv file in
 the 'output' folder within the working directory.
 
 User-configurable Parameters:
-•	calc_scatt (logical): if TRUE, computes scattering parameters and band ratios;
-•	calc_SPM (logical): if TRUE, computes SPM concentration according to Novoa et al. (2017);
-•	calc_TUR (logical): if TRUE, computes TUR concentration according to Novoa et al. (2017);
-•	calc_TSS (logical): if TRUE, computes SPM concentration according to Jiang et al. (2021);
-•	calc_gons (logical): if TRUE, computes CHL concentration according to Gons et al. (2002); 
-•	calc_gons740 (logical): if TRUE, computes CHL concentration according to Gons et al. (2002);
-•	calc_NDCI (logical): if TRUE, computes NDCI index according to Mishra et al. (2012);
-•	calc_mishra (logical): if TRUE, computes CHL concentration according to Mishra et al. (2012);
-•	calc_dom_wave (logical): if TRUE, computes dominant wavelength and Hue Angle;
-•	calc_OWT (logical): if TRUE, computes Optical Water Type classification.
+
+- **calc_scatt** (logical): if `TRUE`, computes scattering parameters and band ratios
+- **calc_SPM** (logical): if `TRUE`, computes SPM concentration according to Novoa et al. (2017)
+- **calc_TUR** (logical): if `TRUE`, computes TUR concentration according to Novoa et al. (2017)
+- **calc_TSS** (logical): if `TRUE`, computes SPM concentration according to Jiang et al. (2021)
+- **calc_gons** (logical): if `TRUE`, computes CHL concentration according to Gons et al. (2002)
+- **calc_gons740** (logical): if `TRUE`, computes CHL concentration according to Gons et al. (2002)
+- **calc_NDCI** (logical): if `TRUE`, computes NDCI index according to Mishra et al. (2012)
+- **calc_mishra** (logical): if `TRUE`, computes CHL concentration according to Mishra et al. (2012)
+- **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength and Hue Angle
+- **calc_OWT** (logical): if `TRUE`, computes Optical Water Type classification
 
 ```{r echo = TRUE, results = 'hide', warning=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
@@ -242,12 +244,13 @@ fig_comparison
 ## Plot the temporal trend
 
 In this function, you can modify the following variables:
-•	params (character vector): list of parameters to visualize;
-•	aggregate (character): defines how temporal aggregation is applied:
-   -	none: displays all individual measurements (ideal for single-day analysis)
-   -	daily_mean: calculates the daily mean and adds a ribbon representing the standard deviation
-   -	daily_median: calculates the daily median
-•	merge_plot (logical): if `TRUE`, parameters sharing the same unit are overlaid in a single plot;
+
+- **params** (character vector): list of parameters to visualize
+- **aggregate** (character): defines how temporal aggregation is applied:
+  - **none**: displays all individual measurements (ideal for single-day analysis)
+  - **daily_mean**: calculates the daily mean and adds a ribbon (standard deviation)
+  - **daily_median**: calculates the daily median
+- **merge_plot** (logical): if `TRUE`, parameters sharing the same unit are overlaid in a single plot
 
 ```{r, warning=FALSE, message=TRUE, out.width="100%"}
 fig_trend <- WISP.data::wisp_trend_plot(
