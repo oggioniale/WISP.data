@@ -37,8 +37,13 @@ A \code{plotly} subplot object comparing the spectral signatures. If only
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function creates an interactive side-by-side comparison of different
-processing levels of WISPstation reflectance data using plotly.
+This function creates an interactive side-by-side visual comparison of the different
+WISPstation data processing levels. Using plotly submodules, it enables the
+visualization of up to three aligned plots within a single interactive window:
+raw data downloaded directly from WISPstation, processed data after QC,
+processed data after SR. This provides a powerful tool for visually assessing
+how filtering and correction algorithms modify spectral signatures, remove
+artifacts, and improve data quality.
 }
 \examples{
 # example code

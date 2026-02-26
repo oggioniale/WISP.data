@@ -62,8 +62,11 @@ selected parameters, with optional ribbons for standard deviation.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function creates an interactive plot of the time trend of one or
-more water quality parameters associated with spectral signatures
+This function generates interactive temporal plots for one or more parameters.
+It is designed to handle both high-frequency measurements within a single day
+and long-term time series spanning multiple months. The function can aggregate
+data (daily mean or median) and allows comparison of multiple parameters in
+the same plot if they share the same unit of measurement.
 }
 \examples{
 # Example usage

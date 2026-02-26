@@ -1,0 +1,39 @@
+# WISP.data
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg)](https://doi.org/10.5281/zenodo.16893167)
+
+`WISP.data` package is designed to store R functions for downloading,
+performing quality control (QC), and visualizing data from the WISP
+station.
+
+# Package index
+
+## All functions
+
+- [`wisp_get_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_get_reflectance_data.md)
+  **\[stable\]** : Get data of reflectance (level2) from WISPstation for
+  a specific date
+- [`wisp_get_reflectance_multi_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_get_reflectance_multi_data.md)
+  **\[stable\]** : Get data of reflectance (level2) from WISPstation for
+  multiple dates
+- [`wisp_qc_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_qc_reflectance_data.md)
+  **\[stable\]** : Quality Control (QC) for WISPstation reflectance data
+- [`wisp_sr_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_sr_reflectance_data.md)
+  **\[stable\]** : SUNGLINT Removal (SR) for WISPstation reflectance
+  data
+- [`wisp_plot_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_reflectance_data.md)
+  **\[stable\]** : Create a plot of reflectance data
+- [`wisp_plot_comparison()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_comparison.md)
+  **\[stable\]** : Comparison plot of Raw vs QC vs SR reflectance data
+- [`wisp_trend_plot()`](https://github.com/oggioniale/WISP.data/reference/wisp_trend_plot.md)
+  **\[stable\]** : Creates a temporal trend plot of one or more water
+  quality parameters
+- [`wisp_runApp()`](https://github.com/oggioniale/WISP.data/reference/wisp_runApp.md)
+  **\[experimental\]** : Run shiny app for get and visualize WISP data
+
+# Articles
+
+### All vignettes
+
+- [Example of WISP.data
+  functions](https://github.com/oggioniale/WISP.data/articles/exampleOfFunctions.md):
