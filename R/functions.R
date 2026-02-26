@@ -1,7 +1,12 @@
 #' Get data of reflectance (level2) from WISPstation for a specific date
 #' @description `r lifecycle::badge("stable")`
-#' This function obtains the reflectance data from WISPstation for a
-#' specific date.
+#' This function represents the main entry point for data acquisition within the 
+#' WISP.data package. It connects to the official Water Insight APIs to download 
+#' spectral reflectance measurements for a user-defined time interval. 
+#' The function handles authentication queries the remote server and returns 
+#' the retrieved data in a structured tibble format. In addition to hyperspectral 
+#' reflectance data (350–900 nm), the function also retrieves the water quality 
+#' parameters natively computed by the WISPstation, including: TSM, Chla, Kd, and cpc.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
 #' @param time_from A `character`. It is the date and time from which the data
@@ -178,7 +183,7 @@ wisp_get_reflectance_data <- function(
           waterquality.chla = units::set_units(waterquality.chla, "mg/m3"),
           waterquality.kd = units::set_units(waterquality.kd, "1/m"),
           waterquality.cpc = units::set_units(waterquality.cpc, "mg/m3"),
-          level2.quality = as.character(level2.quality) # Conversion without units of measurement
+          level2.quality = as.character(level2.quality)
         ) |>
         dplyr::rename_with(
           ~ stringr::str_c(
@@ -207,8 +212,11 @@ wisp_get_reflectance_data <- function(
 
 #' Get data of reflectance (level2) from WISPstation for multiple dates
 #' @description `r lifecycle::badge("stable")`
-#' This function obtains the reflectance data from WISPstation for
-#' multiple dates.
+#' This function acts as an iterative wrapper around `wisp_get_reflectance_data()`. 
+#' It is specifically designed to download extended time series that exceed the 
+#' limits of a single API request. The function automatically splits the user-defined 
+#' time interval into daily blocks, performs sequential downloads, and aggregates 
+#' all retrieved data into a single, coherent tibble.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
 #' @param time_from A `character`. It is the date and time from which the data
@@ -323,8 +331,12 @@ wisp_get_reflectance_multi_data <- function(
 
 #' Quality Control (QC) for WISPstation reflectance data
 #' @description `r lifecycle::badge("stable")`
-#' This function removes all anomalous spectral signatures and 
-#' explains the reason for each elimination
+#' This function performs the Quality Control (QC) process and applies different 
+#' algorithms to spectral signatures. The function applies a structured sequence 
+#' of QC tests (QC1 - QC6), designed to identify and remove low-quality or 
+#' physically implausible spectra. In addition, the function integrates independent 
+#' quality assessment metrics derived from the literature (QA and QWIP), 
+#' providing robust spectral validation through established optical criteria.
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
 #' @param maxPeak A `decimal`. Maximum magnitude of the spectral signatures.
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
@@ -813,10 +825,13 @@ wisp_qc_reflectance_data <- function(
 
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
 #' @description `r lifecycle::badge("stable")`
-#' This function applies the algorithm of Jiang et al. (2020) for removing
-#' sunglint from spectral signatures. It calculates an offset value, 
-#' represented by the **delta** column, based on the Relative Height Water (RHW) 
-#' in the NIR region to correct the surface reflectance.
+#' This function implements a Sky Glint Removal algorithm based on the methodology 
+#' proposed by Jiang et al. (2020). The function operates on spectra that have 
+#' already been filtered through the Quality Control process and applies a 
+#' correction to obtain glint-corrected remote sensing reflectance. 
+#' Following this correction, all algorithms are re-applied using the corrected 
+#' reflectance, ensuring more accurate and physically consistent estimates 
+#' of water constituents.
 #' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
@@ -1119,10 +1134,10 @@ wisp_calc_Novoa_SPM <- function(data) {
   # General parameters
   novoa_spm_dict <- list(
     novoa_waves_req = c(560, 665, 865),   
-    novoa_algorithm = "nechad_centre",     # "nechad_centre" or "nechad_average"
+    novoa_algorithm = "nechad_centre", # "nechad_centre" or "nechad_average"
     novoa_output_switch = FALSE,           
     rhow_switch_red = c(0.007, 0.016),     
-    rhow_switch_nir = c(0.08, 0.12)        #  or "c(0.046,0.09)" (Bourgneuf) 
+    rhow_switch_nir = c(0.08, 0.12) #  or "c(0.046,0.09)" (Bourgneuf) 
   )
   
   # A_Nechad and C_Nechad coefficients (SPM) for green, red and nir bands
@@ -1221,9 +1236,9 @@ wisp_calc_Novoa_TUR <- function(data) {
   # General parameters
   novoa_tur_dict <- list(
     novoa_waves_req = c(665, 865),          
-    novoa_algorithm = "nechad_centre",      # "nechad_centre" or "nechad_average"
+    novoa_algorithm = "nechad_centre", # "nechad_centre" or "nechad_average"
     novoa_output_switch = FALSE,
-    rhow_switch_nir = c(0.08, 0.12)         #  or "c(0.046,0.09)" (Bourgneuf) 
+    rhow_switch_nir = c(0.08, 0.12) # or "c(0.046,0.09)" (Bourgneuf) 
   )
   
   # A_Nechad and C_Nechad coefficients (TUR) for green, red and nir bands
@@ -2172,7 +2187,7 @@ wisp_calc_OWT_class <- function(data) {
 900;0.000004;0.000008;0.000066;0.000125;0.001257;0.00158;0.000968;0.009878;0.015803;0.000819
 "
   
-  # Descrizioni testuali delle classi
+  # Textual descriptions of classes
   descriptions <- c(
     "1"  = "Extremely clear and oligotrophic indigo-blue waters with high reflectance in the short visible wavelengths",
     "2"  = "Blue waters with a low presence of detritus and CDOM",

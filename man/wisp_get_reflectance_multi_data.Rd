@@ -44,8 +44,11 @@ default, all the reflectance values from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function obtains the reflectance data from WISPstation for
-multiple dates.
+This function acts as an iterative wrapper around \code{wisp_get_reflectance_data()}.
+It is specifically designed to download extended time series that exceed the
+limits of a single API request. The function automatically splits the user-defined
+time interval into daily blocks, performs sequential downloads, and aggregates
+all retrieved data into a single, coherent tibble.
 }
 \examples{
 # example code

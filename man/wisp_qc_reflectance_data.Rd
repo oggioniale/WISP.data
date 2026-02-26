@@ -96,8 +96,12 @@ a message containing the reason behind the elimination of each anomalous spectra
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function removes all anomalous spectral signatures and
-explains the reason for each elimination
+This function performs the Quality Control (QC) process and applies different
+algorithms to spectral signatures. The function applies a structured sequence
+of QC tests (QC1 - QC6), designed to identify and remove low-quality or
+physically implausible spectra. In addition, the function integrates independent
+quality assessment metrics derived from the literature (QA and QWIP),
+providing robust spectral validation through established optical criteria.
 }
 \examples{
 # example code

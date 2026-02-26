@@ -77,10 +77,13 @@ in a CSV file.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function applies the algorithm of Jiang et al. (2020) for removing
-sunglint from spectral signatures. It calculates an offset value,
-represented by the \strong{delta} column, based on the Relative Height Water (RHW)
-in the NIR region to correct the surface reflectance.
+This function implements a Sky Glint Removal algorithm based on the methodology
+proposed by Jiang et al. (2020). The function operates on spectra that have
+already been filtered through the Quality Control process and applies a
+correction to obtain glint-corrected remote sensing reflectance.
+Following this correction, all algorithms are re-applied using the corrected
+reflectance, ensuring more accurate and physically consistent estimates
+of water constituents.
 }
 \examples{
 # example code

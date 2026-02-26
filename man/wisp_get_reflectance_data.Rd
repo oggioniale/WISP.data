@@ -44,8 +44,13 @@ all the reflectance values from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-This function obtains the reflectance data from WISPstation for a
-specific date.
+This function represents the main entry point for data acquisition within the
+WISP.data package. It connects to the official Water Insight APIs to download
+spectral reflectance measurements for a user-defined time interval.
+The function handles authentication queries the remote server and returns
+the retrieved data in a structured tibble format. In addition to hyperspectral
+reflectance data (350–900 nm), the function also retrieves the water quality
+parameters natively computed by the WISPstation, including: TSM, Chla, Kd, and cpc.
 }
 \examples{
 # example code
