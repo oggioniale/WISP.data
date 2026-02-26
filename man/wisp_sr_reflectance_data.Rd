@@ -14,6 +14,8 @@ wisp_sr_reflectance_data(
   calc_gons740 = TRUE,
   calc_NDCI = TRUE,
   calc_mishra = TRUE,
+  calc_dom_wave = TRUE,
+  calc_OWT = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )
@@ -46,6 +48,23 @@ Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is \
 \item{calc_mishra}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
 using Mishra and Mishra (2012) algorithm. Default is \code{TRUE}.}
 
+\item{calc_dom_wave}{A \code{logical}. If \code{TRUE}, the function calculates the hue
+angle and the dominant wavelength. Default is \code{TRUE}.}
+
+\item{calc_OWT}{A \code{logical}. If \code{TRUE}, the function calculates the Optical
+Water Type classification in according to Bi and Hieronymi (2024) (OWT_class),
+the membership probability (OWT_score), and the average Z-score
+(OWT_z_dist). In addition, it adds a column with the description of the
+corresponding OWT class. "OWT_class" represents the optical category to which
+the analyzed spectral signature belongs based on Gaussian Likelihood.
+"OWT_score" is a value between 0 and 1 representing the fuzzy membership grade;
+it indicates the probability of belonging to the selected class relative to
+the other available classes. "OWT_z_dist" indicates the statistical
+distance between the observed spectrum and the class mean, weighted by its
+standard deviation. 0-1.5 indicate an excellent fit with the OWT reference.
+Values above 3 suggest that the spectral signature is an outlier or deviates
+significantly from the typical range of that class. Default is \code{TRUE}.}
+
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
 \item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
@@ -57,9 +76,11 @@ if parameter \code{save_out_sr} is \code{TRUE}, the function saves the reflectan
 in a CSV file.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function applies the algorithm of Jiang et al., (2020) for removing
-sunglint from spectral signatures
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+This function applies the algorithm of Jiang et al. (2020) for removing
+sunglint from spectral signatures. It calculates an offset value,
+represented by the \strong{delta} column, based on the Relative Height Water (RHW)
+in the NIR region to correct the surface reflectance.
 }
 \examples{
 # example code
@@ -75,6 +96,8 @@ reflect_data_sr <- wisp_sr_reflectance_data(
   calc_gons740 = TRUE,
   calc_NDCI = TRUE,
   calc_mishra = FALSE,
+  calc_dom_wave = TRUE,
+  calc_OWT = TRUE,
   save_csv = FALSE,
   out_dir = "outputs"
 )

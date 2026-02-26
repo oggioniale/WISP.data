@@ -10,6 +10,7 @@ wisp_trend_plot(
   datetime_col = "measurement.date",
   instrument_col = "instrument.name",
   aggregate = c("none", "daily_mean", "daily_median"),
+  merge_plot = FALSE,
   na.rm = TRUE,
   colors = NULL,
   title = NULL,
@@ -38,6 +39,11 @@ ribbon for the Standard Deviation (SD) (requires data for multiple days).
 \item \code{"daily_median"}: Calculates and plots the daily median
 (requires data for multiple days).} Default is \code{"none"}.}
 
+\item{merge_plot}{A \code{logical}. If \code{TRUE}, parameters that share the same
+unit of measurement will be merged into a single plot. The function will
+throw an error if no common units are found among the requested \code{params}.
+Default is \code{FALSE}.}
+
 \item{na.rm}{A \code{logical}. If \code{TRUE}, NA values are ignored during aggregation.
 Default is \code{TRUE}.}
 
@@ -55,19 +61,30 @@ An interactive \code{plotly} object showing the temporal trend of the
 selected parameters, with optional ribbons for standard deviation.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
-This function creates an interactive graph of the time trend of one or
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+This function creates an interactive plot of the time trend of one or
 more water quality parameters associated with spectral signatures
 }
 \examples{
 # Example usage
 \dontrun{
+# Standard plot with facets for each parameter
 fig_trend <- wisp_trend_plot(
-  data = reflect_data_sr,
-  params = c("TSM", "Chla", "Novoa_SPM"),
-  aggregate = "none",
+   data = reflect_data_sr,
+   params = c("TSM", "Chla"),
+   aggregate = "none",
+   merge_plot = FALSE
 )
-fig_trend
+print(fig_trend)
+
+# Merged plot for parameters with common units 
+fig_merged <- wisp_trend_plot(
+   data = reflect_data_sr,
+   params = c("TSM", "Novoa_SPM"),
+   aggregate = "daily_mean",
+   merge_plot = TRUE
+)
+print(fig_trend)
 }
 }
 \author{

@@ -16,6 +16,7 @@ reference:
     - wisp_qc_reflectance_data
     - wisp_sr_reflectance_data
     - wisp_plot_reflectance_data
+    - wisp_plot_comparison
     - wisp_trend_plot
     - wisp_runApp
 navbar:

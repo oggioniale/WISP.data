@@ -18,7 +18,12 @@ wisp_plot_reflectance_data(
   legend_gons_CHL = FALSE,
   legend_gons740_CHL = FALSE,
   legend_NDCI = FALSE,
-  legend_mishra_CHL = FALSE
+  legend_mishra_CHL = FALSE,
+  legend_hue_angle = FALSE,
+  legend_dom_wavelength = FALSE,
+  legend_OWT_class = FALSE,
+  legend_OWT_score = FALSE,
+  legend_OWT_z_dist = FALSE
 )
 }
 \arguments{
@@ -63,13 +68,28 @@ the \code{NDCI}values. Default is \code{FALSE}.}
 
 \item{legend_mishra_CHL}{A \code{logical}. If \code{TRUE}, the plot legend includes
 the \code{Mishra_CHL}values. Default is \code{FALSE}.}
+
+\item{legend_hue_angle}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{Hue_Angle}values. Default is \code{FALSE}.}
+
+\item{legend_dom_wavelength}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{Dominant_Wavelength}values. Default is \code{FALSE}.}
+
+\item{legend_OWT_class}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{OWT_class}. Default is \code{FALSE}.}
+
+\item{legend_OWT_score}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{OWT_score} (membership grade). Default is \code{FALSE}.}
+
+\item{legend_OWT_z_dist}{A \code{logical}. If \code{TRUE}, the plot legend includes
+the \code{OWT_z_dist} (statistical distance). Default is \code{FALSE}.}
 }
 \value{
 an interactive plot showing the spectral signatures of the
 reflectance data.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 This function return a plotly of each spectral signature measured by a
 WISPstation.
 }
@@ -91,7 +111,12 @@ wisp_plot_reflectance_data(
   legend_gons_CHL  = FALSE,
   legend_gons740_CHL = FALSE,
   legend_NDCI = FALSE,
-  legend_mishra_CHL = FALSE
+  legend_mishra_CHL = FALSE,
+  legend_hue_angle = FALSE, 
+  legend_dom_wavelength = FALSE,
+  legend_OWT_class = FALSE,
+  legend_OWT_score = FALSE,
+  legend_OWT_z_dist = FALSE  
 )
 }
 ## End (Not run)

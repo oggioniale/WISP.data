@@ -39,7 +39,7 @@ WISPstation."><script defer data-domain="docs.ropensci.org/relter" src="https://
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a>
 This function return a plotly of each spectral signature measured by a
 WISPstation.</p>
     </div>
@@ -60,7 +60,12 @@ WISPstation.</p>
 <span>  legend_gons_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  legend_gons740_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  legend_NDCI <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_hue_angle <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_dom_wavelength <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_OWT_class <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_OWT_score <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  legend_OWT_z_dist <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -137,6 +142,31 @@ the <code>NDCI</code>values. Default is <code>FALSE</code>.</p></dd>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
 the <code>Mishra_CHL</code>values. Default is <code>FALSE</code>.</p></dd>
 
+
+<dt id="arg-legend-hue-angle">legend_hue_angle<a class="anchor" aria-label="anchor" href="#arg-legend-hue-angle"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>Hue_Angle</code>values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-legend-dom-wavelength">legend_dom_wavelength<a class="anchor" aria-label="anchor" href="#arg-legend-dom-wavelength"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>Dominant_Wavelength</code>values. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-legend-owt-class">legend_OWT_class<a class="anchor" aria-label="anchor" href="#arg-legend-owt-class"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>OWT_class</code>. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-legend-owt-score">legend_OWT_score<a class="anchor" aria-label="anchor" href="#arg-legend-owt-score"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>OWT_score</code> (membership grade). Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-legend-owt-z-dist">legend_OWT_z_dist<a class="anchor" aria-label="anchor" href="#arg-legend-owt-z-dist"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
+the <code>OWT_z_dist</code> (statistical distance). Default is <code>FALSE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -168,7 +198,12 @@ reflectance data.</p>
 <span class="r-in"><span>  legend_gons_CHL  <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>  legend_gons740_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>  legend_NDCI <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  legend_hue_angle <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
+<span class="r-in"><span>  legend_dom_wavelength <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  legend_OWT_class <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  legend_OWT_score <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  legend_OWT_z_dist <span class="op">=</span> <span class="cn">FALSE</span>  </span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span><span class="co">## End (Not run)</span></span></span>

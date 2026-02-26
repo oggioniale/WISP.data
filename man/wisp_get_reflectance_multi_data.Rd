@@ -43,7 +43,7 @@ waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
 default, all the reflectance values from 350 to 900 nm.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 This function obtains the reflectance data from WISPstation for
 multiple dates.
 }

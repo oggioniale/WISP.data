@@ -1,5 +1,5 @@
 #' Get data of reflectance (level2) from WISPstation for a specific date
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function obtains the reflectance data from WISPstation for a
 #' specific date.
 #' @param version A `character`. It is the version of the API data. Default
@@ -206,7 +206,7 @@ wisp_get_reflectance_data <- function(
 }
 
 #' Get data of reflectance (level2) from WISPstation for multiple dates
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function obtains the reflectance data from WISPstation for
 #' multiple dates.
 #' @param version A `character`. It is the version of the API data. Default
@@ -322,7 +322,7 @@ wisp_get_reflectance_multi_data <- function(
 }
 
 #' Quality Control (QC) for WISPstation reflectance data
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function removes all anomalous spectral signatures and 
 #' explains the reason for each elimination
 #' @param data A `tibble`. From wisp_get_reflectance_data() function.
@@ -812,7 +812,7 @@ wisp_qc_reflectance_data <- function(
 }
 
 #' SUNGLINT Removal (SR) for WISPstation reflectance data
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function applies the algorithm of Jiang et al. (2020) for removing
 #' sunglint from spectral signatures. It calculates an offset value, 
 #' represented by the **delta** column, based on the Relative Height Water (RHW) 
@@ -2258,7 +2258,7 @@ wisp_calc_OWT_class <- function(data) {
 
 
 #' Create a plot of reflectance data
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function return a plotly of each spectral signature measured by a
 #' WISPstation.
 #' @param data A `tibble` obtained by any of the functions provided by this
@@ -2463,7 +2463,7 @@ wisp_plot_reflectance_data <- function(
 
 
 #' Comparison plot of Raw vs QC vs SR reflectance data
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function creates an interactive side-by-side comparison of different 
 #' processing levels of WISPstation reflectance data using plotly.
 #' @param raw_data A `tibble`. The original data obtained by `wisp_get_reflectance_data()`.
@@ -2581,7 +2581,7 @@ wisp_plot_comparison <- function(
 }
 
 #' Creates a temporal trend plot of one or more water quality parameters
-#' @description `r lifecycle::badge("experimental")`
+#' @description `r lifecycle::badge("stable")`
 #' This function creates an interactive plot of the time trend of one or
 #' more water quality parameters associated with spectral signatures 
 #' @param data A `tibble` containing water quality parameters and spectral

@@ -39,7 +39,7 @@ explains the reason for each elimination"><script defer data-domain="docs.ropens
     </div>
 
     <div class="ref-description section level2">
-    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="figures/lifecycle-experimental.svg" alt="[Experimental]"></a>
+    <p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="figures/lifecycle-stable.svg" alt="[Stable]"></a>
 This function removes all anomalous spectral signatures and
 explains the reason for each elimination</p>
     </div>
@@ -60,6 +60,8 @@ explains the reason for each elimination</p>
 <span>  calc_gons740 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  calc_NDCI <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  calc_mishra <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calc_dom_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  calc_OWT <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -82,17 +84,19 @@ Default is 0.05.</p></dd>
 
 <dt id="arg-maxpeak-blue">maxPeak_blue<a class="anchor" aria-label="anchor" href="#arg-maxpeak-blue"></a></dt>
 <dd><p>A <code>decimal</code>. Maximum magnitude 350 nm values.
-We recommend setting this parameter to: 0.02 (default)</p></dd>
+We recommend setting this parameter to: 0.02 (default).</p></dd>
 
 
 <dt id="arg-qa-threshold">qa_threshold<a class="anchor" aria-label="anchor" href="#arg-qa-threshold"></a></dt>
 <dd><p>A <code>decimal</code>. Minimum threshold for Quality Assurance (QA).
-We recommend setting this parameter to: 0.5 (default)</p></dd>
+We recommend setting this parameter to: 0.5 (default).
+To make QC more stringent, raise the threshold.</p></dd>
 
 
 <dt id="arg-qwip-threshold">qwip_threshold<a class="anchor" aria-label="anchor" href="#arg-qwip-threshold"></a></dt>
 <dd><p>A <code>decimal</code>. Maximum threshold for Quality Water Index Polynomial (QWIP).
-We recommend setting this parameter to: 0.2 (default)</p></dd>
+We recommend setting this parameter to: 0.2 (default).
+To make QC more stringent, decrease the threshold.</p></dd>
 
 
 <dt id="arg-calc-scatt">calc_scatt<a class="anchor" aria-label="anchor" href="#arg-calc-scatt"></a></dt>
@@ -136,6 +140,27 @@ Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is <
 using Mishra and Mishra (2012) algorithm. Default is <code>TRUE</code>.</p></dd>
 
 
+<dt id="arg-calc-dom-wave">calc_dom_wave<a class="anchor" aria-label="anchor" href="#arg-calc-dom-wave"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function calculates the hue
+angle and the dominant wavelength. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-calc-owt">calc_OWT<a class="anchor" aria-label="anchor" href="#arg-calc-owt"></a></dt>
+<dd><p>A <code>logical</code>. If <code>TRUE</code>, the function calculates the Optical
+Water Type classification in according to Bi and Hieronymi (2024) (OWT_class),
+the membership probability (OWT_score), and the average Z-score
+(OWT_z_dist). In addition, it adds a column with the description of the
+corresponding OWT class. "OWT_class" represents the optical category to which
+the analyzed spectral signature belongs based on Gaussian Likelihood.
+"OWT_score" is a value between 0 and 1 representing the fuzzy membership grade;
+it indicates the probability of belonging to the selected class relative to
+the other available classes. "OWT_z_dist" indicates the statistical
+distance between the observed spectrum and the class mean, weighted by its
+standard deviation. 0-1.5 indicate an excellent fit with the OWT reference.
+Values above 3 suggest that the spectral signature is an outlier or deviates
+significantly from the typical range of that class. Default is <code>TRUE</code>.</p></dd>
+
+
 <dt id="arg-save-csv">save_csv<a class="anchor" aria-label="anchor" href="#arg-save-csv"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the function saves the reflectance data.</p></dd>
 
@@ -174,7 +199,9 @@ a message containing the reason behind the elimination of each anomalous spectra
 <span class="r-in"><span>  calc_gons <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  calc_gons740 <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  calc_NDCI <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  calc_mishra <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  calc_mishra <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  calc_dom_wave <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  calc_OWT <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
