@@ -2274,8 +2274,13 @@ wisp_calc_OWT_class <- function(data) {
 
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("stable")`
-#' This function return a plotly of each spectral signature measured by a
-#' WISPstation.
+#' This function generates an interactive visualization of all spectral signatures 
+#' contained in a dataset, based on the plotly library. It is highly flexible and 
+#' can be used to display: raw data downloaded directly from WISPstation, processed
+#' data after QC, processed data after SR. The function’s distinctive feature is 
+#' its dynamic tooltip system: when hovering over a spectral curve, users can 
+#' instantly visualize the corresponding acquisition date and time, together with 
+#' all associated bio-optical parameters computed for that specific measurement.
 #' @param data A `tibble` obtained by any of the functions provided by this
 #' package: `wisp_get_reflectance_data()`, or after QC and SR removal operations.
 #' @param legend_TSM A `logical`. If `TRUE`, the plot legend includes the `TSM`
@@ -2479,8 +2484,13 @@ wisp_plot_reflectance_data <- function(
 
 #' Comparison plot of Raw vs QC vs SR reflectance data
 #' @description `r lifecycle::badge("stable")`
-#' This function creates an interactive side-by-side comparison of different 
-#' processing levels of WISPstation reflectance data using plotly.
+#' This function creates an interactive side-by-side visual comparison of the different 
+#' WISPstation data processing levels. Using plotly submodules, it enables the 
+#' visualization of up to three aligned plots within a single interactive window:
+#' raw data downloaded directly from WISPstation, processed data after QC, 
+#' processed data after SR. This provides a powerful tool for visually assessing 
+#' how filtering and correction algorithms modify spectral signatures, remove 
+#' artifacts, and improve data quality.
 #' @param raw_data A `tibble`. The original data obtained by `wisp_get_reflectance_data()`.
 #' @param qc_data A `tibble`. The data after `wisp_qc_reflectance_data()` operations. 
 #' Default is `NULL`.
@@ -2597,8 +2607,11 @@ wisp_plot_comparison <- function(
 
 #' Creates a temporal trend plot of one or more water quality parameters
 #' @description `r lifecycle::badge("stable")`
-#' This function creates an interactive plot of the time trend of one or
-#' more water quality parameters associated with spectral signatures 
+#' This function generates interactive temporal plots for one or more parameters. 
+#' It is designed to handle both high-frequency measurements within a single day 
+#' and long-term time series spanning multiple months. The function can aggregate 
+#' data (daily mean or median) and allows comparison of multiple parameters in 
+#' the same plot if they share the same unit of measurement.
 #' @param data A `tibble` containing water quality parameters and spectral
 #' signatures. 
 #' @param params A character vector specifying which parameters to plot.
