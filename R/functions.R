@@ -674,7 +674,7 @@ wisp_qc_reflectance_data <- function(
     QC5 = "remove spectral signatures similar to 'decreasing logarithms' functions",
     QC6 = "remove 'invalid' and 'None' spectral signatures according to level2.quality",
     QA = "remove spectral signatures with low quality based on Wei et al. (2016)",
-    QWIP = "remove spectral signatures with low quality based on Dierssen et al., 2022"
+    QWIP = "remove spectral signatures with low quality based on Dierssen et al., (2022)"
   )
   
   message("\n----")
