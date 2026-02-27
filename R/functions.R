@@ -1680,7 +1680,7 @@ wisp_calc_dom_wave <- function(data) {
 ### wisp_calc_OWT_class
 wisp_calc_OWT_class <- function(data) {
   
-  # Standard OWT spectral signatures (Mean)
+  # Standard OWT spectral signatures (Mean) (Bi & Hieronymi, 2024)
   owt_means_string <- "wavelen;1;2;3a;3b;4a;4b;5a;5b;6;7
 400;0.017993;0.006752;0.003844;0.011794;0.00336;0.009152;0.002714;0.00262;0.008908;0.000067
 402;0.017635;0.006785;0.003876;0.011847;0.003404;0.009229;0.0027;0.002605;0.00907;0.000068
@@ -1935,7 +1935,7 @@ wisp_calc_OWT_class <- function(data) {
 900;0.000004;0.000008;0.000044;0.000121;0.000508;0.001062;0.000897;0.008796;0.015979;0.000325
 "
   
-  # Standard OWT spectral signatures (Standard Deviation)
+  # Standard OWT spectral signatures (Standard Deviation) (Bi & Hieronymi, 2024)
   owt_sds_string <- "wavelen;1;2;3a;3b;4a;4b;5a;5b;6;7
 400;0.012619;0.003746;0.004319;0.008004;0.004588;0.007984;0.002253;0.001997;0.005921;0.000088
 402;0.012212;0.003765;0.004376;0.00803;0.004659;0.008013;0.002258;0.001995;0.006;0.000091
@@ -2190,7 +2190,7 @@ wisp_calc_OWT_class <- function(data) {
 900;0.000004;0.000008;0.000066;0.000125;0.001257;0.00158;0.000968;0.009878;0.015803;0.000819
 "
   
-  # Textual descriptions of classes
+  # Textual descriptions of classes (Bi & Hieronymi, 2024)
   descriptions <- c(
     "1"  = "Extremely clear and oligotrophic indigo-blue waters with high reflectance in the short visible wavelengths",
     "2"  = "Blue waters with a low presence of detritus and CDOM",
@@ -2483,7 +2483,6 @@ wisp_plot_reflectance_data <- function(
   
   plotly::ggplotly(p, tooltip = "text")
 }
-
 
 #' Comparison plot of Raw vs QC vs SR reflectance data
 #' @description `r lifecycle::badge("stable")`

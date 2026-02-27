@@ -50,11 +50,83 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="wispdata">WISP.data<a class="anchor" aria-label="anchor" href="#wispdata"></a>
+<div class="page-header"><h1 id="wispdata">
+<strong>WISP.data</strong><a class="anchor" aria-label="anchor" href="#wispdata"></a>
 </h1></div>
 <p><a href="https://doi.org/10.5281/zenodo.16893167" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg" alt="DOI"></a></p>
-<p><code>WISP.data</code> package is designed to store R functions for downloading, performing quality control (QC), and visualizing data from the WISP station.</p>
 </div>
+<div class="section level1">
+<h1 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h1>
+<p><code>WISP.data</code> is an R package designed to automate the acquisition, quality control (QC), analysis, and visualization of spectral data collected by the WISPstation fixed spectroradiometer. Developed by Water Insight as an evolution of the handheld WISP-3 system, the WISPstation is a fixed instrument that records radiance and irradiance across a wavelength range of 350 to 1100 nm (spectral resolution of 4.6 nm). This package serves as a crucial bridge between Water Insight API services and the research community, enabling the transformation of raw reflectance measurements into scientifically validated, analysis-ready products through fully reproducible and transparent workflows.</p>
+<p>The WISPstation operates with 8 specialized channels to optimize data collection:</p>
+<ul>
+<li>
+<strong>Dual-directional radiance</strong>: two sets of sensors (NNW and NNE) measure upwelling radiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>u</mi></msub><annotation encoding="application/x-tex">L_u</annotation></semantics></math>) and sky radiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mrow><mi>s</mi><mi>k</mi><mi>y</mi></mrow></msub><annotation encoding="application/x-tex">L_{sky}</annotation></semantics></math>) at 40° angles.</li>
+<li>
+<strong>Smart orientation</strong>: the system automatically selects the best-oriented sensor set based on the Sun’s position, maintaining a relative azimuth angle of approximately 135°.</li>
+<li>
+<strong>Irradiance and calibration</strong>: includes two downwelling irradiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>E</mi><mi>s</mi></msub><annotation encoding="application/x-tex">E_s</annotation></semantics></math>) channels and two unexposed “dark” channels to assess sensor degradation over time.</li>
+</ul>
+<p>The primary aim of <code>WISP.data</code> is the derivation of Remote Sensing Reflectance (Rrs), defined as the ratio between water-leaving radiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>w</mi></msub><annotation encoding="application/x-tex">L_w</annotation></semantics></math>) and downwelling irradiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>E</mi><mi>s</mi></msub><annotation encoding="application/x-tex">E_s</annotation></semantics></math>):</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Rrs</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mi>w</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>E</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mfrac><mrow><msub><mi>L</mi><mi>u</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>ρ</mi><mo>⋅</mo><msub><mi>L</mi><mrow><mi>s</mi><mi>k</mi><mi>y</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>E</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>λ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}</annotation></semantics></math></p>
+<p>The package handles the complex transition from total upwelling radiance (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>u</mi></msub><annotation encoding="application/x-tex">L_u</annotation></semantics></math>), which includes unwanted sky-glint and sun-glint, to the pure water-leaving signal (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>w</mi></msub><annotation encoding="application/x-tex">L_w</annotation></semantics></math>) by integrating <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mrow><mi>s</mi><mi>k</mi><mi>y</mi></mrow></msub><annotation encoding="application/x-tex">L_{sky}</annotation></semantics></math> and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>E</mi><mi>s</mi></msub><annotation encoding="application/x-tex">E_s</annotation></semantics></math> measurements into standardized atmospheric correction algorithms.</p>
+<p><code>WISP.data</code> provides a modular set of R functions for:</p>
+<ul>
+<li>downloading WISPstation data;</li>
+<li>performing automated and reproducible quality control (QC);</li>
+<li>performing automated skyglint removal (SR);</li>
+<li>applying different algorithms to spectral measurements;</li>
+<li>visualizing spectral and derived data products.</li>
+</ul>
+<p>This makes <code>WISP.data</code> an ideal solution for operational water quality monitoring, long-term research applications, and integration into large-scale environmental data pipelines.</p>
+</div>
+<div class="section level1">
+<h1 id="statement-of-need">Statement of need<a class="anchor" aria-label="anchor" href="#statement-of-need"></a>
+</h1>
+<p>The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality, providing high-frequency spectral measurements essential for environmental observation, ecosystem assessment, and long-term trend analysis. However, the effective management and scientific use of these spectral data present several significant challenges. Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. In addition, raw spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading. A further critical barrier lies in the interpretation of spectral signatures themselves. For non-expert users, it is difficult to assess the physical and optical plausibility of reflectance spectra, identify anomalous signals, or distinguish between instrument artifacts and real environmental variability. Moreover, the application of third-party bio-optical algorithms for the estimation of water quality products typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.</p>
+<p><code>WISP.data</code> addresses these challenges by providing an integrated, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, spectral validation, and product generation within a single R-based framework. By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform raw WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.</p>
+</div>
+<div class="section level1">
+<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h1>
+<p>You can install the development version of WISP.data directly from GitHub.<br>
+The following commands will automatically install all required dependencies:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install remotes if not already available</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Install WISP.data and dependencies</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"oggioniale/WISP.data"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level1">
+<h1 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
+</h1>
+<p>For a detailed description of each function, please visit this link: <a href="https://oggioniale.github.io/WISP.data/reference/index.html" class="external-link uri">https://oggioniale.github.io/WISP.data/reference/index.html</a></p>
+</div>
+<div class="section level1">
+<h1 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h1>
+<p>To view a complete example of WISP.data, please visit this page: <a href="https://oggioniale.github.io/WISP.data/articles/exampleOfFunctions.html" class="external-link uri">https://oggioniale.github.io/WISP.data/articles/exampleOfFunctions.html</a></p>
+</div>
+<div class="section level1">
+<h1 id="wisp_runapp">WISP_runApp<a class="anchor" aria-label="anchor" href="#wisp_runapp"></a>
+</h1>
+<p>To view a complete example of WISP_runApp, please visit this page <a href="https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html" class="external-link uri">https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html</a></p>
+</div>
+<div class="section level1">
+<h1 id="data-flow">Data flow<a class="anchor" aria-label="anchor" href="#data-flow"></a>
+</h1>
+</div>
+<div class="section level1">
+<h1 id="gallery">Gallery<a class="anchor" aria-label="anchor" href="#gallery"></a>
+</h1>
+</div>
+<div class="section level1">
+<h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h1>
+</div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
