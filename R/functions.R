@@ -2391,33 +2391,38 @@ wisp_plot_reflectance_data <- function(
     }
   }
   
+  # Identification columns "nm_"
+  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  valid_rows <- rowSums(!is.na(data[, nm_cols]) & data[, nm_cols] != 0) > 0
+  data <- data[valid_rows, ]
+  
+  if (nrow(data) == 0) return(NULL)
+  
   # Creation of the 'products_info' column
   data$products_info <- mapply(
     function(tsm, chla, kd, cpc, scatt, ratio, novoa_spm, novoa_tur, jiang_tss, 
              gons_chl, gons740_chl, ndci, mishra_chl, hue, dom_wv, owt_c, owt_s, owt_z) {
-      paste(
-        c(
-          if (legend_TSM && !is.na(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
-          if (legend_Chla && !is.na(chla)) paste("<b>Chla [mg/m3]:</b>", chla),
-          if (legend_Kd && !is.na(kd)) paste("<b>Kd [1/m]:</b>", kd),
-          if (legend_cpc && !is.na(cpc)) paste("<b>Cpc [mg/m3]:</b>", cpc),
-          if (legend_scatt && !is.na(scatt)) paste("<b>Scatt [1/sr]:</b>", scatt),
-          if (legend_ratio && !is.na(ratio)) paste("<b>Ratio:</b>", ratio),
-          if (legend_novoa_SPM && !is.na(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
-          if (legend_novoa_TUR && !is.na(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
-          if (legend_jiang_TSS && !is.na(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
-          if (legend_gons_CHL && !is.na(gons_chl)) paste("<b>Gons_CHL [mg/m3]:</b>", gons_chl),
-          if (legend_gons740_CHL && !is.na(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
-          if (legend_NDCI && !is.na(ndci)) paste("<b>NDCI:</b>", ndci),
-          if (legend_mishra_CHL && !is.na(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
-          if (legend_hue_angle && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
-          if (legend_dom_wavelength && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv),
-          if (legend_OWT_class && !is.na(owt_c)) paste("<b>OWT Class:</b>", owt_c),
-          if (legend_OWT_score && !is.na(owt_s)) paste("<b>OWT Score:</b>", owt_s),
-          if (legend_OWT_z_dist && !is.na(owt_z)) paste("<b>OWT Z-Dist:</b>", owt_z)
-        ),
-        collapse = "<br>"
+      lines <- c(
+        if (legend_TSM && !is.na(tsm)) paste("<b>TSM [g/m3]:</b>", tsm),
+        if (legend_Chla && !is.na(chla)) paste("<b>Chla [mg/m3]:</b>", chla),
+        if (legend_Kd && !is.na(kd)) paste("<b>Kd [1/m]:</b>", kd),
+        if (legend_cpc && !is.na(cpc)) paste("<b>Cpc [mg/m3]:</b>", cpc),
+        if (legend_scatt && !is.na(scatt)) paste("<b>Scatt [1/sr]:</b>", scatt),
+        if (legend_ratio && !is.na(ratio)) paste("<b>Ratio:</b>", ratio),
+        if (legend_novoa_SPM && !is.na(novoa_spm)) paste("<b>Novoa_SPM [g/m3]:</b>", novoa_spm),
+        if (legend_novoa_TUR && !is.na(novoa_tur)) paste("<b>Novoa_TUR [NTU]:</b>", novoa_tur),
+        if (legend_jiang_TSS && !is.na(jiang_tss)) paste("<b>Jiang_TSS [g/m3]:</b>", jiang_tss),
+        if (legend_gons_CHL && !is.na(gons_chl)) paste("<b>Gons_CHL [mg/m3]:</b>", gons_chl),
+        if (legend_gons740_CHL && !is.na(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
+        if (legend_NDCI && !is.na(ndci)) paste("<b>NDCI:</b>", ndci),
+        if (legend_mishra_CHL && !is.na(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
+        if (legend_hue_angle && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
+        if (legend_dom_wavelength && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv),
+        if (legend_OWT_class && !is.na(owt_c)) paste("<b>OWT Class:</b>", owt_c),
+        if (legend_OWT_score && !is.na(owt_s)) paste("<b>OWT Score:</b>", owt_s),
+        if (legend_OWT_z_dist && !is.na(owt_z)) paste("<b>OWT Z-Dist:</b>", owt_z)
       )
+      paste(lines, collapse = "<br>")
     },
     tsm         = if ("waterquality.tsm"     %in% names(data)) data$waterquality.tsm else NA,
     chla        = if ("waterquality.chla"    %in% names(data)) data$waterquality.chla else NA,
@@ -2436,13 +2441,12 @@ wisp_plot_reflectance_data <- function(
     dom_wv      = if ("dominant_wavelength"  %in% names(data)) data$dominant_wavelength else NA,
     owt_c       = if ("OWT_class"            %in% names(data)) data$OWT_class else NA,
     owt_s       = if ("OWT_score"            %in% names(data)) data$OWT_score else NA,
-    owt_z       = if ("OWT_z_dist"           %in% names(data)) data$OWT_z_dist else NA
+    owt_z       = if ("OWT_z_dist"            %in% names(data)) data$OWT_z_dist else NA
   )
   
   instr_name <- if("instrument.name" %in% names(data)) data$instrument.name[1] else "Unknown"
   
-  # Data preparation
-  nm_cols <- grep("^nm_", names(data), value = TRUE)
+  # Data pivoting
   data_2 <- tidyr::pivot_longer(
     data[, c("measurement.date", "products_info", nm_cols)],
     cols = dplyr::all_of(nm_cols),   
@@ -2466,10 +2470,10 @@ wisp_plot_reflectance_data <- function(
     "<b>Rrs:</b> ", round(data_2$Rrs, 6), " [1/sr]"
   )
   
+  # Plot
   num_colors <- length(unique(data_2$color_group))
   color_palette <- viridis::viridis(num_colors)
   
-  # Plot generation
   p <- ggplot2::ggplot(data_2, ggplot2::aes(x=wavelength, y=Rrs, color=color_group, text=tooltip_text)) +
     ggplot2::geom_line(ggplot2::aes(group = measurement.date)) + 
     ggplot2::scale_color_manual(values=color_palette) +
