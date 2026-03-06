@@ -28,13 +28,13 @@ peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter
 to the second chlorophyll absorption peak (670-680 nm). Default is \code{TRUE}.}
 
 \item{calc_SPM}{A \code{logical}. If \code{TRUE}, the function calculates the
-SPM concentrations in according to Novoa et al., (2017). Default is \code{TRUE}.}
+SPM concentrations in according to Novoa et al. (2017). Default is \code{TRUE}.}
 
 \item{calc_TUR}{A \code{logical}. If \code{TRUE}, the function calculates the
-turbidity (FNU) in according to Novoa et al., (2017). Default is \code{TRUE}.}
+turbidity (FNU) in according to Novoa et al. (2017). Default is \code{TRUE}.}
 
 \item{calc_TSS}{A \code{logical}. If \code{TRUE}, the function calculates the
-TSS concentrations in according to Jiang et al., (2021). Default is \code{TRUE}.}
+TSS concentrations in according to Jiang et al. (2021). Default is \code{TRUE}.}
 
 \item{calc_gons}{A \code{logical}. If \code{TRUE}, the function calculates chlorophyll
 using Gons et al. (2002) algorithm (NIR ~782 nm). Default is \code{TRUE}.}
@@ -49,7 +49,8 @@ Difference Chlorophyll Index algorithm by Mishra and Mishra (2012). Default is \
 using Mishra and Mishra (2012) algorithm. Default is \code{TRUE}.}
 
 \item{calc_dom_wave}{A \code{logical}. If \code{TRUE}, the function calculates the hue
-angle and the dominant wavelength. Default is \code{TRUE}.}
+angle and the dominant wavelength (van der Woerd and Wernand, 2015, 2018).
+Default is \code{TRUE}.}
 
 \item{calc_OWT}{A \code{logical}. If \code{TRUE}, the function calculates the Optical
 Water Type classification in according to Bi and Hieronymi (2024) (OWT_class),

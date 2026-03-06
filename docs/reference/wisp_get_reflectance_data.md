@@ -7,7 +7,8 @@ user-defined time interval. The function handles authentication queries
 the remote server and returns the retrieved data in a structured tibble
 format. In addition to hyperspectral reflectance data (350–900 nm), the
 function also retrieves the water quality parameters natively computed
-by the WISPstation, including: TSM, Chla, Kd, and cpc.
+by the WISPstation, including: TSM (Van Der Woerd & Pasterkamp, 2008),
+Chla (Gons et al., 2005), Kd, and cpc.
 
 ## Usage
 

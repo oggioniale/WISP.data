@@ -72,17 +72,17 @@ wisp_qc_reflectance_data(
 - calc_SPM:
 
   A `logical`. If `TRUE`, the function calculates the SPM concentrations
-  in according to Novoa et al., (2017). Default is `TRUE`.
+  in according to Novoa et al. (2017). Default is `TRUE`.
 
 - calc_TUR:
 
   A `logical`. If `TRUE`, the function calculates the turbidity (FNU) in
-  according to Novoa et al., (2017). Default is `TRUE`.
+  according to Novoa et al. (2017). Default is `TRUE`.
 
 - calc_TSS:
 
   A `logical`. If `TRUE`, the function calculates the TSS concentrations
-  in according to Jiang et al., (2021). Default is `TRUE`.
+  in according to Jiang et al. (2021). Default is `TRUE`.
 
 - calc_gons:
 
@@ -108,7 +108,8 @@ wisp_qc_reflectance_data(
 - calc_dom_wave:
 
   A `logical`. If `TRUE`, the function calculates the hue angle and the
-  dominant wavelength. Default is `TRUE`.
+  dominant wavelength (van der Woerd and Wernand, 2015, 2018). Default
+  is `TRUE`.
 
 - calc_OWT:
 

@@ -63,8 +63,9 @@ wisp_get_reflectance_multi_data(
 
 A `tibble` with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances), waterquality
-values of TSM, Chla, Kd, and cpc as provided by instrument by default,
-all the reflectance values from 350 to 900 nm.
+values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al.,
+2005), Kd, and cpc as provided by instrument by default, all the
+reflectance values from 350 to 900 nm.
 
 ## Author
 

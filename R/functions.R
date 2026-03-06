@@ -6,7 +6,8 @@
 #' The function handles authentication queries the remote server and returns 
 #' the retrieved data in a structured tibble format. In addition to hyperspectral 
 #' reflectance data (350–900 nm), the function also retrieves the water quality 
-#' parameters natively computed by the WISPstation, including: TSM, Chla, Kd, and cpc.
+#' parameters natively computed by the WISPstation, including: TSM 
+#' (Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc.
 #' @param version A `character`. It is the version of the API data. Default
 #' is "1.0"
 #' @param time_from A `character`. It is the date and time from which the data
@@ -231,7 +232,8 @@ wisp_get_reflectance_data <- function(
 #' Default is "outputs" within the working directory.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
-#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by
+#' waterquality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla 
+#' (Gons et al., 2005), Kd, and cpc as provided by instrument by
 #' default, all the reflectance values from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
@@ -354,11 +356,11 @@ wisp_get_reflectance_multi_data <- function(
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
 #' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
-#' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
+#' SPM concentrations in according to Novoa et al. (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
-#' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
+#' turbidity (FNU) in according to Novoa et al. (2017). Default is `TRUE`.
 #' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
-#' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
+#' TSS concentrations in according to Jiang et al. (2021). Default is `TRUE`.
 #' @param calc_gons A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Gons et al. (2002) algorithm (NIR ~782 nm). Default is `TRUE`.
 #' @param calc_gons740 A `logical`. If `TRUE`, the function calculates chlorophyll 
@@ -368,7 +370,8 @@ wisp_get_reflectance_multi_data <- function(
 #' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
-#' angle and the dominant wavelength. Default is `TRUE`.
+#' angle and the dominant wavelength (van der Woerd and Wernand, 2015, 2018). 
+#' Default is `TRUE`.
 #' @param calc_OWT A `logical`. If `TRUE`, the function calculates the Optical 
 #' Water Type classification in according to Bi and Hieronymi (2024) (OWT_class), 
 #' the membership probability (OWT_score), and the average Z-score 
@@ -840,11 +843,11 @@ wisp_qc_reflectance_data <- function(
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
 #' @param calc_SPM A `logical`. If `TRUE`, the function calculates the 
-#' SPM concentrations in according to Novoa et al., (2017). Default is `TRUE`.
+#' SPM concentrations in according to Novoa et al. (2017). Default is `TRUE`.
 #' @param calc_TUR A `logical`. If `TRUE`, the function calculates the 
-#' turbidity (FNU) in according to Novoa et al., (2017). Default is `TRUE`.
+#' turbidity (FNU) in according to Novoa et al. (2017). Default is `TRUE`.
 #' @param calc_TSS A `logical`. If `TRUE`, the function calculates the 
-#' TSS concentrations in according to Jiang et al., (2021). Default is `TRUE`.
+#' TSS concentrations in according to Jiang et al. (2021). Default is `TRUE`.
 #' @param calc_gons A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Gons et al. (2002) algorithm (NIR ~782 nm). Default is `TRUE`.
 #' @param calc_gons740 A `logical`. If `TRUE`, the function calculates chlorophyll 
@@ -854,7 +857,8 @@ wisp_qc_reflectance_data <- function(
 #' @param calc_mishra A `logical`. If `TRUE`, the function calculates chlorophyll 
 #' using Mishra and Mishra (2012) algorithm. Default is `TRUE`.
 #' @param calc_dom_wave A `logical`. If `TRUE`, the function calculates the hue 
-#' angle and the dominant wavelength. Default is `TRUE`.
+#' angle and the dominant wavelength (van der Woerd and Wernand, 2015, 2018). 
+#' Default is `TRUE`.
 #' @param calc_OWT A `logical`. If `TRUE`, the function calculates the Optical 
 #' Water Type classification in according to Bi and Hieronymi (2024) (OWT_class), 
 #' the membership probability (OWT_score), and the average Z-score 

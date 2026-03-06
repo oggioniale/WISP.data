@@ -161,6 +161,10 @@ Mishra_CHL, Novoa_SPM, and TSM) averaged on a daily basis (period:
   Resolution Imaging Spectrometer) of inland and coastal waters.
   *Journal of Plankton Research*, 24(9), 947-951.
   <https://doi.org/10.1093/plankt/24.9.947>.
+- Gons, H. J., Rijkeboer, M., & Ruddick, K. G. (2005). Effect of a
+  waveband shift on chlorophyll retrieval from MERIS imagery of inland
+  and coastal waters. *Journal of Plankton Research*, 27(1), 125-127.
+  <https://doi.org/10.1093/plankt/fbh151>.
 - Jiang, D., Matsushita, B., & Yang, W. (2020). A simple and effective
   method for removing residual reflected skylight in above-water remote
   sensing reflectance measurements. *ISPRS Journal of Photogrammetry and
@@ -189,10 +193,18 @@ Mishra_CHL, Novoa_SPM, and TSM) averaged on a daily basis (period:
   algorithm for multi-sensor remote sensing of suspended particulate
   matter in low-to-high turbidity levels coastal waters. *Remote
   Sensing*, 9(1), 61. <https://doi.org/10.3390/rs9010061>.
+- van der Woerd, H. J., & Pasterkamp, R. (2008). HYDROPT: A fast and
+  flexible method to retrieve chlorophyll-a from multispectral satellite
+  observations of optically complex coastal waters. *Remote Sensing of
+  Environment*, 112(4), 1795-1807.
+  <https://doi.org/10.1016/j.rse.2007.09.001>.
 - van der Woerd, H. J., & Wernand, M. R. (2015). True colour
   classification of natural waters with medium-spectral resolution
   satellites: SeaWiFS, MODIS, MERIS and OLCI. *Sensors*, 15(10),
   25663-25680. <https://doi.org/10.3390/s151025663>.
+- van der Woerd, H. J., & Wernand, M. R. (2018). Hue-angle product for
+  low to medium spatial resolution optical satellite sensors. *Remote
+  Sensing*, 10(2), 180. <https://doi.org/10.3390/rs10020180>.
 - Wei, J., Lee, Z., & Shang, S. (2016). A system to measure the data
   quality of spectral remote‐sensing reflectance of aquatic
   environments. *Journal of Geophysical Research: Oceans*, 121(11),
