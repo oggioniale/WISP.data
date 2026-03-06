@@ -40,8 +40,8 @@ Default is "outputs" within the working directory.}
 A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
 waterquality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla
-(Gons et al., 2005), Kd, and cpc as provided by instrument by
-default, all the reflectance values from 350 to 900 nm.
+(Gons et al., 2005), Kd (Gons et al., 1998), and cpc (Simis, 2006) as provided
+by instrument by default, all the reflectance values from 350 to 900 nm.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}

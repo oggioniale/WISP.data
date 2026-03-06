@@ -7,9 +7,10 @@
 #' the retrieved data in a structured tibble format. In addition to hyperspectral 
 #' reflectance data (350–900 nm), the function also retrieves the water quality 
 #' parameters natively computed by the WISPstation, including: TSM 
-#' (Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc.
+#' (Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd 
+#' (Gons et al., 1998), and cpc (Simis, 2006).
 #' @param version A `character`. It is the version of the API data. Default
-#' is "1.0"
+#' is "1.0".
 #' @param time_from A `character`. It is the date and time from which the data
 #' is requested.
 #' @param time_to A `character`. It is the date and time to which the data
@@ -233,8 +234,8 @@ wisp_get_reflectance_data <- function(
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
 #' waterquality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla 
-#' (Gons et al., 2005), Kd, and cpc as provided by instrument by
-#' default, all the reflectance values from 350 to 900 nm.
+#' (Gons et al., 2005), Kd (Gons et al., 1998), and cpc (Simis, 2006) as provided 
+#' by instrument by default, all the reflectance values from 350 to 900 nm.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
 #' @importFrom dplyr bind_rows

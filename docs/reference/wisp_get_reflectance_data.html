@@ -7,7 +7,8 @@ The function handles authentication queries the remote server and returns
 the retrieved data in a structured tibble format. In addition to hyperspectral
 reflectance data (350–900 nm), the function also retrieves the water quality
 parameters natively computed by the WISPstation, including: TSM
-(Van Der Woerd &amp;amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc."><meta property="og:description" content="
+(Van Der Woerd &amp;amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd
+(Gons et al., 1998), and cpc (Simis, 2006)."><meta property="og:description" content="
 This function represents the main entry point for data acquisition within the
 WISP.data package. It connects to the official Water Insight APIs to download
 spectral reflectance measurements for a user-defined time interval.
@@ -15,7 +16,8 @@ The function handles authentication queries the remote server and returns
 the retrieved data in a structured tibble format. In addition to hyperspectral
 reflectance data (350–900 nm), the function also retrieves the water quality
 parameters natively computed by the WISPstation, including: TSM
-(Van Der Woerd &amp;amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc."><script defer data-domain="docs.ropensci.org/relter" src="https://plausible.io/js/plausible.js"></script></head><body>
+(Van Der Woerd &amp;amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd
+(Gons et al., 1998), and cpc (Simis, 2006)."><script defer data-domain="docs.ropensci.org/relter" src="https://plausible.io/js/plausible.js"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -59,7 +61,8 @@ The function handles authentication queries the remote server and returns
 the retrieved data in a structured tibble format. In addition to hyperspectral
 reflectance data (350–900 nm), the function also retrieves the water quality
 parameters natively computed by the WISPstation, including: TSM
-(Van Der Woerd &amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc.</p>
+(Van Der Woerd &amp; Pasterkamp, 2008), Chla (Gons et al., 2005), Kd
+(Gons et al., 1998), and cpc (Simis, 2006).</p>
     </div>
 
     <div class="section level2">
@@ -82,7 +85,7 @@ parameters natively computed by the WISPstation, including: TSM
 
 <dl><dt id="arg-version">version<a class="anchor" aria-label="anchor" href="#arg-version"></a></dt>
 <dd><p>A <code>character</code>. It is the version of the API data. Default
-is "1.0"</p></dd>
+is "1.0".</p></dd>
 
 
 <dt id="arg-time-from">time_from<a class="anchor" aria-label="anchor" href="#arg-time-from"></a></dt>

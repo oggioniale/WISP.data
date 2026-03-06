@@ -17,7 +17,7 @@ wisp_get_reflectance_data(
 }
 \arguments{
 \item{version}{A \code{character}. It is the version of the API data. Default
-is "1.0"}
+is "1.0".}
 
 \item{time_from}{A \code{character}. It is the date and time from which the data
 is requested.}
@@ -51,7 +51,8 @@ The function handles authentication queries the remote server and returns
 the retrieved data in a structured tibble format. In addition to hyperspectral
 reflectance data (350–900 nm), the function also retrieves the water quality
 parameters natively computed by the WISPstation, including: TSM
-(Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd, and cpc.
+(Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd
+(Gons et al., 1998), and cpc (Simis, 2006).
 }
 \examples{
 # example code

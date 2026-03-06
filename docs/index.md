@@ -153,6 +153,11 @@ Mishra_CHL, Novoa_SPM, and TSM) averaged on a daily basis (period:
   quality control of aquatic reflectance spectral shape using the
   apparent visible wavelength. *Frontiers in Remote Sensing*, 3, 869611.
   <https://doi.org/10.3389/frsen.2022.869611>.
+- Gons, H. J., Ebert, J., & Kromkamp, J. (1997). Optical teledetection
+  of the vertical attenuation coefficient for downward quantum
+  irradiance of photosynthetically available radiation in turbid inland
+  waters. *Aquatic Ecology*, 31(3), 299-311.
+  <https://doi.org/10.1023/A:1009902627476>.
 - Gons, H. J. (1999). Optical teledetection of chlorophyll a in turbid
   inland waters. *Environmental science & technology*, 33(7), 1127-1132.
   <https://doi.org/10.1021/es9809657>.
@@ -193,6 +198,8 @@ Mishra_CHL, Novoa_SPM, and TSM) averaged on a daily basis (period:
   algorithm for multi-sensor remote sensing of suspended particulate
   matter in low-to-high turbidity levels coastal waters. *Remote
   Sensing*, 9(1), 61. <https://doi.org/10.3390/rs9010061>.
+- Simis, S. G. H. (2006). Blue-green catastrophe: remote sensing of mass
+  viral lysis of cyanobacteria. Vrije Universiteit Amsterdam.
 - van der Woerd, H. J., & Pasterkamp, R. (2008). HYDROPT: A fast and
   flexible method to retrieve chlorophyll-a from multispectral satellite
   observations of optically complex coastal waters. *Remote Sensing of
