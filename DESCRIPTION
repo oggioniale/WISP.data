@@ -18,7 +18,7 @@ Authors@R: c(
     )
   )
 Description: R package for downloading, performing quality control (QC), and visualizing data from the WISP station.
-License: `use_gpl3_license()`
+License: GPL-3
 URL: https://github.com/oggioniale/WISP.data
 BugReports: https://github.com/oggioniale/WISP.data/issues
 Encoding: UTF-8
@@ -29,11 +29,20 @@ Depends:
   R (>= 2.10)
 VignetteBuilder: 
     knitr
-Suggests:
+Suggests: 
     knitr,
     rmarkdown,
     shiny,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    httptest2
 Imports: 
+    httr2,
+    tibble,
+    dplyr,
+    tidyr,
+    lubridate,
+    units,
+    stringr,
+    readr,
     lifecycle
 Config/testthat/edition: 3
