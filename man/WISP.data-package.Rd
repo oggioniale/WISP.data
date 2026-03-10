@@ -6,7 +6,7 @@
 \alias{WISP.data-package}
 \title{WISP.data: Managing WISPstation Hyperspectral Data}
 \description{
-R package for downloading, performing quality control (QC), and visualizing data from the WISP station.
+R package designed to automate the acquisition, quality control, analysis, and visualization of spectral data collected by the WISPstation fixed spectroradiometer.
 }
 \seealso{
 Useful links:
