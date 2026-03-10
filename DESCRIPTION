@@ -44,5 +44,9 @@ Imports:
     units,
     stringr,
     readr,
-    lifecycle
+    lifecycle,
+    ggplot2,
+    stats,
+    utils,
+    grDevices
 Config/testthat/edition: 3
