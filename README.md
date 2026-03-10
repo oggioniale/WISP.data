@@ -20,6 +20,8 @@ The primary aim of `WISP.data` is the derivation of Remote Sensing Reflectance (
 
 $$\text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}$$
 
+Where $\rho$ is the Fresnel reflection coefficient.
+
 The package handles the complex transition from total upwelling radiance ($L_u$), which includes unwanted sky-glint and sun-glint, to the pure water-leaving signal ($L_w$) by integrating $L_{sky}$ and $E_s$ measurements into standardized atmospheric correction algorithms.
 
 `WISP.data` provides a modular set of R functions for:
@@ -35,12 +37,18 @@ This makes `WISP.data` an ideal solution for operational water quality monitorin
 
 Statement of need
 ===================
-The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality, providing high-frequency spectral measurements essential for environmental observation, ecosystem assessment, and long-term trend analysis. However, the effective management and scientific use of these spectral data present several significant challenges.
-Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. In addition, raw spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
+The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it delivers specialized water quality products derived through various algorithms (Gons et al., 1997, 2005; Simis, 2006; van der Woerd & Pasterkamp, 2008), essential for environmental observation, ecosystem assessment, and long-term trend analysis. 
+However, the effective management and scientific use of these spectral data and derived products present several significant challenges.
+Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. In addition, native spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
 A further critical barrier lies in the interpretation of spectral signatures themselves. For non-expert users, it is difficult to assess the physical and optical plausibility of reflectance spectra, identify anomalous signals, or distinguish between instrument artifacts and real environmental variability. Moreover, the application of third-party bio-optical algorithms for the estimation of water quality products typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.
 
+The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events (Free et al., 2021) to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno (Bresciani et al., 2020). 
+Despite these successful applications, the processing of WISPstation data has been a labor-intensive and time-consuming.
+Prior to the development of `WISP.data`, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameter. 
+This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring. 
+
 `WISP.data` addresses these challenges by providing an integrated, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, spectral validation, and product generation within a single R-based framework. 
-By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform raw WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.
+By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform native WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.
 
 
 Installation
@@ -69,8 +77,7 @@ To view a complete example of WISP.data, please visit this page: https://oggioni
 
 WISP_runApp
 ===================
-To view a complete example of WISP_runApp, please visit this page
-https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html
+To view a complete example of WISP_runApp, please visit this page: https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html
 
 
 Data flow
@@ -89,26 +96,28 @@ In this section, we showcase some of the typical outputs generated by `WISP.data
 <p align="center">
   <img src="man/figures/Figure%202.png" width="100%" alt="Figure 2">
   <br>
-  <em><b>Figure 2.</b> Plot resulting from the ‘wisp_plot_comparison’ function showing the comparison between “raw” spectral signatures, those filtered by “QC”, and those to which “SR” has been applied (period: 11/09/2024 – 17/09/2024).</em>
+  <em><b>Figure 2.</b> Plot resulting from the `wisp_plot_comparison()` function showing the comparison between: A) native WISPstation Rrs, B) Rrs filtered by “QC”, C) Rrs to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).</em>
 </p>
 
 <p align="center">
   <img src="man/figures/Figure%203.png" width="100%" alt="Figure 3">
   <br>
-  <em><b>Figure 3.</b> Plot resulting from the ‘wisp_trend_plot’ function showing the temporal trend of four exemplary parameters (Chla, Mishra_CHL, Novoa_SPM, and TSM) for 25/07/2024.</em>
+  <em><b>Figure 3.</b> Plot resulting from the `wisp_trend_plot()` function showing the temporal trend of three exemplary parameters (from top to bottom: "Novoa_SPM", "Novoa_TUR", and "Mishra_CHL") for 25/07/2024 from 8 a.m. to 4 p.m. (site: Trasimeno).</em>
 </p>
 
 <p align="center">
   <img src="man/figures/Figure%204.png" width="100%" alt="Figure 4">
   <br>
-  <em><b>Figure 4.</b> Plot resulting from the ‘wisp_trend_plot’ function showing the temporal trend of four exemplary parameters (Chla, Mishra_CHL, Novoa_SPM, and TSM) averaged on a daily basis (period: 11/09/2024 – 17/09/2024).</em>
+  <em><b>Figure 4.</b> Plot resulting from the `wisp_trend_plot()` function showing the temporal trend of five exemplary parameters averaged on a daily basis: in the upper plot, a comparison between the WISPstation native algorithm (TSM) and two third-party algorithms for estimating suspended solids concentration ("Novoa_SPM" and "Jiang_TSS"); in the lower plot, the comparison between the WISPstation native chlorophyll-a algorithm (Chla) and Mishra_CHL algorithm. (site: Trasimeno; period: 01/05/2024 – 10/05/2024).</em>
 </p>
 
 
 References
 ===================
 * Bi, S., & Hieronymi, M. (2024). Holistic optical water type classification for ocean, coastal, and inland waters. *Limnology and Oceanography*, 69(7), 1547-1561. https://doi.org/10.1002/lno.12606
+* Bresciani, M., Pinardi, M., Free, G., Luciani, G., Ghebrehiwot, S., Laanen, M., Peters, S., Della Bella, V., Padula, R., & Giardino, C. (2020). The use of multisource optical sensors to study phytoplankton spatio-temporal variation in a Shallow Turbid Lake. *Water*, 12(1), 284. https://doi.org/10.3390/w12010284.
 * Dierssen, H. M., Vandermeulen, R. A., Barnes, B. B., Castagna, A., Knaeps, E., & Vanhellemont, Q. (2022). QWIP: A quantitative metric for quality control of aquatic reflectance spectral shape using the apparent visible wavelength. *Frontiers in Remote Sensing*, 3, 869611. https://doi.org/10.3389/frsen.2022.869611.
+* Free, G., Bresciani, M., Pinardi, M., Giardino, C., Alikas, K., Kangro, K., Rõõm, E.I., Vaičiūtė, D., Bučas, M., Tiškus, E., Hommersom, A., & Peters, S. (2021). Detecting climate driven changes in chlorophyll-a using high frequency monitoring: the impact of the 2019 European heatwave in three contrasting aquatic systems. *Sensors*, 21(18), 6242. https://doi.org/10.3390/s21186242.
 * Gons, H. J., Ebert, J., & Kromkamp, J. (1997). Optical teledetection of the vertical attenuation coefficient for downward quantum irradiance of photosynthetically available radiation in turbid inland waters. *Aquatic Ecology*, 31(3), 299-311. https://doi.org/10.1023/A:1009902627476.
 * Gons, H. J. (1999). Optical teledetection of chlorophyll a in turbid inland waters. *Environmental science & technology*, 33(7), 1127-1132. https://doi.org/10.1021/es9809657.
 * Gons, H. J., Rijkeboer, M., & Ruddick, K. G. (2002). A chlorophyll-retrieval algorithm for satellite imagery (Medium Resolution Imaging Spectrometer) of inland and coastal waters. *Journal of Plankton Research*, 24(9), 947-951. https://doi.org/10.1093/plankt/24.9.947.

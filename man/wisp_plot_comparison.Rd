@@ -40,7 +40,7 @@ vs SR). If only \code{raw_data} is provided or valid, a single plot is returned.
 This function creates an interactive side-by-side visual comparison of the different
 WISPstation data processing levels. Using plotly submodules, it enables the
 visualization of up to three aligned plots within a single interactive window:
-raw data downloaded directly from WISPstation, processed data after QC,
+native data downloaded directly from WISPstation, processed data after QC,
 processed data after SR. This provides a powerful tool for visually assessing
 how filtering and correction algorithms modify spectral signatures, remove
 artifacts, and improve data quality.

@@ -3,11 +3,11 @@
 **\[stable\]** This function creates an interactive side-by-side visual
 comparison of the different WISPstation data processing levels. Using
 plotly submodules, it enables the visualization of up to three aligned
-plots within a single interactive window: raw data downloaded directly
-from WISPstation, processed data after QC, processed data after SR. This
-provides a powerful tool for visually assessing how filtering and
-correction algorithms modify spectral signatures, remove artifacts, and
-improve data quality.
+plots within a single interactive window: native data downloaded
+directly from WISPstation, processed data after QC, processed data after
+SR. This provides a powerful tool for visually assessing how filtering
+and correction algorithms modify spectral signatures, remove artifacts,
+and improve data quality.
 
 ## Usage
 

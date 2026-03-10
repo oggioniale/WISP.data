@@ -2284,7 +2284,7 @@ wisp_calc_OWT_class <- function(data) {
 #' @description `r lifecycle::badge("stable")`
 #' This function generates an interactive visualization of all spectral signatures 
 #' contained in a dataset, based on the plotly library. It is highly flexible and 
-#' can be used to display: raw data downloaded directly from WISPstation, processed
+#' can be used to display: native data downloaded directly from WISPstation, processed
 #' data after QC, processed data after SR. The function’s distinctive feature is 
 #' its dynamic tooltip system: when hovering over a spectral curve, users can 
 #' instantly visualize the corresponding acquisition date and time, together with 
@@ -2498,7 +2498,7 @@ wisp_plot_reflectance_data <- function(
 #' This function creates an interactive side-by-side visual comparison of the different 
 #' WISPstation data processing levels. Using plotly submodules, it enables the 
 #' visualization of up to three aligned plots within a single interactive window:
-#' raw data downloaded directly from WISPstation, processed data after QC, 
+#' native data downloaded directly from WISPstation, processed data after QC, 
 #' processed data after SR. This provides a powerful tool for visually assessing 
 #' how filtering and correction algorithms modify spectral signatures, remove 
 #' artifacts, and improve data quality.
@@ -2585,9 +2585,9 @@ wisp_plot_comparison <- function(
   }
   
   plot_title <- if (length(plot_list) == 3) {
-    "<b>Reflectance comparison: Raw vs QC vs SR<b>"
+    "<b>Reflectance comparison: WISPstation vs QC vs SR<b>"
   } else {
-    "<b>Reflectance: Raw<b>"
+    "<b>Reflectance: WISPstation native<b>"
   }
   
   final_plot <- if (length(plot_list) > 1) {
