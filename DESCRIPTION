@@ -36,19 +36,20 @@ Suggests:
     testthat (>= 3.0.0),
     httptest2
 Imports: 
-    httr2,
-    tibble,
     dplyr,
-    tidyr,
-    lubridate,
-    units,
-    stringr,
-    readr,
-    lifecycle,
     ggplot2,
+    grDevices,
+    httr2,
+    lifecycle,
+    lubridate,
     plotly,
     purrr,
+    readr,
     stats,
+    stringr,
+    tibble,
+    tidyr,
+    units,
     utils,
-    grDevices
+    viridis
 Config/testthat/edition: 3
