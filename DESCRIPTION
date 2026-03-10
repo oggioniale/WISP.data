@@ -32,6 +32,8 @@ VignetteBuilder:
 Suggests:
     knitr,
     rmarkdown,
-    shiny
+    shiny,
+    testthat (>= 3.0.0)
 Imports: 
     lifecycle
+Config/testthat/edition: 3
