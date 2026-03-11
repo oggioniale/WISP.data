@@ -9,7 +9,7 @@ author: "Alessandro Oggioni, Nicola Ghirardi"
 ---
 
 ## Provide the account of your station
-```{r echo = TRUE, results = 'hide', warning=FALSE}
+```{r echo = TRUE, results = 'hide', warning=FALSE, eval=FALSE}
 userid <- Sys.getenv("WISP_IREA_USERID")
 pwd <- Sys.getenv("WISP_IREA_PSW")
 ```
@@ -20,7 +20,7 @@ In this function if the `save_csv` parameter is set to `TRUE`, the function
 will save the reflectance data as a .csv file in the 'output' folder within
 the working directory.
 
-```{r echo = TRUE, results = 'hide', warning=FALSE, message=FALSE}
+```{r echo = TRUE, results = 'hide', warning=FALSE, message=FALSE, eval=FALSE}
 reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_from = "2024-09-11T09:00",
   time_to   = "2024-09-17T14:00",
@@ -55,7 +55,7 @@ User-configurable Parameters:
 - **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength and Hue Angle
 - **calc_OWT** (logical): if `TRUE`, computes Optical Water Type classification
 
-```{r echo = TRUE, results = 'hide', warning=FALSE, message=FALSE}
+```{r echo = TRUE, results = 'hide', warning=FALSE, message=FALSE, eval=FALSE}
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data           = reflect_data,
   maxPeak        = 0.05,
@@ -157,7 +157,7 @@ User-configurable Parameters:
 - **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength and Hue Angle
 - **calc_OWT** (logical): if `TRUE`, computes Optical Water Type classification
 
-```{r echo = TRUE, results = 'hide', warning=FALSE}
+```{r echo = TRUE, results = 'hide', warning=FALSE, eval=FALSE}
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data       = reflect_data_qc,
   calc_scatt    = TRUE,
@@ -180,7 +180,7 @@ reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
 In this function, you can set to `TRUE` for the parameters you want to display 
 in the legend for each of the three plots (raw, QC, SR).
 
-```{r, warning=FALSE, out.width="100%"}
+```{r, warning=FALSE, out.width="100%", eval=FALSE}
 custom_raw <- list(
   legend_TSM  = TRUE, 
   legend_Chla = TRUE, 
@@ -252,7 +252,7 @@ In this function, you can modify the following variables:
   - **daily_median**: calculates the daily median
 - **merge_plot** (logical): if `TRUE`, parameters sharing the same unit are overlaid in a single plot
 
-```{r, warning=FALSE, message=TRUE, out.width="100%"}
+```{r, warning=FALSE, message=TRUE, out.width="100%", eval=FALSE}
 fig_trend <- WISP.data::wisp_trend_plot(
   data       = reflect_data_sr,
   params     = c("TSM", "Chla", "Novoa_SPM", "Mishra_CHL"),
