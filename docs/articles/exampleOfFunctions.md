@@ -279,19 +279,5 @@ fig_trend <- WISP.data::wisp_trend_plot(
   aggregate  = "daily_mean",
   merge_plot = TRUE
 )
-```
-
-    ## 
-    ## ----------------------------------------------------------------------
-    ## Parameters available (`params`): TSM, Chla, Kd, cpc, scatt, ratio, Novoa_SPM, Novoa_TUR, Jiang_TSS, Gons_CHL, Gons740_CHL, NDCI, Mishra_CHL, Hue_Angle, Dom_Wave
-
-    ## 
-    ## Aggregation methods (`aggregate`):
-    ##  - 'none': Plot all available values (requires only one day in `wisp_get_reflectance_data()`).
-    ##  - 'daily_mean': Plot the daily average and standard deviation (requires multiple days in `wisp_get_reflectance_data()`).
-    ##  - 'daily_median': Plot the daily median (requires multiple days in `wisp_get_reflectance_data()`)
-    ## ----------------------------------------------------------------------
-
-``` r
 fig_trend
 ```

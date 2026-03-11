@@ -149,7 +149,7 @@ wisp_get_reflectance_data <- function(
         ) {
         reflectance_data_tbl <- NULL
         message(
-          "\n----\n⚠️ Thank you for your request, but the instrument does not acquire data on ",
+          "\n----\nThank you for your request, but the instrument does not acquire data on ",
           start_date,
           ".\nIf you requested data for more than one date, only the data for ", start_date, " will be missing in the result.\n",
           "If you requested data for only one date, your result will be empty.",
@@ -159,7 +159,7 @@ wisp_get_reflectance_data <- function(
         reflectance_data_tbl <- NULL
         new_station <- df_no_station$instrument.name[2]
         message(paste0(
-          "\n----\n⚠️ Thank you for your request. Data for the requested station is not available, but we know there is data for the same date from this station: ",
+          "\n----\nThank you for your request. Data for the requested station is not available, but we know there is data for the same date from this station: ",
           new_station,
           ".\n",
           "Maybe you're interested in these?\n\nResubmit the request by entering this value ",
@@ -209,7 +209,7 @@ wisp_get_reflectance_data <- function(
     }
   } else {
     reflectance_data_tbl <- NULL
-    message("\n----\n⚠️ Please check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use function: wisp_get_reflectance_multi_data()\n----\n")
+    message("\n----\nPlease check the 'time_from' and 'time_to' parameters.\n\nThe two dates are not consistent.\n\nThe dates must be equal. \n\nTo use multiple dates use function: wisp_get_reflectance_multi_data()\n----\n")
   }
   # output
   return(reflectance_data_tbl)
@@ -306,7 +306,7 @@ wisp_get_reflectance_multi_data <- function(
       )
     }, error = function(e) {
       message(sprintf(
-        "\n----\n⚠️ Skipping %s: %s\n----\n",
+        "\n----\nSkipping %s: %s\n----\n",
         as.character(date),
         e$message
       ))
@@ -480,7 +480,7 @@ wisp_qc_reflectance_data <- function(
     closest_idx <- which.min(abs(band_wavelengths - 350))
     blue_ref_band <- candidate_bands[closest_idx]
   } else {
-    stop("⚠️ No band between 350 and 450 nm available for QC4.")
+    stop("No band between 350 and 450 nm available for QC4.")
   }
   removed_QC4 <- data[which(
     (data[[blue_ref_band]] > pmax(data$nm_555,
@@ -709,7 +709,7 @@ wisp_qc_reflectance_data <- function(
   message("----\n") 
   
   if (final_nrow == 0) {
-    message("\n----\n⚠️ Thank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
+    message("\n----\nThank you for your request, but the QC operation removed all the spectral signatures available on this date.\n----\n")
     return(NULL)
   }
   
@@ -926,7 +926,7 @@ wisp_sr_reflectance_data <- function(
     out_dir       = "outputs"
 ) {
   if (!"QC" %in% names(qc_data)) {
-    message("\n----\n⚠️ This function is not executable on this dataset. Try after QC.\n----\n")
+    message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
     return(invisible(NULL))
   }
   
@@ -1175,7 +1175,7 @@ wisp_calc_Novoa_SPM <- function(data) {
     } else if (wave == 865) {
       return(list(A = 2971.93, C = 0.2115))
     } else {
-      stop("⚠️ Wavelength not supported")
+      stop("Wavelength not supported")
     }
   }
   
@@ -1274,7 +1274,7 @@ wisp_calc_Novoa_TUR <- function(data) {
     } else if (wave == 865) {
       return(list(A = 2109.35, C = 0.2115))
     } else {
-      stop("⚠️ Wavelength not supported")
+      stop("Wavelength not supported")
     }
   }
   
@@ -1444,7 +1444,7 @@ wisp_calc_Gons_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("⚠️ wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
+    warning("wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
     data$Gons.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1495,7 +1495,7 @@ wisp_calc_Gons740_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("⚠️ wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
+    warning("wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
     data$Gons740.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1545,7 +1545,7 @@ wisp_calc_NDCI <- function(data) {
   
   # If bands are missing, return NA
   if (length(cols_670) == 0 || length(cols_705) == 0) {
-    warning("⚠️ wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
+    warning("wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
     data$NDCI <- units::set_units(rep(NA_real_, nrow(data)), "1")
     return(data)
   }
@@ -1575,7 +1575,7 @@ wisp_calc_Mishra_CHL <- function(data) {
   
   # Check if NDCI column is present
   if (!"NDCI" %in% names(data)) {
-    stop("⚠️ Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
+    stop("Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
   }
   
   # Coefficients derived from Mishra and Mishra (2012)
@@ -2599,7 +2599,7 @@ wisp_plot_comparison <- function(
   plot_list <- Filter(Negate(is.null), list(fig1, fig2, fig3))
   
   if (length(plot_list) == 1) {
-    message("\n----\n⚠️ The only valid plot is the one referring to RAW.\n----\n")
+    message("\n----\nThe only valid plot is the one referring to RAW.\n----\n")
   }
   
   plot_title <- if (length(plot_list) == 3) {
@@ -2718,8 +2718,8 @@ wisp_trend_plot <- function(
 ) {
   aggregate <- match.arg(aggregate)
   
-  if (is.null(data) || nrow(data) == 0) stop("⚠️ The ‘data’ dataset is empty or NULL.")
-  if (!datetime_col %in% names(data)) stop("⚠️ Datetime column not found: ", datetime_col)
+  if (is.null(data) || nrow(data) == 0) stop("The ‘data’ dataset is empty or NULL.")
+  if (!datetime_col %in% names(data)) stop("Datetime column not found: ", datetime_col)
   
   mapping <- list(
     TSM          = "waterquality.tsm",
@@ -2788,12 +2788,12 @@ wisp_trend_plot <- function(
   if (merge_plot) {
     relevant_units <- unit_groups_map[valid]
     if (length(unique(relevant_units)) == length(relevant_units)) {
-      stop("⚠️ Please note: you are requesting to merge plots with parameters that do not have any common units of measurement. Try changing the 'params' or set 'merge_plot = FALSE'.")
+      stop("Please note: you are requesting to merge plots with parameters that do not have any common units of measurement. Try changing the 'params' or set 'merge_plot = FALSE'.")
     }
   }
   cols <- unlist(mapping[valid])
   present <- cols %in% names(data)
-  if (!all(present)) warning("⚠️ Some parameters not present in the dataset: ", paste(valid[!present], collapse = ", "))
+  if (!all(present)) warning("Some parameters not present in the dataset: ", paste(valid[!present], collapse = ", "))
   cols <- cols[present]
   valid <- valid[present]
   
@@ -2807,10 +2807,10 @@ wisp_trend_plot <- function(
   n_unique_dates <- length(unique_dates)
   
   if (aggregate == "none" && n_unique_dates > 1) {
-    stop("⚠️ Please note: you are requesting multiple days. Try changing the 'aggregate' or requesting a single day.")
+    stop("Please note: you are requesting multiple days. Try changing the 'aggregate' or requesting a single day.")
   }
   if (aggregate %in% c("daily_mean", "daily_median") && n_unique_dates == 1) {
-    stop("⚠️ Please note: you are requesting only one day. Try changing the 'aggregate' or requesting multiple days. 
+    stop("Please note: you are requesting only one day. Try changing the 'aggregate' or requesting multiple days. 
      If, on the other hand, you requested multiple days, it means that QC removed all the spectral signatures in some of them.")
   }
   
@@ -2845,7 +2845,7 @@ wisp_trend_plot <- function(
   }
   
   long_df <- long_df[!is.na(long_df$value), ]
-  if (nrow(long_df) == 0) stop("⚠️ No valid value after filtering NA.")
+  if (nrow(long_df) == 0) stop("No valid value after filtering NA.")
   
   # Aggregation if requested
   if (aggregate != "none") {

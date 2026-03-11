@@ -19,11 +19,6 @@ wisp_runApp <- function(
     ...
 ) {
   
-  library(shiny)
-  library(shinyjs)
-  library(plotly)
-  library(readr)
-  
   shinyApp(
     
     ui = fluidPage(
@@ -120,7 +115,7 @@ wisp_runApp <- function(
         removeModal()
         shinyjs::enable("get_data_btn")
         shinyjs::enable("download_csv")
-        user_message("✔️ Successfully authenticated.")
+        user_message("Successfully authenticated.")
       })
       
       observeEvent(input$logout_btn, {
@@ -129,7 +124,7 @@ wisp_runApp <- function(
         creds$logged <- FALSE
         shinyjs::disable("get_data_btn")
         shinyjs::disable("download_csv")
-        user_message("🔒 Credentials cleared. Please login again.")
+        user_message("Credentials cleared. Please login again.")
       })
       
       # -------------------------
@@ -331,7 +326,7 @@ wisp_runApp <- function(
           )
           
           if (is.null(rd) || nrow(rd) == 0) {
-            shinyjs::alert("⚠️ QC removed all spectral signatures.")
+            shinyjs::alert("QC removed all spectral signatures.")
             return(NULL)
           }
         }

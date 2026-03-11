@@ -6,15 +6,19 @@ visualizing data from a specific WISP station.
 ## Usage
 
 ``` r
-wisp_runApp(stations = c("WISPstation012", "WISPstation013"))
+wisp_runApp(stations = c("WISPstation012", "WISPstation013"), ...)
 ```
 
 ## Arguments
 
+- stations:
+
+  A `character vector` of station names.
+
 - ...:
 
-  other params passed to
-  [`shiny::runApp`](https://rdrr.io/pkg/shiny/man/runApp.html)
+  Other parameters passed to
+  [`shiny::runApp`](https://rdrr.io/pkg/shiny/man/runApp.html).
 
 ## Author
 
@@ -23,7 +27,7 @@ Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 ## Examples
 
 ``` r
-# example code
+if (FALSE) { # \dontrun{
 WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
-#> Error: 'wisp_runApp' is not an exported object from 'namespace:WISP.data'
+} # }
 ```
