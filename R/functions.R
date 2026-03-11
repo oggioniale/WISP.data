@@ -33,6 +33,9 @@
 #' @importFrom tidyr unnest_wider
 #' @importFrom lubridate as_datetime
 #' @importFrom units set_units
+#' @importFrom utils read.csv read.table
+#' @importFrom stats approx
+#' @importFrom tidyselect matches
 #' @export
 #' @examples
 #' # example code
@@ -1121,7 +1124,10 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
   "waterquality.cpc", "level2.quality", "X", "wavelength", "Rrs", 
   "color_group", "tooltip_text", "Novoa.TUR", "Blended.TUR", "Jiang.TSS", 
   "ref_band", "bbp", "Gons.CHL", "Gons740.CHL", "NDCI", "Mishra.CHL", 
-  "hue_angle", "dominant_wavelength", "datetime", "param", "mean_value", "sd_value"
+  "hue_angle", "dominant_wavelength", "datetime", "param", "mean_value", 
+  "sd_value", "OWT_class", "OWT_description", "OWT_score", "OWT_z_dist", 
+  "QWIP_score", "RHW", "SR", "delta", "est_md_750_780", "main_text", 
+  "md_750_780", "md_780", "md_810", "md_840", "text_sd", "unit_group", "value", "y"
 ))
 
 

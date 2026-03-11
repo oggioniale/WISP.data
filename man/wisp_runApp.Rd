@@ -4,12 +4,12 @@
 \alias{wisp_runApp}
 \title{Run shiny app for get and visualize WISP data}
 \usage{
-wisp_runApp(stations = c("WISPstation012", "WISPstation013"))
+wisp_runApp(stations = c("WISPstation012", "WISPstation013"), ...)
 }
 \arguments{
 \item{stations}{A \verb{character vector} of station names.}
 
-\item{...}{other params passed to \code{shiny::runApp}}
+\item{...}{Other parameters passed to \code{shiny::runApp}.}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

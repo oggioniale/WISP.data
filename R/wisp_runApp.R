@@ -3,7 +3,7 @@
 #' This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
 #' @param stations A `character vector` of station names.
-#' @param ... other params passed to `shiny::runApp`
+#' @param ... Other parameters passed to `shiny::runApp`.
 #' @import shiny
 #' @importFrom plotly plotlyOutput renderPlotly
 #' @importFrom shinyjs useShinyjs
@@ -15,7 +15,8 @@
 #' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
 #' }
 wisp_runApp <- function(
-    stations = c("WISPstation012", "WISPstation013")
+    stations = c("WISPstation012", "WISPstation013"),
+    ...
 ) {
   
   library(shiny)

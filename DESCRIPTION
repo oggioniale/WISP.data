@@ -50,6 +50,7 @@ Imports:
     stringr,
     tibble,
     tidyr,
+    tidyselect,
     units,
     utils,
     viridis,
