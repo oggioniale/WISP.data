@@ -1112,6 +1112,18 @@ wisp_sr_reflectance_data <- function(
 }
 
 
+# Definition to suppress R CMD check NOTES on dplyr/ggplot2 variables
+if(getRversion() >= "2.15.1")  utils::globalVariables(c(
+  "green_value", "red_value", "nir_value", "novoa_spm", "Novoa.SPM", 
+  "Blended.SPM", "waterquality.tsm", "novoa_tur", "scattering.peak", 
+  "band.ratio", "waterquality.chla", "level2.reflectance", "measurement.date", 
+  "measurement.latitude", "degree", "measurement.longitude", "waterquality.kd", 
+  "waterquality.cpc", "level2.quality", "X", "wavelength", "Rrs", 
+  "color_group", "tooltip_text", "Novoa.TUR", "Blended.TUR", "Jiang.TSS", 
+  "ref_band", "bbp", "Gons.CHL", "Gons740.CHL", "NDCI", "Mishra.CHL", 
+  "hue_angle", "dominant_wavelength", "datetime", "param", "mean_value", "sd_value"
+))
+
 
 #' @noRd
 #' @keywords internal

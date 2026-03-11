@@ -7,6 +7,8 @@
 wisp_runApp(stations = c("WISPstation012", "WISPstation013"))
 }
 \arguments{
+\item{stations}{A \verb{character vector} of station names.}
+
 \item{...}{other params passed to \code{shiny::runApp}}
 }
 \description{
@@ -14,9 +16,9 @@ wisp_runApp(stations = c("WISPstation012", "WISPstation013"))
 This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 }
 \examples{
-# example code
+\dontrun{
 WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
-
+}
 }
 \author{
 Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}

@@ -45,11 +45,15 @@ Imports:
     purrr,
     readr,
     shiny,
+    shinyjs,
     stats,
     stringr,
     tibble,
     tidyr,
     units,
     utils,
-    viridis
+    viridis,
+    rstudioapi,
+    curl,
+    methods
 Config/testthat/edition: 3

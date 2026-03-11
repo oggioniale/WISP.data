@@ -2,17 +2,18 @@
 #' @description `r lifecycle::badge("experimental")`
 #' This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 #' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
+#' @param stations A `character vector` of station names.
 #' @param ... other params passed to `shiny::runApp`
 #' @import shiny
 #' @importFrom plotly plotlyOutput renderPlotly
-#' @importFrom shiny fluidPage titlePanel sidebarLayout sidebarPanel mainPanel
-#' @importFrom shiny dateInput
+#' @importFrom shinyjs useShinyjs
+#' @importFrom rstudioapi viewer
+#' @export
 #' @keywords internal
 #' @examples
-#' # example code
+#' \dontrun{
 #' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
-#' 
-### wisp_runApp
+#' }
 wisp_runApp <- function(
     stations = c("WISPstation012", "WISPstation013")
 ) {
