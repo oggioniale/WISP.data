@@ -8,9 +8,9 @@ citEntry(entry = "Misc",
                              as.person("Nicola Ghirardi")),
          year = year,
          DOI = "https://doi.org/10.5281/zenodo.16893167",
-         note = paste("R package version", "v0.1.0"),
+         note = paste("R package version", "v1.0.0"),
          textVersion =
          paste("Alessandro Oggioni & Nicola Ghirardi.",
-         " (year). WISP.data (v0.1.0).",
+         " (year). WISP.data (v1.0.0).",
          "Zenodo. https://doi.org/10.5281/zenodo.16893167")
          )

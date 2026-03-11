@@ -95,6 +95,24 @@ Data flow
   <em><b>Figure 1.</b> WISP.data workflow.</em>
 </p>
 
+## Citation
+
+To cite `{WISP.data}` please use:
+
+Alessandro Oggioni & Nicola Ghirardi.
+(2026). WISP.data (v1.0.0). Zenodo.
+<https://doi.org/10.5281/zenodo.16893167>
+
+``` bibtex
+@software{WIPS.data2026,
+  title = {WISP.data - Managing WISPstation Hyperspectral Data},
+  author = {Alessandro Oggioni and Nicola Ghirardi},
+  year = {2026},
+  doi = {https://doi.org/10.5281/zenodo.16893167},
+  note = {R package version v1.0.0},
+}
+```
+
 
 Gallery
 ===================
