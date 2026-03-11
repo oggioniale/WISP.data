@@ -93,7 +93,7 @@ reflectance data.
 This function generates an interactive visualization of all spectral signatures
 contained in a dataset, based on the plotly library. It is highly flexible and
 can be used to display: native data downloaded directly from WISPstation, processed
-data after QC, processed data after SR. The function’s distinctive feature is
+data after QC, processed data after SR. The function's distinctive feature is
 its dynamic tooltip system: when hovering over a spectral curve, users can
 instantly visualize the corresponding acquisition date and time, together with
 all associated bio-optical parameters computed for that specific measurement.

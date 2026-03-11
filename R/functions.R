@@ -5,7 +5,7 @@
 #' spectral reflectance measurements for a user-defined time interval. 
 #' The function handles authentication queries the remote server and returns 
 #' the retrieved data in a structured tibble format. In addition to hyperspectral 
-#' reflectance data (350–900 nm), the function also retrieves the water quality 
+#' reflectance data (350-900 nm), the function also retrieves the water quality 
 #' parameters natively computed by the WISPstation, including: TSM 
 #' (Van Der Woerd & Pasterkamp, 2008), Chla (Gons et al., 2005), Kd 
 #' (Gons et al., 1998), and cpc (Simis, 2006).
@@ -1405,7 +1405,7 @@ wisp_calc_Jiang_TSS <- function(data) {
     return(data.frame(a = a_val, bbp = bbp_val, ref_band = paste0("QAA_", sub("Rrs", "", band)), Jiang.TSS = TSS_val))
   }
   
-  # Compute Rrs means (±3 nm)
+  # Compute Rrs means (+/-3 nm)
   nm_cols <- grep("^nm_", names(data), value = TRUE)
   wl <- as.numeric(sub("^nm_", "", nm_cols))
   cols_list <- lapply(wave, function(w) {
@@ -1444,7 +1444,7 @@ wisp_calc_Gons_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("wisp_calc_Gons_CHL: missing required bands (664/704/782 ±3 nm).")
+    warning("wisp_calc_Gons_CHL: missing required bands (664/704/782 +/-3 nm).")
     data$Gons.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1495,7 +1495,7 @@ wisp_calc_Gons740_CHL <- function(data) {
   
   # If bands are missing, return NA
   if (length(red_cols) == 0 || length(re_cols) == 0 || length(nir_cols) == 0) {
-    warning("wisp_calc_Gons740_CHL: missing required bands (664/704/740 ±3 nm).")
+    warning("wisp_calc_Gons740_CHL: missing required bands (664/704/740 +/-3 nm).")
     data$Gons740.CHL <- units::set_units(rep(NA_real_, nrow(data)), "mg/m3")
     return(data)
   }
@@ -1545,7 +1545,7 @@ wisp_calc_NDCI <- function(data) {
   
   # If bands are missing, return NA
   if (length(cols_670) == 0 || length(cols_705) == 0) {
-    warning("wisp_calc_NDCI: missing required bands (670/705 ±3 nm).")
+    warning("wisp_calc_NDCI: missing required bands (670/705 +/-3 nm).")
     data$NDCI <- units::set_units(rep(NA_real_, nrow(data)), "1")
     return(data)
   }
@@ -1575,7 +1575,7 @@ wisp_calc_Mishra_CHL <- function(data) {
   
   # Check if NDCI column is present
   if (!"NDCI" %in% names(data)) {
-    stop("Error: the ‘NDCI’ column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
+    stop("Error: the 'NDCI' column is not present. First calculate NDCI using 'wisp_calc_NDCI' function.")
   }
   
   # Coefficients derived from Mishra and Mishra (2012)
@@ -2303,7 +2303,7 @@ wisp_calc_OWT_class <- function(data) {
 #' This function generates an interactive visualization of all spectral signatures 
 #' contained in a dataset, based on the plotly library. It is highly flexible and 
 #' can be used to display: native data downloaded directly from WISPstation, processed
-#' data after QC, processed data after SR. The function’s distinctive feature is 
+#' data after QC, processed data after SR. The function's distinctive feature is 
 #' its dynamic tooltip system: when hovering over a spectral curve, users can 
 #' instantly visualize the corresponding acquisition date and time, together with 
 #' all associated bio-optical parameters computed for that specific measurement.
@@ -2406,7 +2406,7 @@ wisp_plot_reflectance_data <- function(
     legend_OWT_z_dist     = FALSE
 ) {
   
-  # Convert columns with ‘units’ to numeric
+  # Convert columns with 'units' to numeric
   units_cols <- names(data)[sapply(data, function(x) inherits(x, "units"))]
   if(length(units_cols) > 0){
     for(col in units_cols){
@@ -2439,7 +2439,7 @@ wisp_plot_reflectance_data <- function(
         if (legend_gons740_CHL && !is.na(gons740_chl)) paste("<b>Gons740_CHL [mg/m3]:</b>", gons740_chl),
         if (legend_NDCI && !is.na(ndci)) paste("<b>NDCI:</b>", ndci),
         if (legend_mishra_CHL && !is.na(mishra_chl)) paste("<b>Mishra_CHL [mg/m3]:</b>", mishra_chl),
-        if (legend_hue_angle && !is.na(hue)) paste("<b>Hue_Angle [°]:</b>", hue),
+        if (legend_hue_angle && !is.na(hue)) paste("<b>Hue_Angle [deg]:</b>", hue),
         if (legend_dom_wavelength && !is.na(dom_wv)) paste("<b>Dom_Wave [nm]:</b>", dom_wv),
         if (legend_OWT_class && !is.na(owt_c)) paste("<b>OWT Class:</b>", owt_c),
         if (legend_OWT_score && !is.na(owt_s)) paste("<b>OWT Score:</b>", owt_s),
@@ -2718,7 +2718,7 @@ wisp_trend_plot <- function(
 ) {
   aggregate <- match.arg(aggregate)
   
-  if (is.null(data) || nrow(data) == 0) stop("The ‘data’ dataset is empty or NULL.")
+  if (is.null(data) || nrow(data) == 0) stop("The 'data' dataset is empty or NULL.")
   if (!datetime_col %in% names(data)) stop("Datetime column not found: ", datetime_col)
   
   mapping <- list(
@@ -2784,7 +2784,7 @@ wisp_trend_plot <- function(
   
   requested <- unique(params)
   valid <- requested[requested %in% names(mapping)]
-  if (length(valid) == 0) stop("⚠️ No valid parameters required.")
+  if (length(valid) == 0) stop("No valid parameters required.")
   if (merge_plot) {
     relevant_units <- unit_groups_map[valid]
     if (length(unique(relevant_units)) == length(relevant_units)) {
@@ -2861,7 +2861,7 @@ wisp_trend_plot <- function(
           "Date: ", date,
           "<br>Param: ", param,
           "<br>Mean: ", round(mean(value, na.rm = na.rm), 2),
-          " ± SD: ", round(stats::sd(value, na.rm = na.rm), 2)
+          " +/- SD: ", round(stats::sd(value, na.rm = na.rm), 2)
         )
       )
     } else if (aggregate == "daily_median") {
