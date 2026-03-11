@@ -1323,10 +1323,12 @@ wisp_calc_Novoa_TUR <- function(data) {
   red_cols <- get_columns_in_range(data, 665, tol = 3)
   nir_cols <- get_columns_in_range(data, 865, tol = 3)
   
-  units::install_unit(
-    symbol = "NTU",
-    name = c("Nephelometric Turbidity Unit")
-  )
+  if (is.null(try(units::as_units("NTU"), silent = TRUE))) {
+    units::install_unit(
+      symbol = "NTU",
+      name = "Nephelometric Turbidity Unit"
+    )
+  }
   
   data <- data |>
     dplyr::rowwise() |>
