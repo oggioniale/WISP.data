@@ -7,6 +7,7 @@
 ![Gitea Last Commit](https://img.shields.io/github/last-commit/oggioniale/WISP.data)
 ![GitHub R package version](https://img.shields.io/github/r-package/v/oggioniale/WISP.data)
 [![Codecov test coverage](https://codecov.io/gh/oggioniale/WISP.data/graph/badge.svg)](https://app.codecov.io/gh/oggioniale/WISP.data)
+[![R-CMD-check](https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check)
 <!-- badges: end -->
 
 
