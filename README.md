@@ -1,7 +1,13 @@
 **WISP.data**
 ===================
-
+<!-- badges: start -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg)](https://doi.org/10.5281/zenodo.16893167)
+![GitHub License](https://img.shields.io/github/license/oggioniale/WISP.data)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/oggioniale/WISP.data)
+![Gitea Last Commit](https://img.shields.io/github/last-commit/oggioniale/WISP.data)
+![GitHub R package version](https://img.shields.io/github/r-package/v/oggioniale/WISP.data)
+[![Codecov test coverage](https://codecov.io/gh/oggioniale/WISP.data/graph/badge.svg)](https://app.codecov.io/gh/oggioniale/WISP.data)
+<!-- badges: end -->
 
 
 Summary
