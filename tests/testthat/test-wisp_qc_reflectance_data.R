@@ -1,6 +1,4 @@
 library(testthat)
-library(dplyr)
-library(units)
 
 test_that("wisp_qc_reflectance_data: Full check (QC1-6, QA, QWIP, Bio-optics)", {
   
@@ -15,11 +13,13 @@ test_that("wisp_qc_reflectance_data: Full check (QC1-6, QA, QWIP, Bio-optics)", 
   
   # Create a 10-row dataframe based on your signature
   df_list <- replicate(10, stats::setNames(as.list(gold_values), col_names), simplify = FALSE)
-  df_test <- dplyr::bind_rows(lapply(df_list, as_tibble))
+  df_test <- df_list |> 
+    lapply(dplyr::as_tibble) |> 
+    dplyr::bind_rows()
   
   # Metadata
-  df_test <- df_test %>%
-    mutate(
+  df_test <- df_test |>
+    dplyr::mutate(
       measurement.id = 494256,
       measurement.date = paste0("2024-05-01T10:0", 0:9, ":00.000Z"),
       instrument.name = "WISPstation012",
@@ -95,8 +95,12 @@ test_that("wisp_qc_reflectance_data: Full check (QC1-6, QA, QWIP, Bio-optics)", 
   expect_false(is.null(res), info = "The Standard Spectral Signature has been removed! Check the QC parameters.")
   expect_s3_class(res, "tbl_df")
   expect_lt(nrow(res), 10)
+  
   expected_cols <- c("QA_score", "QWIP_score", "NDCI", "OWT_class", "Jiang.TSS")
   expect_true(any(expected_cols %in% colnames(res)))
-  expect_equal(as.character(units(res$nm_550)), "1/sr")
+  
+  expect_s3_class(res$nm_550, "units")
+  expect_match(format(res$nm_550[1]), "1/sr", fixed = TRUE)
+  
   expect_true(all(res$QC == "checked"))
 })

@@ -1,7 +1,7 @@
 # HEADERLINES 19
-# Request processed at 2026-03-10 15:17:31 UTC
+# Request processed at 2026-03-12 11:33:45 UTC
 # 
-# Requested by cnr_irea (cnr_irea) from 87.4.35.30
+# Requested by cnr_irea (cnr_irea) from 155.253.20.87
 # 
 # ---original request---
 # https://wispcloud.waterinsight.nl/api/query?SERVICE=data&VERSION=1.0&REQUEST=GetData&INSTRUMENT=WISPstation012&TIME=2024-08-01T09%3A00%2C2024-08-01T14%3A00&INCLUDE=measurement.id%2Cmeasurement.date%2Cinstrument.name%2Cmeasurement.latitude%2Cmeasurement.longitude%2Clevel2.quality%2Ced.selected%2Clu.selected%2Cld.selected%2Cwaterquality.tsm%2Cwaterquality.chla%2Cwaterquality.kd%2Cwaterquality.cpc%2Clevel2.reflectance

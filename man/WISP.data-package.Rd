@@ -12,6 +12,7 @@ R package designed to automate the acquisition, quality control, analysis, and v
 Useful links:
 \itemize{
   \item \url{https://github.com/oggioniale/WISP.data}
+  \item \url{https://oggioniale.github.io/WISP.data/}
   \item Report bugs at \url{https://github.com/oggioniale/WISP.data/issues}
 }
 

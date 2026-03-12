@@ -170,16 +170,19 @@ wisp_get_reflectance_data <- function(
     } else {
       reflectance_data_tbl <- tibble::as_tibble(df) |>
         dplyr::slice(-1) |>
-        tidyr::unnest_wider(
-          col = level2.reflectance,
-          names_sep = ("_")
-        ) |>
+        tidyr::unnest_wider(col = level2.reflectance, names_sep = "_") |>
         dplyr::mutate(
+          
           dplyr::across(
-            dplyr::starts_with("level2.reflectance_"), ~ units::set_units(as.numeric(as.character(.)), "1/sr")
+            dplyr::starts_with("level2.reflectance_"),
+            ~ {
+              val <- as.numeric(ifelse(.x == "None" | .x == "", NA, .x))
+              suppressWarnings(units::set_units(val, "1/sr"))
+            }
           ),
           dplyr::across(
-            dplyr::starts_with("waterquality."), ~ as.numeric(as.character(.))
+            dplyr::starts_with("waterquality."), 
+            ~ as.numeric(ifelse(.x == "None" | .x == "", NA, as.character(.x)))
           ),
           measurement.date = lubridate::as_datetime(measurement.date),
           measurement.latitude = units::set_units(as.numeric(measurement.latitude), degree),
@@ -191,10 +194,7 @@ wisp_get_reflectance_data <- function(
           level2.quality = as.character(level2.quality)
         ) |>
         dplyr::rename_with(
-          ~ stringr::str_c(
-            "nm_",
-            350:900
-          ),
+          ~ stringr::str_c("nm_", 350:900),
           dplyr::starts_with("level2.reflectance_")
         )
     }
@@ -2298,7 +2298,6 @@ wisp_calc_OWT_class <- function(data) {
 }
 
 
-
 #' Create a plot of reflectance data
 #' @description `r lifecycle::badge("stable")`
 #' This function generates an interactive visualization of all spectral signatures 
@@ -2917,7 +2916,7 @@ wisp_trend_plot <- function(
     group = param,
     text = main_text
   )) +
-    ggplot2::geom_line(size=0.8) +
+    ggplot2::geom_line(linewidth=0.8) +
     ggplot2::geom_point(size=2) +
     ggplot2::scale_color_manual(values=colors_map, labels=legend_labels) +
     ggplot2::facet_wrap(~ facet_var, ncol=1, scales="free_y", labeller=facet_labeller) +

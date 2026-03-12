@@ -1,0 +1,40 @@
+# HEADERLINES 18
+# Request processed at 2026-03-12 11:34:31 UTC
+# 
+# Requested by cnr_irea (cnr_irea) from 155.253.20.87
+# 
+# ---original request---
+# https://wispcloud.waterinsight.nl/api/query?SERVICE=data&VERSION=1.0&REQUEST=GetData&TIME=2024-08-27T09%3A00%2C2024-08-27T14%3A00&INCLUDE=measurement.id%2Cmeasurement.date%2Cinstrument.name%2Cmeasurement.latitude%2Cmeasurement.longitude%2Clevel2.quality%2Ced.selected%2Clu.selected%2Cld.selected%2Cwaterquality.tsm%2Cwaterquality.chla%2Cwaterquality.kd%2Cwaterquality.cpc%2Clevel2.reflectance
+# 
+# ----------------------
+# Resource: https://wispcloud.waterinsight.nl/api/query
+# Parameters:
+#   include ['measurement.id,measurement.date,instrument.name,measurement.latitude,measurement.longitude,level2.quality,ed.selected,lu.selected,ld.selected,waterquality.tsm,waterquality.chla,waterquality.kd,waterquality.cpc,level2.reflectance']
+#   time ['2024-08-27t09:00,2024-08-27t14:00']
+#   service ['data']
+#   version ['1.0']
+#   request ['getdata']
+# ----------------------
+# 
+measurement.id	measurement.date	instrument.name	measurement.latitude	measurement.longitude	level2.quality	ed.selected	lu.selected	ld.selected	waterquality.tsm	waterquality.chla	waterquality.kd	waterquality.cpc	level2.reflectance
+[-]	[YYYY-MM-DD hh:mm:ss.sssss (UTC)]	[-]	[degree north]	[degree east]	[-]	[-]	[-]	[-]	[g m-3]	[mg m-3]	[m-1]	[mg m-3]	[1/sr for wavelength [350..900] in 1nm steps]
+564129	2024-08-27 09:00:05.761406	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564142	2024-08-27 09:15:05.409313	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564153	2024-08-27 09:30:05.516437	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564166	2024-08-27 09:45:05.468541	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564176	2024-08-27 10:00:06.549403	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564187	2024-08-27 10:15:05.805979	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564196	2024-08-27 10:30:05.221134	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564206	2024-08-27 10:45:05.168897	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564217	2024-08-27 11:00:05.522760	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564228	2024-08-27 11:15:05.527805	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564236	2024-08-27 11:30:05.990831	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564245	2024-08-27 11:45:05.866230	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564256	2024-08-27 12:00:05.769083	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564265	2024-08-27 12:15:05.953898	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564275	2024-08-27 12:30:05.189540	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564284	2024-08-27 12:45:05.003485	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564295	2024-08-27 13:00:05.037641	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564305	2024-08-27 13:15:05.251596	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564314	2024-08-27 13:30:05.497256	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
+564322	2024-08-27 13:45:06.322431	WISPstation012	43.1223	12.1344	None	None	None	None	None	None	None	None	None
