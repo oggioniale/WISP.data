@@ -19,7 +19,7 @@ Authors@R: c(
   )
 Description: R package designed to automate the acquisition, quality control, analysis, and visualization of spectral data collected by the WISPstation fixed spectroradiometer.
 License: GPL-3 + file LICENSE
-URL: https://github.com/oggioniale/WISP.data
+URL: https://github.com/oggioniale/WISP.data, https://oggioniale.github.io/WISP.data/
 BugReports: https://github.com/oggioniale/WISP.data/issues
 Encoding: UTF-8
 Language: en-GB
