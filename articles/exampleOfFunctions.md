@@ -1,0 +1,283 @@
+# Example of WISP.data functions
+
+## Provide the account of your station
+
+``` r
+userid <- Sys.getenv("WISP_IREA_USERID")
+pwd <- Sys.getenv("WISP_IREA_PSW")
+```
+
+## Get data from the WISP station server for a single or multiple dates.
+
+In this function if the `save_csv` parameter is set to `TRUE`, the
+function will save the reflectance data as a .csv file in the ‘output’
+folder within the working directory.
+
+``` r
+reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
+  time_from = "2024-09-11T09:00",
+  time_to   = "2024-09-17T14:00",
+  station   = "WISPstation012",
+  userid    = userid,
+  pwd       = pwd,
+  save_csv  = FALSE,
+  out_dir   = tempdir()
+)
+```
+
+## Quality Check (QC) of the reflectance data
+
+In this function if the `save_csv` parameter is set to `TRUE`, the
+function will save the quality checked reflectance data as a .csv file
+in the ‘output’ folder within the working directory.
+
+User-configurable Parameters:
+
+- **maxPeak** (numeric): maximum allowed reflectance peak threshold.
+  Default: 0.05
+- **maxPeak_blue** (numeric): maximum allowed threshold for the blue
+  region. Default: 0.02
+- **qa_threshold** (numeric): maximum threshold for the QA index.
+  Default: 0.5
+- **qwip_threshold** (numeric): minimum threshold for the QWIP index.
+  Default: 0.2
+- **calc_scatt** (logical): if `TRUE`, computes scattering parameters
+  and band ratios
+- **calc_SPM** (logical): if `TRUE`, computes SPM concentration
+  according to Novoa et al. (2017)
+- **calc_TUR** (logical): if `TRUE`, computes TUR concentration
+  according to Novoa et al. (2017)
+- **calc_TSS** (logical): if `TRUE`, computes SPM concentration
+  according to Jiang et al. (2021)
+- **calc_gons** (logical): if `TRUE`, computes CHL concentration
+  according to Gons et al. (2002)
+- **calc_gons740** (logical): if `TRUE`, computes CHL concentration
+  according to Gons et al. (2002)
+- **calc_NDCI** (logical): if `TRUE`, computes NDCI index according to
+  Mishra et al. (2012)
+- **calc_mishra** (logical): if `TRUE`, computes CHL concentration
+  according to Mishra et al. (2012)
+- **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength
+  and Hue Angle
+- **calc_OWT** (logical): if `TRUE`, computes Optical Water Type
+  classification
+
+``` r
+reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
+  data           = reflect_data,
+  maxPeak        = 0.05,
+  maxPeak_blue   = 0.02,
+  qa_threshold   = 0.5,
+  qwip_threshold = 0.2,
+  calc_scatt     = TRUE,
+  calc_SPM       = TRUE,
+  calc_TUR       = TRUE,
+  calc_TSS       = TRUE,
+  calc_gons      = TRUE,
+  calc_gons740   = TRUE,
+  calc_NDCI      = TRUE,
+  calc_mishra    = TRUE,
+  calc_dom_wave  = TRUE,
+  calc_OWT       = TRUE,
+  save_csv       = FALSE,
+  out_dir        = tempdir()
+)
+
+# ----
+# 106 spectral signatures were removed during QC:
+# 
+# - 16 spectral signatures were removed thanks to QA+QWIP
+# - 2 spectral signatures were removed thanks to QC1+QA+QWIP
+# - 4 spectral signatures were removed thanks to QC2+QA+QWIP
+# - 1 spectral signatures were removed thanks to QC3+QC4+QA+QWIP
+# - 4 spectral signatures were removed thanks to QC4+QA+QWIP
+# - 79 spectral signatures were removed thanks to QC6+QA+QWIP
+# 
+# The spectral signature of 2024-09-11 09:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 09:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 09:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 09:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 10:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 10:15:05 has been removed thanks to: QA QWIP
+# The spectral signature of 2024-09-11 10:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 10:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 11:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 11:15:05 has been removed thanks to: QC2 QA QWIP
+# The spectral signature of 2024-09-11 11:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 11:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 12:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 12:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 12:30:06 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 12:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 13:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 13:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-11 13:30:05 has been removed thanks to: QC6 QA QWIP
+# ...
+# The spectral signature of 2024-09-17 09:00:05 has been removed thanks to: QC3 QC4 QA QWIP
+# The spectral signature of 2024-09-17 09:15:05 has been removed thanks to: QC4 QA QWIP
+# The spectral signature of 2024-09-17 09:30:05 has been removed thanks to: QA QWIP
+# The spectral signature of 2024-09-17 09:45:05 has been removed thanks to: QA QWIP
+# The spectral signature of 2024-09-17 10:00:05 has been removed thanks to: QA QWIP
+# The spectral signature of 2024-09-17 10:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 10:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 10:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 11:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 11:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 11:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 11:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 12:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 12:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 12:30:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 12:45:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 13:00:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 13:15:05 has been removed thanks to: QC6 QA QWIP
+# The spectral signature of 2024-09-17 13:30:05 has been removed thanks to: QC4 QA QWIP
+# The spectral signature of 2024-09-17 13:45:05 has been removed thanks to: QC6 QA QWIP
+# 
+# QA remove spectral signatures with low quality based on Wei et al. (2016)
+# QC1 remove spectral signatures with negative values below 845 nm
+# QC2 remove spectral signatures with outliers in the NIR (840 nm > 700 nm)
+# QC3 remove spectral signatures with maximum peak greater than maxPeak
+# QC4 remove spectral signatures with outliers in the Blue domain
+# QC6 remove 'invalid' and 'None' spectral signatures according to level2.quality
+# QWIP remove spectral signatures with low quality based on Dierssen et al., 2022
+# ----
+```
+
+## Skyglint Removal (SR) of the reflectance data
+
+In this function if the `save_csv` parameter is set to `TRUE`, the
+function will save the reflectance data with the sunglint removed as a
+.csv file in the ‘output’ folder within the working directory.
+
+User-configurable Parameters:
+
+- **calc_scatt** (logical): if `TRUE`, computes scattering parameters
+  and band ratios
+- **calc_SPM** (logical): if `TRUE`, computes SPM concentration
+  according to Novoa et al. (2017)
+- **calc_TUR** (logical): if `TRUE`, computes TUR concentration
+  according to Novoa et al. (2017)
+- **calc_TSS** (logical): if `TRUE`, computes SPM concentration
+  according to Jiang et al. (2021)
+- **calc_gons** (logical): if `TRUE`, computes CHL concentration
+  according to Gons et al. (2002)
+- **calc_gons740** (logical): if `TRUE`, computes CHL concentration
+  according to Gons et al. (2002)
+- **calc_NDCI** (logical): if `TRUE`, computes NDCI index according to
+  Mishra et al. (2012)
+- **calc_mishra** (logical): if `TRUE`, computes CHL concentration
+  according to Mishra et al. (2012)
+- **calc_dom_wave** (logical): if `TRUE`, computes dominant wavelength
+  and Hue Angle
+- **calc_OWT** (logical): if `TRUE`, computes Optical Water Type
+  classification
+
+``` r
+reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
+  qc_data       = reflect_data_qc,
+  calc_scatt    = TRUE,
+  calc_SPM      = TRUE,
+  calc_TUR      = TRUE,
+  calc_TSS      = TRUE,
+  calc_gons     = TRUE,
+  calc_gons740  = TRUE,
+  calc_NDCI     = TRUE,
+  calc_mishra   = TRUE,
+  calc_dom_wave = TRUE,
+  calc_OWT      = TRUE,
+  save_csv      = FALSE,
+  out_dir       = tempdir()
+)
+```
+
+## Plot the reflectance data
+
+In this function, you can set to `TRUE` for the parameters you want to
+display in the legend for each of the three plots (raw, QC, SR).
+
+``` r
+custom_raw <- list(
+  legend_TSM  = TRUE, 
+  legend_Chla = TRUE, 
+  legend_Kd   = TRUE, 
+  legend_cpc  = TRUE
+)
+
+custom_qc <- list(
+  legend_TSM            = TRUE, 
+  legend_Chla           = TRUE, 
+  legend_Kd             = TRUE, 
+  legend_cpc            = TRUE, 
+  legend_scatt          = TRUE,
+  legend_ratio          = TRUE,
+  legend_novoa_SPM      = TRUE,
+  legend_novoa_TUR      = TRUE,
+  legend_jiang_TSS      = TRUE,
+  legend_gons_CHL       = TRUE,
+  legend_gons740_CHL    = TRUE,
+  legend_NDCI           = TRUE,
+  legend_mishra_CHL     = TRUE,
+  legend_hue_angle      = TRUE, 
+  legend_dom_wavelength = TRUE,
+  legend_OWT_class      = TRUE,
+  legend_OWT_score      = TRUE,
+  legend_OWT_z_dist     = TRUE
+)
+
+custom_sr <- list(
+  legend_TSM            = TRUE, 
+  legend_Chla           = TRUE, 
+  legend_Kd             = TRUE, 
+  legend_cpc            = TRUE, 
+  legend_scatt          = TRUE,
+  legend_ratio          = TRUE,
+  legend_novoa_SPM      = TRUE,
+  legend_novoa_TUR      = TRUE,
+  legend_jiang_TSS      = TRUE,
+  legend_gons_CHL       = TRUE,
+  legend_gons740_CHL    = TRUE,
+  legend_NDCI           = TRUE,
+  legend_mishra_CHL     = TRUE,
+  legend_hue_angle      = TRUE, 
+  legend_dom_wavelength = TRUE,
+  legend_OWT_class      = TRUE,
+  legend_OWT_score      = TRUE,
+  legend_OWT_z_dist     = TRUE
+)
+
+fig_comparison <- WISP.data::wisp_plot_comparison(
+  raw_data = reflect_data, 
+  qc_data  = reflect_data_qc, 
+  sr_data  = reflect_data_sr,
+  raw_args = custom_raw,
+  qc_args  = custom_qc,
+  sr_args  = custom_sr
+)
+fig_comparison
+```
+
+## Plot the temporal trend
+
+In this function, you can modify the following variables:
+
+- **params** (character vector): list of parameters to visualize
+- **aggregate** (character): defines how temporal aggregation is
+  applied:
+  - **none**: displays all individual measurements (ideal for single-day
+    analysis)
+  - **daily_mean**: calculates the daily mean and adds a ribbon
+    (standard deviation)
+  - **daily_median**: calculates the daily median
+- **merge_plot** (logical): if `TRUE`, parameters sharing the same unit
+  are overlaid in a single plot
+
+``` r
+fig_trend <- WISP.data::wisp_trend_plot(
+  data       = reflect_data_sr,
+  params     = c("TSM", "Chla", "Novoa_SPM", "Mishra_CHL"),
+  aggregate  = "daily_mean",
+  merge_plot = TRUE
+)
+fig_trend
+```
