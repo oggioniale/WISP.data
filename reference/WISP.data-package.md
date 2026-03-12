@@ -10,6 +10,8 @@ Useful links:
 
 - <https://github.com/oggioniale/WISP.data>
 
+- <https://oggioniale.github.io/WISP.data/>
+
 - Report bugs at <https://github.com/oggioniale/WISP.data/issues>
 
 ## Author
