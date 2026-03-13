@@ -78,8 +78,12 @@ This makes `WISP.data` an ideal solution for operational water quality monitorin
 
 The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it delivers specialized water quality products derived through various algorithms [@Gons:1997; @Gons:2005; @Simis:2006; @vanderWoerd:2008], essential for environmental observation, ecosystem assessment, and long-term trend analysis. 
 However, the effective management and scientific use of these spectral data and derived products present several significant challenges.
-Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. In addition, native spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
-A further critical barrier lies in the interpretation of spectral signatures themselves. For non-expert users, it is difficult to assess the physical and optical plausibility of reflectance spectra, identify anomalous signals, or distinguish between instrument artifacts and real environmental variability. Moreover, the application of third-party bio-optical algorithms for the estimation of water quality products typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.
+Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. 
+In addition, native spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. 
+Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
+A further critical barrier lies in the interpretation of spectral signatures themselves. 
+For non-expert users, it is difficult to assess the physical and optical plausibility of reflectance spectra, identify anomalous signals, or distinguish between instrument artifacts and real environmental variability. 
+Moreover, the application of third-party bio-optical algorithms for the estimation of water quality products typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.
 
 The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events [@Free:2021] to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno [@Bresciani:2020]. 
 Despite these successful applications, the processing of WISPstation data has been a labor-intensive and time-consuming.
@@ -123,16 +127,24 @@ The package architecture is organized into functional modules:
 # Research impact statement (---) 
 
 To date, the `WISP.data` package has been successfully deployed and tested at two distinct WISPstation sites: Lake Trasimeno (43.122° N, 12.134° E) and the Po River (ISMAR).
-Lake Trasimeno, located in central Italy, is the fourth-largest lake in Italy (124 km2). The basin is characterized by intensive agricultural land use and livestock farming, which lead to significant nutrient loading. These high nutrient inputs frequently trigger phytoplankton blooms, including potentially harmful cyanobacteria. 
-The lake's complex hydrological conditions, combined with climatic drivers such as temperature and wind-induced resuspension, result in high intra-day and inter-day variability. In such dynamic environments, using a fixed spectroradiometer such as the WISPstation is essential for capturing rapid shifts and understanding water quality trends at different time scales.
+Lake Trasimeno, located in central Italy, is the fourth-largest lake in Italy (124 km^2^). 
+The basin is characterized by intensive agricultural land use and livestock farming, which lead to significant nutrient loading. 
+These high nutrient inputs frequently trigger phytoplankton blooms, including potentially harmful cyanobacteria. 
+The lake's complex hydrological conditions, combined with climatic drivers such as temperature and wind-induced resuspension, result in high intra-day and inter-day variability. 
+In such dynamic environments, using a fixed spectroradiometer such as the WISPstation is essential for capturing rapid shifts and understanding water quality trends at different time scales.
 
 Regarding Po river ... (ISMAR)
 
-Both monitoring stations are integrated into the Long-Term Ecosystem Research (LTER) network and form part of the eLTER Research Infrastructure (eLTER-RI; DEIMS.iD: https://deims.org/c93c97fb-196e-480a-87b0-817218cd7c24), which provides a framework for integrated ecosystem and socio-ecological studies across Europe.
+The first WISPstation was installed in April 2018 on Lake Trasimeno. 
+A second deployment took place in September 2024 along the Po River, as part of the ITINERIS project (PNRR) within the Italian DANUBIUS-RI Supersite. 
+Both areas – Lake Trasimeno (https://deims.org/c93c97fb-196e-480a-87b0-817218cd7c24) and the Po Delta (https://deims.org/6869436a-80f4-4c6d-954b-a730b348d7ce) – are recognized as research sites of the European eLTER-RI Infrastructure. 
+Since their installation, the instruments have operated continuously, acquiring hyperspectral above-water radiometric data (350–900 nm) every 15 minutes during daylight hours, capturing a wide range of optical water conditions.
 
 The scientific utility of `WISP.data` was recently demonstrated in a study by Ghirardi et al. (2026, Under Review). 
-This research investigates the spatio-temporal dynamics of Suspended Particulate Matter (SPM) and Chlorophyll-a (CHL) in Lake Trasimeno using a synergistic approach. By combining high-frequency in situ data processed via `WISP.data` with multisensor satellite imagery (2019–2024), the study validated Rrs products from 14 different satellite sensors. 
-The strong agreement between the satellite-derived data and the `WISP.data` processed ground-truth enabled the accurate retrieval of SPM and CHL concentrations. These results highlight the package's role in bridging the gap between local autonomous measurements and large-scale satellite monitoring, facilitating the study of rapid environmental changes in lake ecosystems.
+This research investigates the spatio-temporal dynamics of Suspended Particulate Matter (SPM) and Chlorophyll-a (CHL) in Lake Trasimeno using a synergistic approach. 
+By combining high-frequency in situ data processed via `WISP.data` with multisensor satellite imagery (2019–2024), the study validated Rrs products from 14 different satellite sensors. 
+The strong agreement between the satellite-derived data and the `WISP.data` processed ground-truth enabled the accurate retrieval of SPM and CHL concentrations. 
+These results highlight the package's role in bridging the gap between local autonomous measurements and large-scale satellite monitoring, facilitating the study of rapid environmental changes in lake ecosystems.
 
 For the Po River, the package was employed to ... (ISMAR)
 
