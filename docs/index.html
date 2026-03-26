@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">WISP.data</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,11 +53,11 @@
 <div class="page-header"><h1 id="wispdata">
 <strong>WISP.data</strong><a class="anchor" aria-label="anchor" href="#wispdata"></a>
 </h1></div>
-<p><a href="https://doi.org/10.5281/zenodo.16893167" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg" alt="DOI"></a></p>
-</div>
-<div class="section level1">
-<h1 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
-</h1>
+<!-- badges: start -->
+
+<div class="section level2">
+<h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h2>
 <p><code>WISP.data</code> is an R package designed to automate the acquisition, quality control (QC), analysis, and visualization of spectral data collected by the WISPstation fixed spectroradiometer. Developed by Water Insight as an evolution of the handheld WISP-3 system, the WISPstation is a fixed instrument that records radiance and irradiance across a wavelength range of 350 to 1100 nm (spectral resolution of 4.6 nm). This package serves as a crucial bridge between Water Insight API services and the research community, enabling the transformation of raw reflectance measurements into scientifically validated, analysis-ready products through fully reproducible and transparent workflows.</p>
 <p>The WISPstation operates with 8 specialized channels to optimize data collection:</p>
 <ul>
@@ -82,16 +82,16 @@
 </ul>
 <p>This makes <code>WISP.data</code> an ideal solution for operational water quality monitoring, long-term research applications, and integration into large-scale environmental data pipelines.</p>
 </div>
-<div class="section level1">
-<h1 id="statement-of-need">Statement of need<a class="anchor" aria-label="anchor" href="#statement-of-need"></a>
-</h1>
+<div class="section level2">
+<h2 id="statement-of-need">Statement of need<a class="anchor" aria-label="anchor" href="#statement-of-need"></a>
+</h2>
 <p>The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it delivers specialized water quality products derived through various algorithms (Gons et al., 1997, 2005; Simis, 2006; van der Woerd &amp; Pasterkamp, 2008), essential for environmental observation, ecosystem assessment, and long-term trend analysis. However, the effective management and scientific use of these spectral data and derived products present several significant challenges. Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. In addition, native spectral measurements are sometimes affected by radiometric problems making robust and standardized quality control procedures indispensable. Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading. A further critical barrier lies in the interpretation of spectral signatures themselves. For non-expert users, it is difficult to assess the physical and optical plausibility of reflectance spectra, identify anomalous signals, or distinguish between instrument artifacts and real environmental variability. Moreover, the application of third-party bio-optical algorithms for the estimation of water quality products typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.</p>
 <p>The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events (Free et al., 2021) to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno (Bresciani et al., 2020). Despite these successful applications, the processing of WISPstation data has been a labor-intensive and time-consuming. Prior to the development of <code>WISP.data</code>, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameter. This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring.</p>
 <p><code>WISP.data</code> addresses these challenges by providing an integrated, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, spectral validation, and product generation within a single R-based framework. By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform native WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.</p>
 </div>
-<div class="section level1">
-<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h1>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <p>You can install the development version of WISP.data directly from GitHub.<br>
 The following commands will automatically install all required dependencies:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -101,31 +101,44 @@ The following commands will automatically install all required dependencies:</p>
 <span><span class="co"># Install WISP.data and dependencies</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"oggioniale/WISP.data"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
-</h1>
-<p>For a detailed description of each function, please visit this link: <a href="https://oggioniale.github.io/WISP.data/reference/index.html" class="external-link uri">https://oggioniale.github.io/WISP.data/reference/index.html</a></p>
+<div class="section level2">
+<h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
+</h2>
+<p>For a detailed description of each function, please visit <a href="https://oggioniale.github.io/WISP.data/reference/index.html" class="external-link">Reference page</a> of documentation.</p>
 </div>
-<div class="section level1">
-<h1 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
-</h1>
-<p>To view a complete example of WISP.data, please visit this page: <a href="https://oggioniale.github.io/WISP.data/articles/exampleOfFunctions.html" class="external-link uri">https://oggioniale.github.io/WISP.data/articles/exampleOfFunctions.html</a></p>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<p>To view a complete example of WISP.data a <a href="https://oggioniale.github.io/WISP.data/articles/exampleOfFunctions.html" class="external-link">vignette</a> has created.</p>
 </div>
-<div class="section level1">
-<h1 id="wisp_runapp">WISP_runApp<a class="anchor" aria-label="anchor" href="#wisp_runapp"></a>
-</h1>
-<p>To view a complete example of WISP_runApp, please visit this page: <a href="https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html" class="external-link uri">https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html</a></p>
+<div class="section level2">
+<h2 id="shiny-app">Shiny App<a class="anchor" aria-label="anchor" href="#shiny-app"></a>
+</h2>
+<p>A ShinyApp has been created to reproduce some of the package’s features through a simple user interface. The function <a href="https://oggioniale.github.io/WISP.data/reference/wisp_runApp.html" class="external-link"><code>WISP_runApp()</code></a> can be executed to launch this app.</p>
 </div>
-<div class="section level1">
-<h1 id="data-flow">Data flow<a class="anchor" aria-label="anchor" href="#data-flow"></a>
-</h1>
+<div class="section level2">
+<h2 id="data-flow">Data flow<a class="anchor" aria-label="anchor" href="#data-flow"></a>
+</h2>
 <p align="center">
-<img src="reference/figures/Figure%201.png" width="100%" alt="Figure 1"><br><em><b>Figure 1.</b> WISP.data workflow.</em>
+<img src="reference/figures/Figure1.png" width="100%" alt="Figure 1"><br><em><b>Figure 1.</b> WISP.data workflow.</em>
 </p>
 </div>
-<div class="section level1">
-<h1 id="gallery">Gallery<a class="anchor" aria-label="anchor" href="#gallery"></a>
-</h1>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>To cite <a href="https://github.com/oggioniale/WISP.data">WISP.data</a> please use:</p>
+<p>Alessandro Oggioni &amp; Nicola Ghirardi. (2026). WISP.data (v1.0.0). Zenodo. <a href="https://doi.org/10.5281/zenodo.16893167" class="external-link uri">https://doi.org/10.5281/zenodo.16893167</a></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">@software{WIPS.data2026,</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">  title = {WISP.data - Managing WISPstation Hyperspectral Data},</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">  author = {Alessandro Oggioni and Nicola Ghirardi},</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">  year = {2026},</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">  doi = {https://doi.org/10.5281/zenodo.16893167},</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">  note = {R package version v1.0.0},</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">}</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="gallery">Gallery<a class="anchor" aria-label="anchor" href="#gallery"></a>
+</h2>
 <p>In this section, we showcase some of the typical outputs generated by <code>WISP.data</code>.</p>
 <p align="center">
 <img src="reference/figures/Figure2.png" width="100%" alt="Figure 2"><br><em><b>Figure 2.</b> Plot resulting from the <code><a href="reference/wisp_plot_comparison.html">wisp_plot_comparison()</a></code> function showing the comparison between: A) native WISPstation Rrs, B) Rrs filtered by “QC”, C) Rrs to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).</em>
@@ -137,9 +150,9 @@ The following commands will automatically install all required dependencies:</p>
 <img src="reference/figures/Figure4.png" width="100%" alt="Figure 4"><br><em><b>Figure 4.</b> Plot resulting from the <code><a href="reference/wisp_trend_plot.html">wisp_trend_plot()</a></code> function showing the temporal trend of five exemplary parameters averaged on a daily basis: in the upper plot, a comparison between the WISPstation native algorithm (TSM) and two third-party algorithms for estimating suspended solids concentration (“Novoa_SPM” and “Jiang_TSS”); in the lower plot, the comparison between the WISPstation native chlorophyll-a algorithm (Chla) and Mishra_CHL algorithm. (site: Trasimeno; period: 01/05/2024 – 10/05/2024).</em>
 </p>
 </div>
-<div class="section level1">
-<h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h1>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <ul>
 <li>Bi, S., &amp; Hieronymi, M. (2024). Holistic optical water type classification for ocean, coastal, and inland waters. <em>Limnology and Oceanography</em>, 69(7), 1547-1561. <a href="https://doi.org/10.1002/lno.12606" class="external-link uri">https://doi.org/10.1002/lno.12606</a>
 </li>
@@ -163,7 +176,7 @@ The following commands will automatically install all required dependencies:</p>
 <li>Wei, J., Lee, Z., &amp; Shang, S. (2016). A system to measure the data quality of spectral remote‐sensing reflectance of aquatic environments. <em>Journal of Geophysical Research: Oceans</em>, 121(11), 8189-8207. <a href="https://doi.org/10.1002/2016JC012126" class="external-link uri">https://doi.org/10.1002/2016JC012126</a>.</li>
 </ul>
 </div>
-
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -197,7 +210,15 @@ The following commands will automatically install all required dependencies:</p>
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://doi.org/10.5281/zenodo.16893167" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg" alt="DOI"></a></li>
+<li><a href="https://app.codecov.io/gh/oggioniale/WISP.data" class="external-link"><img src="https://codecov.io/gh/oggioniale/WISP.data/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check"><img src="https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main" alt="R-CMD-check"></a></li>
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="Lifecycle: maturing"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

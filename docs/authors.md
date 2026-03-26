@@ -12,7 +12,7 @@
 Source:
 [`inst/CITATION`](https://github.com/oggioniale/WISP.data/blob/HEAD/inst/CITATION)
 
-Alessandro Oggioni & Nicola Ghirardi. (year). WISP.data (v0.1.0).
+Alessandro Oggioni & Nicola Ghirardi. (year). WISP.data (v1.0.0).
 Zenodo. https://doi.org/10.5281/zenodo.16893167
 
     @Misc{,
@@ -20,5 +20,5 @@ Zenodo. https://doi.org/10.5281/zenodo.16893167
       author = {Alessandro Oggioni and Nicola Ghirardi},
       year = {2026},
       doi = {https://doi.org/10.5281/zenodo.16893167},
-      note = {R package version v0.1.0},
+      note = {R package version v1.0.0},
     }
