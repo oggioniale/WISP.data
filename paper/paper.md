@@ -1,47 +1,47 @@
 ---
 title: "WISP.data package"
 tags:
- - R
- - WISPstation
- - spectroradiometer
- - remote sensing
- - spectral signatures analysis
+  - R
+  - WISPstation
+  - spectroradiometer
+  - remote sensing
+  - spectral signatures analysis
 authors:
- - name: Nicola Ghirardi
-  orcid: 0000-0002-5006-9853
-  equal-contrib: true
-  affiliation: "1, 2"
- - name: Alessandro Oggioni
-  orcid: 0000-0002-7997-219X
-  equal-contrib: true
-  affiliation: 2
- - name: Mariano Bresciani
-  orcid: 0000-0002-7185-8464
-  equal-contrib: false
-  affiliation: 2
- - name: Gian Marco Scarpa
-  orcid: 0000-0002-5061-5607
-  equal-contrib: false
-  affiliation: 3
- - name: Federica Braga
-  orcid: 0000-0002-4131-9080
-  equal-contrib: false
-  affiliation: 3
+  - name: Nicola Ghirardi
+    orcid: 0000-0002-5006-9853
+    equal-contrib: true
+    affiliation: "1, 2"
+  - name: Alessandro Oggioni
+    orcid: 0000-0002-7997-219X
+    equal-contrib: true
+    affiliation: "2"
+  - name: Mariano Bresciani
+    orcid: 0000-0002-7185-8464
+    equal-contrib: false
+    affiliation: "2"
+  - name: Gian Marco Scarpa
+    orcid: 0000-0002-5061-5607
+    equal-contrib: false
+    affiliation: "3"
+  - name: Federica Braga
+    orcid: 0000-0002-4131-9080
+    equal-contrib: false
+    affiliation: "3"
 affiliations:
- - name: CNR - Institute of Bioeconomy (IBE), Via Madonna del Piano 10, 50019 Firenze, Italy
-  index: 1
-  ror: 05wq02383
- - name: CNR - Institute of Electromagnetic Sensing of the Environment (IREA), Via A. Corti 12, 20133 Milan, Italy
-  index: 2
-  ror: 02wxw4x45
- - name: CNR - Institute of Marine Sciences (ISMAR), Arsenale - Tesa 104, Castello 2737/F, 30122 Venice, Italy
-  index: 3
-  ror: 01t306r88
+  - name: CNR - Institute of Bioeconomy (IBE), Via Madonna del Piano 10, 50019 Firenze, Italy
+    index: 1
+    ror: 05wq02383
+  - name: CNR - Institute of Electromagnetic Sensing of the Environment (IREA), Via A. Corti 12, 20133 Milan, Italy
+    index: 2
+    ror: 02wxw4x45
+  - name: CNR - Institute of Marine Sciences (ISMAR), Arsenale - Tesa 104, Castello 2737/F, 30122 Venice, Italy
+    index: 3
+    ror: 01t306r88
 date: 26 March 2026
 bibliography: paper.bib
 output: pdf_document
 header-includes:
- - \usepackage[labelfont=bf, labelseparator=period, justification=centering]{caption}
+  - \usepackage[labelfont=bf, labelseparator=period, justification=centering]{caption}
 ---
 
 # Summary
