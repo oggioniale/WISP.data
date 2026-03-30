@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/oggioniale/WISP.data/blob/v1.0.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/oggioniale/WISP.data/blob/main/inst/CITATION)
 
 Alessandro Oggioni & Nicola Ghirardi. (year). WISP.data (v1.0.0).
 Zenodo. https://doi.org/10.5281/zenodo.16893167
