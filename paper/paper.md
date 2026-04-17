@@ -15,14 +15,18 @@ authors:
     orcid: 0000-0002-7997-219X
     equal-contrib: true
     affiliation: "2"
-  - name: Mariano Bresciani
-    orcid: 0000-0002-7185-8464
-    equal-contrib: false
-    affiliation: "2"
   - name: Gian Marco Scarpa
     orcid: 0000-0002-5061-5607
     equal-contrib: false
     affiliation: "3"
+  - name: Mariano Bresciani
+    orcid: 0000-0002-7185-8464
+    equal-contrib: false
+    affiliation: "2"
+  - name: Dalin Jiang
+    orcid: 0000-0001-5676-5860
+    equal-contrib: false
+    affiliation: "4"
   - name: Federica Braga
     orcid: 0000-0002-4131-9080
     equal-contrib: false
@@ -37,7 +41,10 @@ affiliations:
   - name: CNR - Institute of Marine Sciences (ISMAR), Arsenale - Tesa 104, Castello 2737/F, 30122 Venice, Italy
     index: 3
     ror: 01t306r88
-date: 9 April 2026
+  - name: University of Stirling - Earth and Planetary Observation Sciences (EPOS), Biological and Environmental Sciences, Faculty of Natural Sciences, Stirling FK9 4LA, UK
+    index: 4
+    ror: 04m01e232
+date: 17 April 2026
 bibliography: paper.bib
 output: pdf_document
 header-includes:
@@ -57,7 +64,7 @@ This makes `WISP.data` an ideal solution for satellite-derived product validatio
 
 # Statement of need
 
-The WISPstation is an autonomous above water fixed spectrometer installed at fixed position, that supports continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it provides water quality products derived from selected algorithms [@Gons:1997; @Gons:2005; @Simis:2006; @vanderWoerd:2008], essential for environmental observation, ecosystem assessment, and long-term trend analysis. 
+The WISPstation is an autonomous above water fixed spectrometer installed at fixed position, that supports continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it provides water quality products derived from selected algorithms [@Gons:1997; @Gons:2005; @Simis:2006; @vanderWoerd:2008], essential for environmental observation, ecosystem assessment, and long-term trend analysis.
 
 The WISPstation operates with 8 specialized channels to optimize data collection:
 
@@ -66,32 +73,32 @@ The WISPstation operates with 8 specialized channels to optimize data collection
 
 The system automatically selects the best-oriented sensor set based on the Sun's position, maintaining a relative azimuth angle of approximately 135°.
 
-The primary aim of `WISP.data` is the derivation of Remote Sensing Reflectance (Rrs), defined as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$):
+The primary aim of `WISP.data` is the derivation of Remote Sensing Reflectance (R~rs~), defined as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$):
 
-$$\text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}$$
+$$\text{R}_{rs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}$$
 
 Where $\rho$ is the Fresnel reflection coefficient, $L_u$ is the total upwelling radiance and $L_{sky}$ is the sky radiance contributing to surface reflections.
 
 However, the effective management and scientific use of these spectral data and derived products present several significant challenges.
-Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. 
-In addition, native spectral measurements could be affected by radiometric issues making the implementation of consistent and rigorous quality control procedures essential. 
+Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience.
+In addition, native spectral measurements could be affected by radiometric issues making the implementation of consistent and rigorous quality control procedures essential.
 Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
-A further critical barrier lies in the interpretation of spectral signatures themselves. 
-For non-expert users, it is difficult to assess the physical and optical reliability of reflectance spectra, identify anomalous signals, or distinguish between instrument geometry artifacts and real environmental variability. 
+A further critical barrier lies in the interpretation of spectral signatures themselves.
+For non-expert users, it is difficult to assess the physical and optical reliability of reflectance spectra, identify anomalous signals, or distinguish between instrument geometry artifacts and real environmental variability.
 Moreover, the application of third-party bio-optical algorithms for the estimation of water quality parameters typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.
 
-The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events [@Free:2021] to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno [@Bresciani:2020]. 
+The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events [@Free:2021] to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno [@Bresciani:2020].
 Despite these successful applications, the processing of WISPstation data has been labor-intensive and time-consuming.
-Prior to the development of `WISP.data`, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameter. 
-This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring. 
+Prior to the development of `WISP.data`, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameter.
+This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring.
 
-`WISP.data` addresses these challenges by delivering an integrated, transparent, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, and product generation within a single R-based framework. 
+`WISP.data` addresses these challenges by delivering an integrated, transparent, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, and product generation within a single R-based framework.
 By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform native WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.
 
 # State of the field                            
 
-The current benchmark for processing WISPstation data is WISPcloud (https://wispcloud.waterinsight.nl/), a proprietary web-based infrastructure developed by Water Insight. 
-While WISPcloud provides an efficient 'plug-and-play' solution by delivering ready-to-use products, its 'black-box' nature poses significant challenges for rigorous scientific inquiry. 
+The current benchmark for processing WISPstation data is WISPcloud (https://wispcloud.waterinsight.nl/), a proprietary web-based infrastructure developed by Water Insight.
+While WISPcloud provides an efficient 'plug-and-play' solution by delivering ready-to-use products, its 'black-box' nature poses significant challenges for rigorous scientific inquiry.
 Specifically, the platform lacks the flexibility to modify critical processing parameters, test third-party algorithms, or customize site-specific quality control thresholds.
 
 In the R ecosystem, while established packages exist for general hyperspectral analysis (e.g., `hyperSpec` [@hyperSpec]) or for specific in-water optical profilers (e.g., `cops` [@cops; @cops-paper]), there is a notable software gap for autonomous, fixed, above-water spectroradiometers.
@@ -113,7 +120,7 @@ The package architecture is organized into functional modules:
 * **Application of third-party algorithms**: `WISP.data` currently supports a wide array of standardized algorithms for assessing the physical and optical properties of water [@Lee:2002; @vanderWoerd:2015; @vanderWoerd:2018; @Bi:2024] and for estimating the concentrations of water quality parameters [@Gons:1999; @Gons:2002; @Nechad:2010; @Mishra:2012; @Novoa:2017; @Jiang:2021]. These are implemented as modular flags within `wisp_qc_reflectance_data()` and `wisp_sr_reflectance_data()` functions, allowing for a seamless "one-call" workflow from native spectra to validated products.
 * **Visualization layer**: utilizing `ggplot2` and `plotly` as backends, the package provides consistent visualization interfaces. Functions like `wisp_plot_reflectance_data()`, `wisp_plot_comparison()` (Figure \ref{fig:spectra}), and `wisp_trend_plot()` (Figures \ref{fig:trendsingle}, \ref{fig:trendmulti}) are designed to handle both publication-quality plots and interactive exploration.
 
-![*Plot resulting from the `wisp_plot_comparison()` function showing the comparison between: A) native WISPstation Rrs, B) Rrs filtered by “QC”, C) Rrs to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).*](Figure_2.png){#fig:spectra width=100%}
+![*Plot resulting from the `wisp_plot_comparison()` function showing the comparison between: A) native WISPstation R~rs~, B) R~rs~ filtered by “QC”, C) R~rs~ to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).*](Figure_2.png){#fig:spectra width=100%}
 
 ![*Plot resulting from the `wisp_trend_plot()` function showing the temporal trend of three exemplary parameters (from top to bottom: "Novoa_SPM", "Novoa_TUR", and "Mishra_CHL") for 25/07/2024 from 8 a.m. to 4 p.m. (site: Trasimeno).*](Figure_3.png){#fig:trendsingle width=100%}
 
@@ -121,37 +128,37 @@ The package architecture is organized into functional modules:
 
 # Research impact statement
 
-The package was successfully tested using two WISPstations installed in two different aquatic environments in Italy. 
-The first was installed in April 2018 in Lake Trasimeno, on a lake platform located approximately 400 m from Polvese Island (43.122° N, 12.134° E). 
+The package was successfully tested using two WISPstations installed in two different aquatic environments in Italy.
+The first was installed in April 2018 in Lake Trasimeno, on a lake platform located approximately 400 m from Polvese Island (43.122° N, 12.134° E).
 The second was deployed in September 2024 along the Po River at Pontelagoscuro (44.889° N, 11.6106° E), approximately 95 km upstream from its confluence with the northern Adriatic Sea, on a floating monitoring platform operated by the Agenzia Interregionale per il fiume Po (AIPO).
 
-Lake Trasimeno, located in central Italy, is the fourth-largest lake in the country (124 km^2^). 
-Its catchment is characterized by intensive agricultural practices and livestock farming, which lead to significant nutrient loading. 
+Lake Trasimeno, located in central Italy, is the fourth-largest lake in the country (124 km^2^).
+Its catchment is characterized by intensive agricultural practices and livestock farming, which lead to significant nutrient loading.
 These conditions frequently promote phytoplankton blooms, including potentially harmful cyanobacteria. The lake exhibits complex hydrodynamic behavior, with strong intra-day and inter-day variability driven by meteorological forcing such as temperature fluctuations and wind-induced sediment resuspension.
-The Po River, the longest river in Italy, flows across the Po Valley and governs the exchanges at the river–sea interface, driving the transfer of sediments, nutrients, and organic matter toward the northern Adriatic Sea and influencing coastal biogeochemistry and water quality. 
-The river is characterized by highly dynamic hydrological conditions, with discharge variability driven by seasonal cycles as well as extreme events such as floods and prolonged drought periods. 
+The Po River, the longest river in Italy, flows across the Po Valley and governs the exchanges at the river–sea interface, driving the transfer of sediments, nutrients, and organic matter toward the northern Adriatic Sea and influencing coastal biogeochemistry and water quality.
+The river is characterized by highly dynamic hydrological conditions, with discharge variability driven by seasonal cycles as well as extreme events such as floods and prolonged drought periods.
 These conditions strongly affect sediment transport and turbidity, resulting in rapid changes in water optical properties.
 
-Both environments are the focus of long-standing research efforts aimed at understanding the spatio-temporal dynamics of parameters that can also be monitored through remote sensing. 
-The stations are designated research sites within ESFRI Research Infrastructures. 
-Particularly, Lake Trasimeno[^1] is part of the Integrated European Long-Term Ecosystem, Critical Zone and Socio-Ecological Research (eLTER RI), while the Po River[^2] is a Supersite of DANUBIUS-RI, the International Centre for Advanced Studies on River-Sea Systems, a pan-European distributed Research Infrastructure enabling integrated studies of rivers and their catchments, transitional waters such as estuaries, deltas and lagoons, and their adjacent coastal seas. 
+Both environments are the focus of long-standing research efforts aimed at understanding the spatio-temporal dynamics of parameters that can also be monitored through remote sensing.
+The stations are designated research sites within ESFRI Research Infrastructures.
+Particularly, Lake Trasimeno[^1] is part of the Integrated European Long-Term Ecosystem, Critical Zone and Socio-Ecological Research (eLTER RI), while the Po River[^2] is a Supersite of DANUBIUS-RI, the International Centre for Advanced Studies on River-Sea Systems, a pan-European distributed Research Infrastructure enabling integrated studies of rivers and their catchments, transitional waters such as estuaries, deltas and lagoons, and their adjacent coastal seas.
 
 [^1]: https://elter-ri.eu
 [^2]: https://danubius-ri.eu
 
-Within these RIs, the availability of continuous, comparable, and quality-controlled measurements is essential to minimize uncertainties and ensure data reliability. 
-Such measurements, acquired through high-quality sensor systems and complemented by parameters derived from robust algorithms, can be particularly valuable for the calibration and validation (Cal/Val) of satellite-derived products. 
-Within eLTER RI, these measurements contribute to the definition of standardized variables [@Zacharias:2026], known as Standard Observations (SOs), which integrate target variables, measurement methods, and protocols to ensure harmonized data collection across sites at the continental scale. 
+Within these RIs, the availability of continuous, comparable, and quality-controlled measurements is essential to minimize uncertainties and ensure data reliability.
+Such measurements, acquired through high-quality sensor systems and complemented by parameters derived from robust algorithms, can be particularly valuable for the calibration and validation (Cal/Val) of satellite-derived products.
+Within eLTER RI, these measurements contribute to the definition of standardized variables [@Zacharias:2026], known as Standard Observations (SOs), which integrate target variables, measurement methods, and protocols to ensure harmonized data collection across sites at the continental scale.
 Among these, the SO “Phenological traits – SOBIO_15” specifically addresses the use of remote sensing approaches for monitoring vegetation phenological dynamics, including in aquatic ecosystems, encompassing both inland standing waters (lakes) and running waters (rivers).
 
-The scientific utility of `WISP.data` has recently been demonstrated by Ghirardi et al. (under review), who investigated the spatio-temporal dynamics of Suspended Particulate Matter (SPM) and Chlorophyll-a (CHL) in Lake Trasimeno using a synergistic approach. 
-By combining high-frequency in situ observations processed with `WISP.data` and multisensor satellite imagery (2019–2024), the study validated Rrs products from 14 different satellite sensors. 
-The strong agreement between satellite-derived estimates and the `WISP.data` processed ground-truth enabled accurate retrieval of SPM and CHL concentrations. 
+The scientific utility of `WISP.data` has recently been demonstrated by Ghirardi et al. (under review), who investigated the spatio-temporal dynamics of suspended particulate matter and chlorophyll-a in Lake Trasimeno using a synergistic approach.
+By combining high-frequency in situ observations processed with `WISP.data` and multisensor satellite imagery (2019–2024), the study validated R~rs~ products from 14 different satellite sensors.
+The strong agreement between satellite-derived estimates and the `WISP.data` processed ground-truth enabled the accurate retrieval of both water quality parameters.
 These results highlight the package's role in bridging the gap between local autonomous measurements and large-scale satellite monitoring, facilitating the study of rapid environmental changes in lake ecosystems.
-For the Po River, `WISP.data` is used to process high-frequency hyperspectral radiometric data collected at the Pontelagoscuro platform, including quality control, sky-glint correction, and the application of algorithms to derive turbidity from optical measurements. 
-The resulting time series of above-water observations supports the assessment of hyperspectral and multispectral satellite missions, enabling the testing of different atmospheric correction algorithms. 
-In addition, water turbidity derived from WISPstation measurements is compared with in situ data acquired by in-water turbidimeters, enabling consistency evaluation between radiometric-derived and direct observations. 
-This integrated approach enhances the interpretation of turbidity dynamics in highly variable riverine systems. 
+For the Po River, `WISP.data` is used to process high-frequency hyperspectral radiometric data collected at the Pontelagoscuro platform, including quality control, sky-glint correction, and the application of algorithms to derive turbidity from optical measurements.
+The resulting time series of above-water observations supports the assessment of hyperspectral and multispectral satellite missions, enabling the testing of different atmospheric correction algorithms.
+In addition, water turbidity derived from WISPstation measurements is compared with in situ data acquired by in-water turbidimeters, enabling consistency evaluation between radiometric-derived and direct observations.
+This integrated approach enhances the interpretation of turbidity dynamics in highly variable riverine systems.
 
 # AI usage disclosure
 
