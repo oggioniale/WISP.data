@@ -28,7 +28,8 @@ authors:
     equal-contrib: false
     affiliation: "2"
   - nome: ?? Water Insight ??
-    orcid:0000-0000-0000-0000
+    orcid: 0000-0000-0000-0000
+    equal-contrib: false
     affiliation: "5"
   - name: Alessandro Oggioni
     orcid: 0000-0002-7997-219X
