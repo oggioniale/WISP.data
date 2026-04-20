@@ -1,5 +1,5 @@
 ---
-title: "WISP.data: An open-source R package for processing spectral data from above-water fixed spectroradiometers"
+title: "WISP.data: An open-source R package for processing spectral data from above-water autonomous spectroradiometers"
 tags:
   - R
   - WISPstation
