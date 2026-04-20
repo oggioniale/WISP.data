@@ -27,6 +27,9 @@ authors:
     orcid: 0000-0002-7185-8464
     equal-contrib: false
     affiliation: "2"
+  - nome: ?? Water Insight ??
+    orcid:0000-0000-0000-0000
+    affiliation: "5"
   - name: Alessandro Oggioni
     orcid: 0000-0002-7997-219X
     equal-contrib: true
@@ -44,6 +47,8 @@ affiliations:
   - name: University of Stirling - Earth and Planetary Observation Sciences (EPOS), Biological and Environmental Sciences, Faculty of Natural Sciences, Stirling FK9 4LA, UK
     index: 4
     ror: 04m01e232
+  - name: Water Insight - address
+    index: 5
 date: 20 April 2026
 bibliography: paper.bib
 output: pdf_document
@@ -140,11 +145,12 @@ The river is characterized by highly dynamic hydrological conditions, with disch
 These conditions strongly affect sediment transport and turbidity, resulting in rapid changes in water optical properties.
 
 Both environments are the focus of long-standing research efforts aimed at understanding the spatio-temporal dynamics of parameters that can also be monitored through remote sensing.
-The stations are designated research sites within ESFRI Research Infrastructures.
-Particularly, Lake Trasimeno[^1] is part of the Integrated European Long-Term Ecosystem, Critical Zone and Socio-Ecological Research (eLTER RI), while the Po River[^2] is a Supersite of DANUBIUS-RI, the International Centre for Advanced Studies on River-Sea Systems, a pan-European distributed Research Infrastructure enabling integrated studies of rivers and their catchments, transitional waters such as estuaries, deltas and lagoons, and their adjacent coastal seas.
+The stations are officially designated as research sites within European Strategy Forum on Research Infrastructures (ESFRI).
+Particularly, Lake Trasimeno[^1] is part of the Integrated European Long-Term Ecosystem, Critical Zone and Socio-Ecological Research (eLTER RI)[^2], while the Po River is a Supersite of DANUBIUS-RI[^3], the International Centre for Advanced Studies on River-Sea Systems, a pan-European distributed Research Infrastructure enabling integrated studies of rivers and their catchments, transitional waters such as estuaries, deltas and lagoons, and their adjacent coastal seas.
 
-[^1]: https://elter-ri.eu
-[^2]: https://danubius-ri.eu
+[^1]: https://deims.org/c93c97fb-196e-480a-87b0-817218cd7c24
+[^2]: https://elter-ri.eu
+[^3]: https://danubius-ri.eu
 
 Within these RIs, the availability of continuous, comparable, and quality-controlled measurements is essential to minimize uncertainties and ensure data reliability.
 Such measurements, acquired through high-quality sensor systems and complemented by parameters derived from robust algorithms, can be particularly valuable for the calibration and validation (Cal/Val) of satellite-derived products.
