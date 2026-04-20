@@ -27,7 +27,7 @@ authors:
     orcid: 0000-0002-7185-8464
     equal-contrib: false
     affiliation: "2"
-  - nome: Water Insight(??)
+  - name: Water Insight(??)
     orcid: 0000-0000-0000-0000
     equal-contrib: false
     affiliation: "5"
