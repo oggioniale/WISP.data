@@ -1,5 +1,5 @@
 ---
-title: "WISP.data package"
+title: "WISP.data: An open-source R package for processing spectral data from above-water fixed spectroradiometers"
 tags:
   - R
   - WISPstation
@@ -11,18 +11,10 @@ authors:
     orcid: 0000-0002-5006-9853
     equal-contrib: true
     affiliation: "1, 2"
-  - name: Alessandro Oggioni
-    orcid: 0000-0002-7997-219X
-    equal-contrib: true
-    affiliation: "2"
   - name: Gian Marco Scarpa
     orcid: 0000-0002-5061-5607
     equal-contrib: false
     affiliation: "3"
-  - name: Mariano Bresciani
-    orcid: 0000-0002-7185-8464
-    equal-contrib: false
-    affiliation: "2"
   - name: Dalin Jiang
     orcid: 0000-0001-5676-5860
     equal-contrib: false
@@ -31,6 +23,14 @@ authors:
     orcid: 0000-0002-4131-9080
     equal-contrib: false
     affiliation: "3"
+  - name: Mariano Bresciani
+    orcid: 0000-0002-7185-8464
+    equal-contrib: false
+    affiliation: "2"
+  - name: Alessandro Oggioni
+    orcid: 0000-0002-7997-219X
+    equal-contrib: true
+    affiliation: "2"
 affiliations:
   - name: CNR - Institute of Bioeconomy (IBE), Via Madonna del Piano 10, 50019 Firenze, Italy
     index: 1
@@ -44,7 +44,7 @@ affiliations:
   - name: University of Stirling - Earth and Planetary Observation Sciences (EPOS), Biological and Environmental Sciences, Faculty of Natural Sciences, Stirling FK9 4LA, UK
     index: 4
     ror: 04m01e232
-date: 17 April 2026
+date: 20 April 2026
 bibliography: paper.bib
 output: pdf_document
 header-includes:
@@ -159,6 +159,8 @@ For the Po River, `WISP.data` is used to process high-frequency hyperspectral ra
 The resulting time series of above-water observations supports the assessment of hyperspectral and multispectral satellite missions, enabling the testing of different atmospheric correction algorithms.
 In addition, water turbidity derived from WISPstation measurements is compared with in situ data acquired by in-water turbidimeters, enabling consistency evaluation between radiometric-derived and direct observations.
 This integrated approach enhances the interpretation of turbidity dynamics in highly variable riverine systems.
+
+Looking ahead, the modular architecture of `WISP.data` is well-suited to be extended and adapted to other optical view fixed spectroradiometric systems widely used in the scientific community for water body monitoring, thereby promoting greater interoperability and standardization in the processing of in situ optical data.
 
 # AI usage disclosure
 
