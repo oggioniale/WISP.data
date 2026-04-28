@@ -27,10 +27,6 @@ authors:
     orcid: 0000-0002-7185-8464
     equal-contrib: false
     affiliation: "2"
-  - name: Water Insight(??)
-    orcid: 0000-0000-0000-0000
-    equal-contrib: false
-    affiliation: "5"
   - name: Alessandro Oggioni
     orcid: 0000-0002-7997-219X
     equal-contrib: true
@@ -48,8 +44,6 @@ affiliations:
   - name: University of Stirling - Earth and Planetary Observation Sciences (EPOS), Biological and Environmental Sciences, Faculty of Natural Sciences, Stirling FK9 4LA, UK
     index: 4
     ror: 04m01e232
-  - name: Water Insight - address
-    index: 5
 date: 20 April 2026
 bibliography: paper.bib
 output: pdf_document
