@@ -60,17 +60,16 @@ header-includes:
 # Summary
 
 `WISP.data` is an R package designed to automate the download, quality control (QC), processing, analysis, and visualization of spectral data collected by WISPstation fixed spectroradiometers.
-Developed by Water Insight B.V. (Ede, The Netherlands) as an evolution of the handheld WISP-3 system [@Hommersom:2012], the WISPstation is an autonomous above water instrument installed at fixed position that records radiance and irradiance across a wavelength range of 350 to 900 nm, with a spectral resolution of 4.6 nm at high frequency (e.g. every 15 minutes, during daytime).
+Developed by Water Insight B.V. (Ede, The Netherlands) as an evolution of the handheld WISP-3 system [@Hommersom:2012], the WISPstation is an autonomous above water instrument installed at fixed position that records radiance and irradiance across a wavelength range of 350 to 900 nm, with a spectral resolution of 4.6 nm at high frequency (e.g. every 15 minutes, during daytime) [@Peters:2018].
 This R package serves as a crucial bridge between Water Insight API services and the scientific users, enabling the conversion of native reflectance measurements into robust, analysis-ready products through fully reproducible and transparent workflows, from an Open Science perspective.
 
-The package performs the retrieval of water-leaving radiance ($L_w$) from total upwelling radiance ($L_u$), which includes sky- and sun-glint contributions, by integrating $L_{sky}$ and $E_s$ measurements.
 `WISP.data` provides a modular set of R functions for: I. downloading data from specific WISPstation by making use of the solutions provided by Water Insight itself (APIs and now via user accounts); II. performing automated and reproducible quality control (QC); III. performing automated sky-glint removal (SR); IV. applying empirical and semi‑analytical bio‑optical algorithms to spectral measurements to retrieve optical properties and water quality parameters; V. visualizing spectral and derived data products.
 
 This makes `WISP.data` an ideal solution for satellite-derived product validation, operational water quality monitoring, long-term research applications, and integration into large-scale environmental data pipelines.
 
 # Statement of need
 
-The WISPstation is an autonomous above water fixed spectrometer installed at fixed position, that supports continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it provides water quality products derived from selected algorithms [@Gons:1997; @Gons:2005; @Simis:2006; @vanderWoerd:2008], essential for environmental observation, ecosystem assessment, and long-term trend analysis.
+The WISPstation is an autonomous above water fixed spectrometer installed at a fixed position, which supports continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it provides water quality products derived from selected algorithms [@Gons:1997; @Gons:2005; @Simis:2005], essential for environmental observation, ecosystem assessment, and long-term trend analysis.
 
 The WISPstation operates with 8 specialized channels to optimize data collection:
 
@@ -79,7 +78,7 @@ The WISPstation operates with 8 specialized channels to optimize data collection
 
 The system automatically selects the best-oriented sensor set based on the Sun's position, maintaining a relative azimuth angle of approximately 135°.
 
-The primary aim of `WISP.data` is the derivation of Remote Sensing Reflectance (R~rs~), defined as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$):
+A central function of `WISP.data` is the retrieval and management of Remote Sensing Reflectance (R~rs~), which the WISPstation calculates as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$) [@Mobley:1999]:
 
 $$\text{R}_{rs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}$$
 
@@ -104,13 +103,15 @@ By lowering technical and methodological barriers, the package enables both expe
 # State of the field                            
 
 The current benchmark for processing WISPstation data is WISPcloud (https://wispcloud.waterinsight.nl/), a proprietary web-based infrastructure developed by Water Insight.
-While WISPcloud provides an efficient 'plug-and-play' solution by delivering ready-to-use products, its 'black-box' nature poses significant challenges for rigorous scientific inquiry.
+While WISPcloud provides an efficient 'plug-and-play' solution by delivering ready-to-use products, its closed proprietary architecture poses significant challenges for rigorous scientific inquiry.
 Specifically, the platform lacks the flexibility to modify critical processing parameters, test third-party algorithms, or customize site-specific quality control thresholds.
 
 In the R ecosystem, while established packages exist for general hyperspectral analysis (e.g., `hyperSpec` [@hyperSpec]) or for specific in-water optical profilers (e.g., `cops` [@cops; @cops-paper]), there is a notable software gap for autonomous, fixed, above-water spectroradiometers.
 Rather than merely replicating existing cloud functionalities, `WISP.data` transforms a proprietary workflow into an open, verifiable, and scientifically controllable ecosystem.
 
 # Software design
+
+The choice of R as the development environment is motivated by its capacity for developing well‑curated, extensively documented packages within a coherent methodological structure. This choice is further justified by R's high effectiveness in statistical data analysis—a central aspect of this study—and its native support for reproducible scientific workflows, which aligns with the Open Science goals of `WISP.data`.
 
 The design philosophy of `WISP.data` is based on three characteristics: I. a modular, pipeline-oriented workflow abstracting complex API interactions; II. the adoption of community standards for data manipulation and physical units; III. a "transparent-box" approach to quality control, sky-glint removal, and bio-optical algorithms application.
 The complete workflow of the `WISP.data` package is shown in Figure \ref{fig:workflow}.
@@ -177,5 +178,6 @@ Generative AI tools were used as a support for code development.
 # Acknowledgements
 
 The development of this package and the related publication has been funded by the European Union – Next Generation EU, Mission 4, Component 2 – CUP B53C22002150006, within the Project IR0000032 – ITINERIS (Italian Integrated Environmental Research Infrastructures System), and has been partially supported by the European Union’s Horizon 2020 research and innovation programme under the H2020 eLTER‑Plus project (Grant Agreement No. 871128, DOI: 10.3030/871128) and the eLTER EnRich project (Grant Agreement No. 101131751, DOI: 10.3030/101131751).
+The authors would also like to thank the Water Insight Team for sharing technical information regarding the WISPstation and its operation, as well as for their valuable advice during the drafting of the manuscript.
 
 # References
