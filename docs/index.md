@@ -10,11 +10,11 @@ WISP-3 system (Hommersom et al., 2012), the WISPstation is an autonomous
 above water instrument installed at fixed position that records radiance
 and irradiance across a wavelength range of 350 to 900 nm, with a
 spectral resolution of 4.6 nm at high frequency (e.g. every 15 minutes,
-during daytime). This R package serves as a crucial bridge between Water
-Insight API services and the scientific users, enabling the conversion
-of native reflectance measurements into robust, analysis-ready products
-through fully reproducible and transparent workflows, from an Open
-Science perspective.
+during daytime) (Peters et al., 2018). This R package serves as a
+crucial bridge between Water Insight API services and the scientific
+users, enabling the conversion of native reflectance measurements into
+robust, analysis-ready products through fully reproducible and
+transparent workflows, from an Open Science perspective.
 
 The WISPstation operates with 8 specialized channels to optimize data
 collection:
@@ -30,9 +30,10 @@ The system automatically selects the best-oriented sensor set based on
 the Sun’s position, maintaining a relative azimuth angle of
 approximately 135°.
 
-The primary aim of `WISP.data` is the derivation of Remote Sensing
-Reflectance (Rrs), defined as the ratio between water-leaving radiance
-($`L_w`$) and downwelling irradiance ($`E_s`$):
+A central function of `WISP.data` is the retrieval and management of
+Remote Sensing Reflectance (R_(rs)), which the WISPstation calculates as
+the ratio between water-leaving radiance ($`L_w`$) and downwelling
+irradiance ($`E_s`$) (Mobley, 1999):
 
 ``` math
 \text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}
@@ -65,8 +66,8 @@ The WISPstation is a fixed spectrometer that plays a crucial role in the
 continuous monitoring of water quality; beyond providing high-frequency
 spectral measurements, it delivers specialized water quality products
 derived through various algorithms (Gons et al., 1997, 2005; Simis,
-2006; van der Woerd & Pasterkamp, 2008), essential for environmental
-observation, ecosystem assessment, and long-term trend analysis.
+2005), essential for environmental observation, ecosystem assessment,
+and long-term trend analysis.
 
 However, the effective management and scientific use of these spectral
 data and derived products present several significant challenges. Data
@@ -257,6 +258,9 @@ Trasimeno; period: 01/05/2024 – 10/05/2024).*
   concentration in turbid productive waters. *Remote Sensing of
   Environment*, 117, 394-406.
   <https://doi.org/10.1016/j.rse.2011.10.016>.
+- Mobley, C. D. (1999). Estimation of the remote-sensing reflectance
+  from above-surface measurements. *Applied optics*, 38(36), 7442-7455.
+  <https://doi.org/10.1364/AO.38.007442>
 - Nechad, B., Ruddick, K. G., & Park, Y. (2010). Calibration and
   validation of a generic multisensor algorithm for mapping of total
   suspended matter in turbid waters. *Remote Sensing of Environment*,
@@ -266,13 +270,14 @@ Trasimeno; period: 01/05/2024 – 10/05/2024).*
   algorithm for multi-sensor remote sensing of suspended particulate
   matter in low-to-high turbidity levels coastal waters. *Remote
   Sensing*, 9(1), 61. <https://doi.org/10.3390/rs9010061>.
-- Simis, S. G. H. (2006). Blue-green catastrophe: remote sensing of mass
-  viral lysis of cyanobacteria. Vrije Universiteit Amsterdam.
-- van der Woerd, H. J., & Pasterkamp, R. (2008). HYDROPT: A fast and
-  flexible method to retrieve chlorophyll-a from multispectral satellite
-  observations of optically complex coastal waters. *Remote Sensing of
-  Environment*, 112(4), 1795-1807.
-  <https://doi.org/10.1016/j.rse.2007.09.001>.
+- Peters, S., Laanen, M., Groetsch, P., Ghezehegn, S., Poser, K.,
+  Hommersom, A., … & Spaias, L. (2018, October). WISPstation: A new
+  autonomous above water radiometer system. *In Proceedings of the Ocean
+  Optics XXIV Conference*, Dubrovnik, Croatia (pp. 7-12).
+- Simis, S. G., Peters, S. W., & Gons, H. J. (2005). Remote sensing of
+  the cyanobacterial pigment phycocyanin in turbid inland water.
+  *Limnology and Oceanography*, 50(1), 237-245.
+  <https://doi.org/10.4319/lo.2005.50.1.0237>.
 - van der Woerd, H. J., & Wernand, M. R. (2015). True colour
   classification of natural waters with medium-spectral resolution
   satellites: SeaWiFS, MODIS, MERIS and OLCI. *Sensors*, 15(10),
