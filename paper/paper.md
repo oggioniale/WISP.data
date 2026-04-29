@@ -172,6 +172,6 @@ Generative AI tools were used as a support for code development.
 # Acknowledgements
 
 The development of this package and the related publication has been funded by the European Union – Next Generation EU, Mission 4, Component 2 – CUP B53C22002150006, within the Project IR0000032 – ITINERIS (Italian Integrated Environmental Research Infrastructures System), and has been partially supported by the European Union’s Horizon 2020 research and innovation programme under the H2020 eLTER‑Plus project (Grant Agreement No. 871128, DOI: 10.3030/871128) and the eLTER EnRich project (Grant Agreement No. 101131751, DOI: 10.3030/101131751).
-The authors would also like to thank the Water Insight Team for sharing technical information regarding the WISPstation and its operation, as well as for their valuable advice during the drafting of the manuscript.
+The authors would also like to thank Salvatore Mangano for the maintenance of the WISPstation, Erika Fabrizi for her management support, and the Water Insight Team for sharing technical information regarding the WISPstation and its operation, as well as for their valuable advice during the drafting of the manuscript.
 
 # References
