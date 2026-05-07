@@ -3,6 +3,7 @@
 ## Provide the account of your station
 
 ``` r
+
 userid <- Sys.getenv("WISP_IREA_USERID")
 pwd <- Sys.getenv("WISP_IREA_PSW")
 ```
@@ -14,6 +15,7 @@ function will save the reflectance data as a .csv file in the ‘output’
 folder within the working directory.
 
 ``` r
+
 reflect_data <- WISP.data::wisp_get_reflectance_multi_data(
   time_from = "2024-09-11T09:00",
   time_to   = "2024-09-17T14:00",
@@ -63,6 +65,7 @@ User-configurable Parameters:
   classification
 
 ``` r
+
 reflect_data_qc <- WISP.data::wisp_qc_reflectance_data(
   data           = reflect_data,
   maxPeak        = 0.05,
@@ -174,6 +177,7 @@ User-configurable Parameters:
   classification
 
 ``` r
+
 reflect_data_sr <- WISP.data::wisp_sr_reflectance_data(
   qc_data       = reflect_data_qc,
   calc_scatt    = TRUE,
@@ -197,6 +201,7 @@ In this function, you can set to `TRUE` for the parameters you want to
 display in the legend for each of the three plots (raw, QC, SR).
 
 ``` r
+
 custom_raw <- list(
   legend_TSM  = TRUE, 
   legend_Chla = TRUE, 
@@ -273,6 +278,7 @@ In this function, you can modify the following variables:
   are overlaid in a single plot
 
 ``` r
+
 fig_trend <- WISP.data::wisp_trend_plot(
   data       = reflect_data_sr,
   params     = c("TSM", "Chla", "Novoa_SPM", "Mishra_CHL"),

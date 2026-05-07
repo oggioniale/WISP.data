@@ -20,10 +20,10 @@ The WISPstation operates with 8 specialized channels to optimize data
 collection:
 
 - **Dual-directional radiance**: two sets of sensors (looking NNW and
-  NNE) measure upwelling radiance ($L_{u}$) and sky radiance ($L_{sky}$)
-  at 40° angles.
+  NNE) measure upwelling radiance ($`L_u`$) and sky radiance
+  ($`L_{sky}`$) at 40° angles.
 - **Irradiance and calibration**: includes two downwelling irradiance
-  ($E_{s}$) channels and two unexposed “dark” channels to assess sensor
+  ($`E_s`$) channels and two unexposed “dark” channels to assess sensor
   degradation over time.
 
 The system automatically selects the best-oriented sensor set based on
@@ -32,18 +32,20 @@ approximately 135°.
 
 A central function of `WISP.data` is the retrieval and management of
 Remote Sensing Reflectance (R_(rs)), which the WISPstation calculates as
-the ratio between water-leaving radiance ($L_{w}$) and downwelling
-irradiance ($E_{s}$) (Mobley, 1999):
+the ratio between water-leaving radiance ($`L_w`$) and downwelling
+irradiance ($`E_s`$) (Mobley, 1999):
 
-$$\text{Rrs}(\lambda) = \frac{L_{w}(\lambda)}{E_{s}(\lambda)} = \frac{L_{u}(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_{s}(\lambda)}$$
+``` math
+\text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}
+```
 
-Where $\rho$ is the Fresnel reflection coefficient, $L_{u}$ is the total
-upwelling radiance and $L_{sky}$ is the sky radiance contributing to
-surface reflections.
+Where $`\rho`$ is the Fresnel reflection coefficient, $`L_u`$ is the
+total upwelling radiance and $`L_{sky}`$ is the sky radiance
+contributing to surface reflections.
 
 The package handles the complex transition from total upwelling radiance
-($L_{u}$), which includes unwanted sky-glint and sun-glint, to the pure
-water-leaving signal ($L_{w}$) by integrating $L_{sky}$ and $E_{s}$
+($`L_u`$), which includes unwanted sky-glint and sun-glint, to the pure
+water-leaving signal ($`L_w`$) by integrating $`L_{sky}`$ and $`E_s`$
 measurements into standardized atmospheric correction algorithms.
 
 `WISP.data` provides a modular set of R functions for:
@@ -116,6 +118,7 @@ The following commands will automatically install all required
 dependencies:
 
 ``` r
+
 # Install remotes if not already available
 if (!require("remotes")) install.packages("remotes")
 
