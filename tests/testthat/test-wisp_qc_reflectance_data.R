@@ -1,6 +1,7 @@
 library(testthat)
 
 test_that("wisp_qc_reflectance_data: Full check (QC1-6, QA, QWIP, Bio-optics)", {
+  skip_on_cran()
   
   # Example of a flawless spectral signature
   gold_values <- c(

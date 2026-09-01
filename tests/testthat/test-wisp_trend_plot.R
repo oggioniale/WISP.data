@@ -1,12 +1,11 @@
 library(testthat)
 
 test_that("wisp_trend_plot: validation of temporal trends and aggregation", {
+  skip_on_cran()
   
-  # CSV upload
-  path_sr <- "reflectance_data_sr_20240914.csv"
-  if (!file.exists(path_sr)) {
-    skip("Test CSV file (SR) not found")
-  }
+  # CSV upload with portable test_path
+  path_sr <- testthat::test_path("reflectance_data_sr_20240914.csv")
+  skip_if_not(file.exists(path_sr), message = "Test CSV file (SR) not found")
   
   df_sr <- read.csv(path_sr, check.names = FALSE)
   
@@ -23,7 +22,7 @@ test_that("wisp_trend_plot: validation of temporal trends and aggregation", {
   expect_s3_class(df_long, "data.frame")
   expect_equal(nrow(df_long), nrow(df_sr) * 2)
   
-  # Test: error if “none” is requested with multiple days
+  # Test: error if "none" is requested with multiple days
   df_multi_day <- df_sr[c(1, 1), ]
   df_multi_day$measurement.date[2] <- "2024-09-15T10:00:00.000Z"
   

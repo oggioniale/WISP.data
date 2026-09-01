@@ -1,14 +1,14 @@
 library(testthat)
 
 test_that("wisp_sr_reflectance_data: validation with real QC vs SR datasets", {
+  skip_on_cran()
   
-  # CSV upload
-  path_qc <- "reflectance_data_qc_20240914.csv"
-  path_sr <- "reflectance_data_sr_20240914.csv"
+  # CSV upload with portable test_path
+  path_qc <- testthat::test_path("reflectance_data_qc_20240914.csv")
+  path_sr <- testthat::test_path("reflectance_data_sr_20240914.csv")
   
-  if (!file.exists(path_qc) || !file.exists(path_sr)) {
-    skip("Test CSV files not found in the directory")
-  }
+  skip_if_not(file.exists(path_qc) && file.exists(path_sr), 
+              message = "Test CSV files not found in the directory")
   
   df_input_raw <- read.csv(path_qc, check.names = FALSE)
   df_expected_raw <- read.csv(path_sr, check.names = FALSE)

@@ -1,6 +1,7 @@
 library(testthat)
 
 test_that("wisp_plot_comparison: structural check for multi-panel plotly output", {
+  skip_on_cran()
   
   # CSV upload
   path_raw <- "reflectance_data_20240914.csv"
@@ -37,16 +38,16 @@ test_that("wisp_plot_comparison: structural check for multi-panel plotly output"
   expect_s3_class(fig_full, "htmlwidget")
   
   expect_true(length(fig_full$x$data) > 0)
- 
+  
   expect_match(fig_full$x$layout$title$text, "WISPstation", fixed = TRUE)
   
   expect_true(!is.null(fig_full$x$layout$xaxis))
   expect_true(!is.null(fig_full$x$layout$xaxis2))
   expect_true(!is.null(fig_full$x$layout$xaxis3))
-
+  
   expect_match(fig_full$x$layout$xaxis$title$text, "Wavelength", fixed = TRUE)
   expect_match(fig_full$x$layout$yaxis$title$text, "Rrs", fixed = TRUE)
- 
+  
   suppressMessages({
     fig_single <- wisp_plot_comparison(raw_data = df_raw)
   })
@@ -58,6 +59,6 @@ test_that("wisp_plot_comparison: structural check for multi-panel plotly output"
   suppressMessages({
     fig_empty_qc <- wisp_plot_comparison(raw_data = df_raw, qc_data = df_qc_empty)
   })
- 
+  
   expect_match(fig_empty_qc$x$layout$title$text, "WISPstation", fixed = TRUE)
 })

@@ -3,6 +3,8 @@ library(httptest2)
 
 # Test: returns NULL if dates are inconsistent
 test_that("wisp_get_reflectance_data handles inconsistent dates", {
+  skip_on_cran()
+  
   expect_message(
     res <- wisp_get_reflectance_data(
       time_from = "2024-09-01T09:00",
@@ -15,6 +17,8 @@ test_that("wisp_get_reflectance_data handles inconsistent dates", {
 
 # Test: returns NULL when no data exists
 test_that("returns NULL when no data exist for the requested date", {
+  skip_on_cran()
+  
   with_mock_dir("mock_no_data", {
     expect_message(
       res <- wisp_get_reflectance_data(
@@ -32,6 +36,8 @@ test_that("returns NULL when no data exist for the requested date", {
 
 # Test: returns a tibble when data is available
 test_that("returns tibble when data are available", {
+  skip_on_cran()
+  
   with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(
       wisp_get_reflectance_data(
@@ -50,6 +56,8 @@ test_that("returns tibble when data are available", {
 
 # Test: check the tibble structure
 test_that("output structure contains expected columns", {
+  skip_on_cran()
+  
   with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(
       wisp_get_reflectance_data(
@@ -71,6 +79,8 @@ test_that("output structure contains expected columns", {
 
 # Test: check CSV output (TRUE)
 test_that("save_csv creates output directory and file", {
+  skip_on_cran()
+  
   temp_dir <- file.path(tempdir(), "test_wisp_output")
   with_mock_dir("mock_ref_data", {
     suppressWarnings({
@@ -96,6 +106,8 @@ test_that("save_csv creates output directory and file", {
 
 # Test: check no CSV output (FALSE)
 test_that("no csv is created when save_csv is FALSE", {
+  skip_on_cran()
+  
   temp_dir <- file.path(tempdir(), "test_wisp_no_csv")
   with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(

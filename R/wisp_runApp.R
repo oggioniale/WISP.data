@@ -12,7 +12,8 @@
 #' @keywords internal
 #' @examples
 #' \dontrun{
-#' WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
+#' # Launch the Shiny application
+#' wisp_runApp(launch.browser = TRUE)
 #' }
 wisp_runApp <- function(
     stations = c("WISPstation012", "WISPstation013"),

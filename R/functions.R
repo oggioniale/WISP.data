@@ -2542,10 +2542,10 @@ wisp_plot_reflectance_data <- function(
 #' \dontrun{
 #' ## Not run:
 #' custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
-#' custom_qc <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
-#' custom_sr <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+#' custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+#' custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
 #'
-#' wisp_plot_comparison(
+#' fig_comparison <- wisp_plot_comparison(
 #'   raw_data = reflect_data,
 #'   qc_data  = reflect_data_qc,
 #'   sr_data  = reflect_data_sr,
@@ -2688,21 +2688,21 @@ wisp_plot_comparison <- function(
 #' \dontrun{
 #' # Standard plot with facets for each parameter
 #' fig_trend <- wisp_trend_plot(
-#'    data = reflect_data_sr,
-#'    params = c("TSM", "Chla"),
-#'    aggregate = "none",
-#'    merge_plot = FALSE
+#'   data       = reflect_data_sr,
+#'   params     = c("TSM", "Chla"),
+#'   aggregate  = "none",
+#'   merge_plot = FALSE
 #' )
 #' print(fig_trend)
 #' 
 #' # Merged plot for parameters with common units 
 #' fig_merged <- wisp_trend_plot(
-#'    data = reflect_data_sr,
-#'    params = c("TSM", "Novoa_SPM"),
-#'    aggregate = "daily_mean",
-#'    merge_plot = TRUE
+#'   data       = reflect_data_sr,
+#'   params     = c("TSM", "Novoa_SPM"),
+#'   aggregate  = "daily_mean",
+#'   merge_plot = TRUE
 #' )
-#' print(fig_trend)
+#' print(fig_merged)
 #' }
 wisp_trend_plot <- function(
     data,

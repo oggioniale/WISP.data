@@ -3,6 +3,8 @@ library(httptest2)
 
 # Test: multi-day aggregation with data
 test_that("aggregates data correctly over multiple days", {
+  skip_on_cran()
+  
   temp_dir <- file.path(tempdir(), "test_multi_data")
   with_mock_dir("mock_ref_multi_1", {
     suppressWarnings({
@@ -28,6 +30,8 @@ test_that("aggregates data correctly over multiple days", {
 
 # Test: returns NULL when no data exists
 test_that("handles empty results gracefully", {
+  skip_on_cran()
+  
   with_mock_dir("mock_no_data", {
     res_empty <- suppressMessages(
       wisp_get_reflectance_multi_data(
@@ -45,6 +49,8 @@ test_that("handles empty results gracefully", {
 
 # Test: multi-day aggregation with data and no data
 test_that("combines multi-day data correctly even with missing days", {
+  skip_on_cran()
+  
   with_mock_dir("mock_ref_multi_2", {
     res_mixed <- suppressWarnings(suppressMessages(
       wisp_get_reflectance_multi_data(
