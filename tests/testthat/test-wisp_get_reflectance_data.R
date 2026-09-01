@@ -32,7 +32,7 @@ test_that("returns NULL when no data exist for the requested date", {
 
 # Test: returns a tibble when data is available
 test_that("returns tibble when data are available", {
-  with_mock_dir("mock_reflectance_data", {
+  with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(
       wisp_get_reflectance_data(
         time_from = "2024-08-01T09:00",
@@ -50,7 +50,7 @@ test_that("returns tibble when data are available", {
 
 # Test: check the tibble structure
 test_that("output structure contains expected columns", {
-  with_mock_dir("mock_reflectance_data", {
+  with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(
       wisp_get_reflectance_data(
         time_from = "2024-08-01T09:00",
@@ -72,7 +72,7 @@ test_that("output structure contains expected columns", {
 # Test: check CSV output (TRUE)
 test_that("save_csv creates output directory and file", {
   temp_dir <- file.path(tempdir(), "test_wisp_output")
-  with_mock_dir("mock_reflectance_data", {
+  with_mock_dir("mock_ref_data", {
     suppressWarnings({
       res <- wisp_get_reflectance_data(
         time_from = "2024-08-01T09:00",
@@ -97,7 +97,7 @@ test_that("save_csv creates output directory and file", {
 # Test: check no CSV output (FALSE)
 test_that("no csv is created when save_csv is FALSE", {
   temp_dir <- file.path(tempdir(), "test_wisp_no_csv")
-  with_mock_dir("mock_reflectance_data", {
+  with_mock_dir("mock_ref_data", {
     res <- suppressWarnings(
       wisp_get_reflectance_data(
         time_from = "2024-08-01T09:00",

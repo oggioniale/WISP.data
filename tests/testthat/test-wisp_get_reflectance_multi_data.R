@@ -4,7 +4,7 @@ library(httptest2)
 # Test: multi-day aggregation with data
 test_that("aggregates data correctly over multiple days", {
   temp_dir <- file.path(tempdir(), "test_multi_data")
-  with_mock_dir("mock_reflectance_data_multi_1", {
+  with_mock_dir("mock_ref_multi_1", {
     suppressWarnings({
       res <- wisp_get_reflectance_multi_data(
         time_from = "2024-08-01T09:00",
@@ -45,7 +45,7 @@ test_that("handles empty results gracefully", {
 
 # Test: multi-day aggregation with data and no data
 test_that("combines multi-day data correctly even with missing days", {
-  with_mock_dir("mock_reflectance_data_multi_2", {
+  with_mock_dir("mock_ref_multi_2", {
     res_mixed <- suppressWarnings(suppressMessages(
       wisp_get_reflectance_multi_data(
         time_from = "2024-08-01T09:00",

@@ -118,6 +118,7 @@ The following commands will automatically install all required
 dependencies:
 
 ``` r
+
 # Install remotes if not already available
 if (!require("remotes")) install.packages("remotes")
 
