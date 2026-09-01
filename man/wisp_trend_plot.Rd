@@ -73,21 +73,21 @@ the same plot if they share the same unit of measurement.
 \dontrun{
 # Standard plot with facets for each parameter
 fig_trend <- wisp_trend_plot(
-   data = reflect_data_sr,
-   params = c("TSM", "Chla"),
-   aggregate = "none",
-   merge_plot = FALSE
+  data       = reflect_data_sr,
+  params     = c("TSM", "Chla"),
+  aggregate  = "none",
+  merge_plot = FALSE
 )
 print(fig_trend)
 
 # Merged plot for parameters with common units 
 fig_merged <- wisp_trend_plot(
-   data = reflect_data_sr,
-   params = c("TSM", "Novoa_SPM"),
-   aggregate = "daily_mean",
-   merge_plot = TRUE
+  data       = reflect_data_sr,
+  params     = c("TSM", "Novoa_SPM"),
+  aggregate  = "daily_mean",
+  merge_plot = TRUE
 )
-print(fig_trend)
+print(fig_merged)
 }
 }
 \author{

@@ -28,6 +28,7 @@ Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 
 ``` r
 if (FALSE) { # \dontrun{
-WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
+# Launch the Shiny application
+wisp_runApp(launch.browser = TRUE)
 } # }
 ```

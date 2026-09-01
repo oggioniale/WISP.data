@@ -17,7 +17,8 @@ This function runs the Shiny app for querying and visualizing data from a specif
 }
 \examples{
 \dontrun{
-WISP.data::wisp_runApp(launch.browser = rstudioapi::viewer)
+# Launch the Shiny application
+wisp_runApp(launch.browser = TRUE)
 }
 }
 \author{

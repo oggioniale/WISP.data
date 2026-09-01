@@ -50,10 +50,10 @@ artifacts, and improve data quality.
 \dontrun{
 ## Not run:
 custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
-custom_qc <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
-custom_sr <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
 
-wisp_plot_comparison(
+fig_comparison <- wisp_plot_comparison(
   raw_data = reflect_data,
   qc_data  = reflect_data_qc,
   sr_data  = reflect_data_sr,

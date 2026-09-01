@@ -3,7 +3,7 @@ title: "Example of WISP.data functions"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Example of WISP.data functions}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 author: "Alessandro Oggioni, Nicola Ghirardi"
 ---
