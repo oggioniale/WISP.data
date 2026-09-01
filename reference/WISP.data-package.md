@@ -1,8 +1,7 @@
-# WISP.data: Managing WISPstation Hyperspectral Data
+# WISP.data: Tools for Managing WISPstation Hyperspectral Data
 
-R package designed to automate the acquisition, quality control,
-analysis, and visualization of spectral data collected by the
-WISPstation fixed spectroradiometer.
+Automate the acquisition, quality control, analysis, and visualization
+of spectral data collected by the 'WISPstation' fixed spectroradiometer.
 
 ## See also
 
