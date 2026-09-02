@@ -3,7 +3,9 @@
 * win-builder (devel)
 
 ## R CMD check results
-0 errors | 0 warnings | 0 notes
+There were 0 ERRORS, 0 WARNINGS, 1 NOTE.
 
-## Resubmission / Submission notes
-* This is a new release (initial submission to CRAN).
+* This is a new release.
+
+## Downstream dependencies
+There are no downstream dependencies.
