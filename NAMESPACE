@@ -9,61 +9,77 @@ export(wisp_runApp)
 export(wisp_sr_reflectance_data)
 export(wisp_trend_plot)
 import(shiny)
-importFrom(dplyr,across)
-importFrom(dplyr,all_of)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,c_across)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,if_all)
-importFrom(dplyr,mutate)
-importFrom(dplyr,reframe)
-importFrom(dplyr,rename_with)
-importFrom(dplyr,rowwise)
-importFrom(dplyr,select)
-importFrom(dplyr,slice)
-importFrom(dplyr,starts_with)
-importFrom(dplyr,summarise)
-importFrom(dplyr,ungroup)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,as_labeller)
-importFrom(ggplot2,element_blank)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,geom_ribbon)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,scale_color_manual)
-importFrom(ggplot2,scale_fill_manual)
-importFrom(ggplot2,scale_x_datetime)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_minimal)
-importFrom(httr2,req_auth_basic)
-importFrom(httr2,req_perform)
-importFrom(httr2,req_url_query)
-importFrom(httr2,request)
-importFrom(httr2,resp_body_string)
+importFrom(dplyr,
+  across,
+  all_of,
+  bind_rows,
+  c_across,
+  filter,
+  group_by,
+  if_all,
+  mutate,
+  reframe,
+  rename_with,
+  rowwise,
+  select,
+  slice,
+  starts_with,
+  summarise,
+  ungroup
+)
+importFrom(ggplot2,
+  aes,
+  as_labeller,
+  element_blank,
+  element_text,
+  facet_wrap,
+  geom_line,
+  geom_point,
+  geom_ribbon,
+  ggplot,
+  labs,
+  scale_color_manual,
+  scale_fill_manual,
+  scale_x_datetime,
+  theme,
+  theme_minimal
+)
+importFrom(httr2,
+  req_auth_basic,
+  req_perform,
+  req_url_query,
+  request,
+  resp_body_string
+)
 importFrom(lifecycle,deprecated)
 importFrom(lubridate,as_datetime)
-importFrom(plotly,ggplotly)
-importFrom(plotly,layout)
-importFrom(plotly,plotlyOutput)
-importFrom(plotly,renderPlotly)
-importFrom(plotly,subplot)
+importFrom(plotly,
+  ggplotly,
+  layout,
+  plotlyOutput,
+  renderPlotly,
+  subplot
+)
 importFrom(rstudioapi,viewer)
 importFrom(shinyjs,useShinyjs)
-importFrom(stats,approx)
-importFrom(stats,median)
-importFrom(stats,sd)
-importFrom(stats,setNames)
+importFrom(stats,
+  approx,
+  median,
+  sd,
+  setNames
+)
 importFrom(tibble,as_tibble)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,unnest_wider)
+importFrom(tidyr,
+  pivot_longer,
+  unnest_wider
+)
 importFrom(tidyselect,matches)
-importFrom(units,drop_units)
-importFrom(units,set_units)
-importFrom(utils,read.csv)
-importFrom(utils,read.table)
+importFrom(units,
+  drop_units,
+  set_units
+)
+importFrom(utils,
+  read.csv,
+  read.table
+)
 importFrom(viridis,viridis)

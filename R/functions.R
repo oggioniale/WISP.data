@@ -2679,9 +2679,9 @@ wisp_plot_comparison <- function(
 #' @importFrom viridis viridis
 #' @importFrom stats sd setNames median
 #' @importFrom units drop_units
-#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_ribbon scale_color_manual 
-#' scale_fill_manual facet_wrap labs theme_minimal theme element_text element_blank 
-#' as_labeller scale_x_datetime
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_ribbon scale_color_manual
+#'   scale_fill_manual facet_wrap labs theme_minimal theme element_text element_blank
+#'   as_labeller scale_x_datetime
 #' @export
 #' @examples
 #' # Example usage

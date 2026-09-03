@@ -24,7 +24,6 @@ BugReports: https://github.com/oggioniale/WISP.data/issues
 Encoding: UTF-8
 Language: en-GB
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends: R (>= 4.1.0)
 VignetteBuilder: knitr
 Suggests: 
@@ -56,3 +55,4 @@ Imports:
     viridis,
     rstudioapi
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0

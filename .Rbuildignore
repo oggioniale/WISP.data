@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^docs$
+^\.github$
+^CITATION\.cff$
+^CRAN-SUBMISSION$
+^INPUT\.R$
+^_pkgdown\.yaml$
+^_pkgdown\.yml$
+^codecov\.yml$
+^codemeta\.json$
+^cran-comments\.md$
+^paper$
+^LICENSE$
