@@ -22,13 +22,13 @@ Default is \code{NULL}.}
 \item{sr_data}{A \code{tibble}. The data after \code{wisp_sr_reflectance_data()} operations.
 Default is \code{NULL}.}
 
-\item{raw_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data}
+\item{raw_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data()}
 for the raw data plot (legend). Default is \code{NULL}.}
 
-\item{qc_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data}
+\item{qc_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data()}
 for the QC data plot (legend). Default is \code{NULL}.}
 
-\item{sr_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data}
+\item{sr_args}{A \code{list} of arguments to be passed to \code{wisp_plot_reflectance_data()}
 for the SR data plot (legend). Default is \code{NULL}.}
 }
 \value{
@@ -46,28 +46,25 @@ how filtering and correction algorithms modify spectral signatures, remove
 artifacts, and improve data quality.
 }
 \examples{
-# example code
-\dontrun{
-## Not run:
-custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
-custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
-custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+if (interactive()) {
+  custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
+  custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+  custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
 
-fig_comparison <- wisp_plot_comparison(
-  raw_data = reflect_data,
-  qc_data  = reflect_data_qc,
-  sr_data  = reflect_data_sr,
-  raw_args = custom_raw,
-  qc_args  = custom_qc,
-  sr_args  = custom_sr
-)
-print(fig_comparison)
+  fig_comparison <- wisp_plot_comparison(
+    raw_data = reflect_data,
+    qc_data  = reflect_data_qc,
+    sr_data  = reflect_data_sr,
+    raw_args = custom_raw,
+    qc_args  = custom_qc,
+    sr_args  = custom_sr
+  )
+  print(fig_comparison)
 }
-## End (Not run)
 
 }
 \author{
-Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

@@ -2,12 +2,12 @@ source("C:/Users/NicolaG/Desktop/R/WISP.data/R/functions.R")
 
 ### Download data --------------------------------------------------------------
 reflect_data <- wisp_get_reflectance_multi_data(
-  time_from = "2026-04-29T06:00",
-  time_to   = "2026-04-30T23:00",
+  time_from = "2026-06-28T09:00",
+  time_to   = "2026-06-30T14:00",
   station   = "WISPstation012",
   userid    = "cnr_irea",
   pwd       = "W1spcloud4cnr_irea",
-  save_csv  = FALSE,
+  save_csv  = F,
   out_dir   = "C:/Users/NicolaG/Downloads"
 )
 ### ----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ reflect_data_qc <- wisp_qc_reflectance_data(
   calc_mishra    = TRUE,
   calc_dom_wave  = TRUE,
   calc_OWT       = TRUE,
-  save_csv       = FALSE,
+  save_csv       = F,
   out_dir        = "C:/Users/NicolaG/Downloads"
 )
 ### ----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ reflect_data_sr <- wisp_sr_reflectance_data(
   calc_mishra   = TRUE,
   calc_dom_wave = TRUE,
   calc_OWT      = TRUE,
-  save_csv      = FALSE,
+  save_csv      = F,
   out_dir       = "C:/Users/NicolaG/Downloads"
 )
 ### ----------------------------------------------------------------------------
@@ -121,8 +121,9 @@ print(fig_comparison)
 fig_trend <- wisp_trend_plot(
   data       = reflect_data_sr,
   params     = c("TSM", "Chla", "Novoa_SPM", "Mishra_CHL", "Hue_Angle", "Dom_Wave"),
-  aggregate  = "none",
+  aggregate  = "daily_mean",
   merge_plot = TRUE
 )
 print(fig_trend)
 ### ----------------------------------------------------------------------------
+

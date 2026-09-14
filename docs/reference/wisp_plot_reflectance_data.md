@@ -76,48 +76,48 @@ wisp_plot_reflectance_data(
 
 - legend_novoa_SPM:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Novoa_SPM`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Novoa_SPM`
+  values. Default is `FALSE`.
 
 - legend_novoa_TUR:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Novoa_TUR`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Novoa_TUR`
+  values. Default is `FALSE`.
 
 - legend_jiang_TSS:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Jiang_TSS`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Jiang_TSS`
+  values. Default is `FALSE`.
 
 - legend_gons_CHL:
 
-  A `logical`. If `TRUE`, the plot legend includes the `Gons_CHL`values.
-  Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Gons_CHL`
+  values. Default is `FALSE`.
 
 - legend_gons740_CHL:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Gons740_CHL`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Gons740_CHL`
+  values. Default is `FALSE`.
 
 - legend_NDCI:
 
-  A `logical`. If `TRUE`, the plot legend includes the `NDCI`values.
+  A `logical`. If `TRUE`, the plot legend includes the `NDCI` values.
   Default is `FALSE`.
 
 - legend_mishra_CHL:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Mishra_CHL`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Mishra_CHL`
+  values. Default is `FALSE`.
 
 - legend_hue_angle:
 
-  A `logical`. If `TRUE`, the plot legend includes the
-  `Hue_Angle`values. Default is `FALSE`.
+  A `logical`. If `TRUE`, the plot legend includes the `Hue_Angle`
+  values. Default is `FALSE`.
 
 - legend_dom_wavelength:
 
   A `logical`. If `TRUE`, the plot legend includes the
-  `Dominant_Wavelength`values. Default is `FALSE`.
+  `Dominant_Wavelength` values. Default is `FALSE`.
 
 - legend_OWT_class:
 
@@ -136,42 +136,39 @@ wisp_plot_reflectance_data(
 
 ## Value
 
-An interactive plot showing the spectral signatures of the reflectance
-data.
+An interactive `plotly` object showing the spectral signatures of the
+reflectance data.
 
 ## Author
 
-Alessandro Oggioni, phD <oggioni.a@irea.cnr.it>
+Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 
 Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 
 ## Examples
 
 ``` r
-# example code
-if (FALSE) { # \dontrun{
-## Not run:
-wisp_plot_reflectance_data(
-  data = reflect_data_sr,
-  legend_TSM = TRUE,
-  legend_Chla = TRUE,
-  legend_Kd = TRUE,
-  legend_cpc = TRUE,
-  legend_scatt = FALSE,
-  legend_ratio = FALSE,
-  legend_novoa_SPM = FALSE,
-  legend_novoa_TUR = FALSE,
-  legend_jiang_TSS = FALSE,
-  legend_gons_CHL  = FALSE,
-  legend_gons740_CHL = FALSE,
-  legend_NDCI = FALSE,
-  legend_mishra_CHL = FALSE,
-  legend_hue_angle = FALSE, 
-  legend_dom_wavelength = FALSE,
-  legend_OWT_class = FALSE,
-  legend_OWT_score = FALSE,
-  legend_OWT_z_dist = FALSE  
-)
-} # }
-## End (Not run)
+if (interactive()) {
+  wisp_plot_reflectance_data(
+    data = reflect_data_sr,
+    legend_TSM = TRUE,
+    legend_Chla = TRUE,
+    legend_Kd = TRUE,
+    legend_cpc = TRUE,
+    legend_scatt = FALSE,
+    legend_ratio = FALSE,
+    legend_novoa_SPM = FALSE,
+    legend_novoa_TUR = FALSE,
+    legend_jiang_TSS = FALSE,
+    legend_gons_CHL = FALSE,
+    legend_gons740_CHL = FALSE,
+    legend_NDCI = FALSE,
+    legend_mishra_CHL = FALSE,
+    legend_hue_angle = FALSE,
+    legend_dom_wavelength = FALSE,
+    legend_OWT_class = FALSE,
+    legend_OWT_score = FALSE,
+    legend_OWT_z_dist = FALSE
+  )
+}
 ```

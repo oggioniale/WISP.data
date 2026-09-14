@@ -125,47 +125,47 @@ values. Default is <code>FALSE</code>.</p></dd>
 
 <dt id="arg-legend-novoa-spm">legend_novoa_SPM<a class="anchor" aria-label="anchor" href="#arg-legend-novoa-spm"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Novoa_SPM</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Novoa_SPM</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-novoa-tur">legend_novoa_TUR<a class="anchor" aria-label="anchor" href="#arg-legend-novoa-tur"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Novoa_TUR</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Novoa_TUR</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-jiang-tss">legend_jiang_TSS<a class="anchor" aria-label="anchor" href="#arg-legend-jiang-tss"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Jiang_TSS</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Jiang_TSS</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-gons-chl">legend_gons_CHL<a class="anchor" aria-label="anchor" href="#arg-legend-gons-chl"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Gons_CHL</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Gons_CHL</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-gons-chl">legend_gons740_CHL<a class="anchor" aria-label="anchor" href="#arg-legend-gons-chl"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Gons740_CHL</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Gons740_CHL</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-ndci">legend_NDCI<a class="anchor" aria-label="anchor" href="#arg-legend-ndci"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>NDCI</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>NDCI</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-mishra-chl">legend_mishra_CHL<a class="anchor" aria-label="anchor" href="#arg-legend-mishra-chl"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Mishra_CHL</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Mishra_CHL</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-hue-angle">legend_hue_angle<a class="anchor" aria-label="anchor" href="#arg-legend-hue-angle"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Hue_Angle</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Hue_Angle</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-dom-wavelength">legend_dom_wavelength<a class="anchor" aria-label="anchor" href="#arg-legend-dom-wavelength"></a></dt>
 <dd><p>A <code>logical</code>. If <code>TRUE</code>, the plot legend includes
-the <code>Dominant_Wavelength</code>values. Default is <code>FALSE</code>.</p></dd>
+the <code>Dominant_Wavelength</code> values. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-legend-owt-class">legend_OWT_class<a class="anchor" aria-label="anchor" href="#arg-legend-owt-class"></a></dt>
@@ -185,43 +185,40 @@ the <code>OWT_z_dist</code> (statistical distance). Default is <code>FALSE</code
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An interactive plot showing the spectral signatures of the
+    <p>An interactive <code>plotly</code> object showing the spectral signatures of the
 reflectance data.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
-    <p>Alessandro Oggioni, phD <a href="mailto:oggioni.a@irea.cnr.it">oggioni.a@irea.cnr.it</a></p>
+    <p>Alessandro Oggioni, phD <a href="mailto:alessandro.oggioni@cnr.it">alessandro.oggioni@cnr.it</a></p>
 <p>Nicola Ghirardi, phD <a href="mailto:nicola.ghirardi@cnr.it">nicola.ghirardi@cnr.it</a></p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example code</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co">## Not run:</span></span></span>
-<span class="r-in"><span><span class="fu">wisp_plot_reflectance_data</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  data <span class="op">=</span> <span class="va">reflect_data_sr</span>,</span></span>
-<span class="r-in"><span>  legend_TSM <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  legend_Chla <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  legend_Kd <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  legend_cpc <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  legend_scatt <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_ratio <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_novoa_SPM <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_novoa_TUR <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_jiang_TSS <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_gons_CHL  <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_gons740_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_NDCI <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_hue_angle <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>  legend_dom_wavelength <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_OWT_class <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_OWT_score <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  legend_OWT_z_dist <span class="op">=</span> <span class="cn">FALSE</span>  </span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">wisp_plot_reflectance_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">reflect_data_sr</span>,</span></span>
+<span class="r-in"><span>    legend_TSM <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    legend_Chla <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    legend_Kd <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    legend_cpc <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    legend_scatt <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_ratio <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_novoa_SPM <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_novoa_TUR <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_jiang_TSS <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_gons_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_gons740_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_NDCI <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_mishra_CHL <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_hue_angle <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_dom_wavelength <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_OWT_class <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_OWT_score <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    legend_OWT_z_dist <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

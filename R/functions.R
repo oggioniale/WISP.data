@@ -15,18 +15,18 @@
 #' is requested.
 #' @param time_to A `character`. It is the date and time to which the data
 #' is requested.
-#' @param station A `character`.  It is the name of the station.
+#' @param station A `character`. It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
-#' Default is "outputs" within the working directory.
+#' Default is `NULL`, which saves to a temporary directory (`tempdir()`) if `save_csv = TRUE`.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
-#' waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
+#' water quality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 #' all the reflectance values from 350 to 900 nm.
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom httr2 request req_url_query req_auth_basic req_perform resp_body_string
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr slice mutate across rename_with
@@ -36,11 +36,10 @@
 #' @importFrom utils read.csv read.table
 #' @importFrom stats approx
 #' @importFrom tidyselect matches
+#' @importFrom readr write_csv
 #' @export
 #' @examples
-#' # example code
 #' \dontrun{
-#' ## Not run:
 #' # NA data
 #' reflect_data <- wisp_get_reflectance_data(
 #'   time_from = "2024-09-01T09:00",
@@ -48,8 +47,7 @@
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #' 
 #' # with data
@@ -59,8 +57,7 @@
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #'
 #' # no data for the station selected
@@ -70,8 +67,7 @@
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #' 
 #' # The two dates are not consistent
@@ -81,11 +77,9 @@
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #' }
-#' ## End (Not run)
 #' 
 ### wisp_get_reflectance_data
 wisp_get_reflectance_data <- function(
@@ -96,7 +90,7 @@ wisp_get_reflectance_data <- function(
     userid    = NULL,
     pwd       = NULL,
     save_csv  = FALSE,
-    out_dir   = "outputs"
+    out_dir   = NULL
 ) {
   # check if the date is different
   start_date <- substr(time_from, start = 0, stop = 10)
@@ -124,7 +118,7 @@ wisp_get_reflectance_data <- function(
     
     if (df$measurement.id[2] == "-1" ||
         all(df$level2.reflectance[-1] %in% c("None", NA))
-      ) {
+    ) {
       # check if the exist data for other station in the same data provided
       response_no_station <- httr2::request("https://wispcloud.waterinsight.nl/api/query") |> 
         httr2::req_url_query(
@@ -146,7 +140,7 @@ wisp_get_reflectance_data <- function(
       
       if (df_no_station$measurement.id[2] == "-1" ||
           all(df$level2.reflectance[-1] %in% c("None", NA))
-        ) {
+      ) {
         reflectance_data_tbl <- NULL
         message(
           "\n----\nThank you for your request, but the instrument does not acquire data on ",
@@ -172,7 +166,6 @@ wisp_get_reflectance_data <- function(
         dplyr::slice(-1) |>
         tidyr::unnest_wider(col = level2.reflectance, names_sep = "_") |>
         dplyr::mutate(
-          
           dplyr::across(
             dplyr::starts_with("level2.reflectance_"),
             ~ {
@@ -200,11 +193,12 @@ wisp_get_reflectance_data <- function(
     }
     # create output csv file
     if (save_csv) {
+      target_dir <- if (is.null(out_dir)) tempdir() else out_dir
       dates <- if (identical(start_date, end_date)) start_date else paste0(start_date, "_", end_date)
-      if (!dir.exists(out_dir)) {
-        dir.create(out_dir, recursive = TRUE)
+      if (!dir.exists(target_dir)) {
+        dir.create(target_dir, recursive = TRUE)
       }
-      file <- file.path(out_dir, paste0("reflectance_data_", dates, ".csv"))
+      file <- file.path(target_dir, paste0("reflectance_data_", dates, ".csv"))
       readr::write_csv(x = reflectance_data_tbl, file = file)
     }
   } else {
@@ -228,33 +222,31 @@ wisp_get_reflectance_data <- function(
 #' is requested.
 #' @param time_to A `character`. It is the date and time to which the data
 #' is requested.
-#' @param station A `character`.  It is the name of the station.
+#' @param station A `character`. It is the name of the station.
 #' @param userid A `character`. It is the userid to access to the data service.
 #' @param pwd A `character`. It is the password to access to the data service.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
-#' Default is "outputs" within the working directory.
+#' Default is `NULL`, which saves to a temporary directory (`tempdir()`) if `save_csv = TRUE`.
 #' @return A `tibble` with measurement id, measurement date, instrument name,
 #' level2_quality, set of sensor (irradiance and radiances),
-#' waterquality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla 
+#' water quality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla 
 #' (Gons et al., 2005), Kd (Gons et al., 1998), and cpc (Simis, 2006) as provided 
 #' by instrument by default, all the reflectance values from 350 to 900 nm.
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
-#' @importFrom dplyr bind_rows
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
+#' @importFrom dplyr bind_rows select
+#' @importFrom readr write_csv
 #' @export
 #' @examples
-#' # example code
 #' \dontrun{
-#' ## Not run:
 #' reflect_data <- wisp_get_reflectance_multi_data(
 #'   time_from = "2024-04-08T09:00",
 #'   time_to = "2024-04-10T14:00",
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #' 
 #' # NA data on 2024-09-01
@@ -264,11 +256,9 @@ wisp_get_reflectance_data <- function(
 #'   station = "WISPstation012",
 #'   userid = userid,
 #'   pwd = pwd,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
+#'   save_csv = FALSE
 #' )
 #' }
-#' ## End (Not run)
 #' 
 ### wisp_get_reflectance_multi_data
 wisp_get_reflectance_multi_data <- function(
@@ -279,7 +269,7 @@ wisp_get_reflectance_multi_data <- function(
     userid    = NULL,
     pwd       = NULL,
     save_csv  = FALSE,
-    out_dir   = "outputs"
+    out_dir   = NULL
 ) {
   
   from_time <- sub(".*T", "", time_from)
@@ -296,7 +286,7 @@ wisp_get_reflectance_multi_data <- function(
     this_to   <- paste0(date, "T", to_time)
     tryCatch({
       wisp_get_reflectance_data(
-        version  = version,
+        version   = version,
         time_from = this_from,
         time_to   = this_to,
         station   = station,
@@ -324,13 +314,16 @@ wisp_get_reflectance_multi_data <- function(
   
   # create output csv file
   if (save_csv) {
-    date_from <- format(as.Date(time_from), "%Y%m%d")
-    date_to   <- format(as.Date(time_to),   "%Y%m%d")
-    dates_str <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-    if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
-    file_path <- file.path(out_dir, paste0("reflectance_data_", dates_str, ".csv"))
+    target_dir <- if (is.null(out_dir)) tempdir() else out_dir
+    date_from  <- format(as.Date(time_from), "%Y%m%d")
+    date_to    <- format(as.Date(time_to),   "%Y%m%d")
+    dates_str  <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
+    
+    if (!dir.exists(target_dir)) dir.create(target_dir, recursive = TRUE)
+    file_path <- file.path(target_dir, paste0("reflectance_data_", dates_str, ".csv"))
     readr::write_csv(x = data_multiDates, file = file_path)
   }
+  
   # output
   return(data_multiDates)
 }
@@ -343,7 +336,7 @@ wisp_get_reflectance_multi_data <- function(
 #' physically implausible spectra. In addition, the function integrates independent 
 #' quality assessment metrics derived from the literature (QA and QWIP), 
 #' providing robust spectral validation through established optical criteria.
-#' @param data A `tibble`. From wisp_get_reflectance_data() function.
+#' @param data A `tibble`. From `wisp_get_reflectance_data()` function.
 #' @param maxPeak A `decimal`. Maximum magnitude of the spectral signatures.
 #' We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
 #' 0.05 for meso- to eutrophic water, and 0.08 for hypereutrophic and highly turbid water.
@@ -391,43 +384,42 @@ wisp_get_reflectance_multi_data <- function(
 #' significantly from the typical range of that class. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
-#' Default is "outputs" within the working directory.
+#' Default is `NULL`, which saves to a temporary directory (`tempdir()`) if `save_csv = TRUE`.
 #' @return A `tibble` with the spectral signatures that have passed QC operation 
 #' and all the extra parameters that were requested. In addition, a message 
 #' containing the reason behind the elimination of each anomalous spectral signature.
 #' If parameter save_csv is `TRUE`, the function saves the reflectance data 
 #' in a CSV file.
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom dplyr filter if_all all_of rowwise ungroup mutate across
 #' @importFrom dplyr starts_with c_across
 #' @importFrom units set_units
 #' @export
 #' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' reflect_data_qc <- wisp_qc_reflectance_data(
-#'   data = reflect_data,
-#'   maxPeak = 0.05,
-#'   maxPeak_blue = 0.02,
-#'   qa_threshold    = 0.5,
-#'   qwip_threshold  = 0.2,
-#'   calc_scatt = TRUE,
-#'   calc_SPM = TRUE,
-#'   calc_TUR = TRUE,
-#'   calc_TSS = TRUE,
-#'   calc_gons = TRUE,
-#'   calc_gons740 = TRUE,
-#'   calc_NDCI = TRUE,
-#'   calc_mishra = TRUE,
-#'   calc_dom_wave = TRUE,
-#'   calc_OWT = TRUE,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
-#' )
+#' \donttest{
+#' # Requires a valid reflectance dataset retrieved from wisp_get_reflectance_data()
+#' if (exists("reflect_data")) {
+#'   reflect_data_qc <- wisp_qc_reflectance_data(
+#'     data = reflect_data,
+#'     maxPeak = 0.05,
+#'     maxPeak_blue = 0.02,
+#'     qa_threshold = 0.5,
+#'     qwip_threshold = 0.2,
+#'     calc_scatt = TRUE,
+#'     calc_SPM = TRUE,
+#'     calc_TUR = TRUE,
+#'     calc_TSS = TRUE,
+#'     calc_gons = TRUE,
+#'     calc_gons740 = TRUE,
+#'     calc_NDCI = TRUE,
+#'     calc_mishra = TRUE,
+#'     calc_dom_wave = TRUE,
+#'     calc_OWT = TRUE,
+#'     save_csv = FALSE,
+#'   )
 #' }
-#' ## End (Not run)
+#' }
 #' 
 ### wisp_qc_reflectance_data
 wisp_qc_reflectance_data <- function(
@@ -447,7 +439,7 @@ wisp_qc_reflectance_data <- function(
     calc_dom_wave  = TRUE,
     calc_OWT       = TRUE, 
     save_csv       = FALSE,
-    out_dir        = "outputs"
+    out_dir        = NULL
 ) {
   initial_nrow <- nrow(data)
   removed_rows <- data.frame(measurement.date = data$measurement.date, reason = "")
@@ -823,10 +815,11 @@ wisp_qc_reflectance_data <- function(
     date_from <- format(as.Date(reflectance_data_filtered$measurement.date[1]), "%Y%m%d")
     date_to <- format(as.Date(reflectance_data_filtered$measurement.date[nrow(reflectance_data_filtered)]), "%Y%m%d")
     dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-    if (!dir.exists(out_dir)) {
-      dir.create(out_dir, recursive = TRUE)
+    target_dir <- if (is.null(out_dir)) tempdir() else out_dir
+    if (!dir.exists(target_dir)) {
+      dir.create(target_dir, recursive = TRUE)
     }
-    file <- file.path(out_dir, paste0("reflectance_data", "_qc_", dates, ".csv"))
+    file <- file.path(target_dir, paste0("reflectance_data", "_qc_", dates, ".csv"))
     readr::write_csv(x = reflectance_data_filtered, file = file)
   }
   
@@ -842,7 +835,7 @@ wisp_qc_reflectance_data <- function(
 #' Following this correction, all algorithms are re-applied using the corrected 
 #' reflectance, ensuring more accurate and physically consistent estimates 
 #' of water constituents.
-#' @param qc_data A `tibble` from wisp_qc_reflectance_data() function.
+#' @param qc_data A `tibble` from `wisp_qc_reflectance_data()` function.
 #' @param calc_scatt A `logical`. If `TRUE`, the function calculates the 
 #' peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter 
 #' to the second chlorophyll absorption peak (670-680 nm). Default is `TRUE`.
@@ -878,36 +871,35 @@ wisp_qc_reflectance_data <- function(
 #' significantly from the typical range of that class. Default is `TRUE`.
 #' @param save_csv A `logical`. If `TRUE`, the function saves the reflectance data.
 #' @param out_dir A `character`. The directory where the CSV file will be saved.
-#' Default is "outputs" within the working directory.
+#' Default is `NULL`, which saves to a temporary directory (`tempdir()`) if `save_csv = TRUE`.
 #' @return A `tibble` with the spectral signatures after the SR operation 
 #' and all the extra parameters that were requested. If parameter save_csv is 
 #' `TRUE`, the function saves the reflectance data in a CSV file.
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom dplyr mutate select all_of across
 #' @importFrom units set_units
 #' @export
 #' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' reflect_data_sr <- wisp_sr_reflectance_data(
-#'   qc_data = reflect_data_qc,
-#'   calc_scatt = TRUE,
-#'   calc_SPM = TRUE,
-#'   calc_TUR = TRUE,
-#'   calc_TSS = TRUE,
-#'   calc_gons  = TRUE,
-#'   calc_gons740 = TRUE,
-#'   calc_NDCI = TRUE,
-#'   calc_mishra = FALSE,
-#'   calc_dom_wave = TRUE,
-#'   calc_OWT = TRUE,
-#'   save_csv = FALSE,
-#'   out_dir = "outputs"
-#' )
+#' \donttest{
+#' # Requires a valid dataset output from wisp_qc_reflectance_data()
+#' if (exists("reflect_data_qc")) {
+#'   reflect_data_sr <- wisp_sr_reflectance_data(
+#'     qc_data = reflect_data_qc,
+#'     calc_scatt = TRUE,
+#'     calc_SPM = TRUE,
+#'     calc_TUR = TRUE,
+#'     calc_TSS = TRUE,
+#'     calc_gons = TRUE,
+#'     calc_gons740 = TRUE,
+#'     calc_NDCI = TRUE,
+#'     calc_mishra = FALSE,
+#'     calc_dom_wave = TRUE,
+#'     calc_OWT = TRUE,
+#'     save_csv = FALSE,
+#'   )
 #' }
-#' ## End (Not run)
+#' }
 #'
 ### wisp_sr_reflectance_data
 wisp_sr_reflectance_data <- function(
@@ -923,7 +915,7 @@ wisp_sr_reflectance_data <- function(
     calc_dom_wave = TRUE,
     calc_OWT      = TRUE, 
     save_csv      = FALSE,
-    out_dir       = "outputs"
+    out_dir       = NULL
 ) {
   if (!"QC" %in% names(qc_data)) {
     message("\n----\nThis function is not executable on this dataset. Try after QC.\n----\n")
@@ -1103,10 +1095,11 @@ wisp_sr_reflectance_data <- function(
     date_from <- format(as.Date(corrected_data$measurement.date[1]), "%Y%m%d")
     date_to   <- format(as.Date(corrected_data$measurement.date[nrow(corrected_data)]), "%Y%m%d")
     dates <- if (identical(date_from, date_to)) date_from else paste0(date_from, "_", date_to)
-    if (!dir.exists(out_dir)) {
-      dir.create(out_dir, recursive = TRUE)
+    target_dir <- if (is.null(out_dir)) tempdir() else out_dir
+    if (!dir.exists(target_dir)) {
+      dir.create(target_dir, recursive = TRUE)
     }
-    file <- file.path(out_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
+    file <- file.path(target_dir, paste0("reflectance_data", "_sr_", dates, ".csv"))
     readr::write_csv(x = corrected_data, file = file)
   }
   
@@ -1131,6 +1124,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(
 ))
 
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with updated scattering peak and band ratio.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_scatt
@@ -1152,6 +1147,8 @@ wisp_calc_scatt <- function(data) {
     dplyr::relocate(scattering.peak, band.ratio, .after = waterquality.chla)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with Novoa SPM estimates and selected blending bands.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Novoa_SPM
@@ -1254,6 +1251,8 @@ wisp_calc_Novoa_SPM <- function(data) {
     dplyr::select(-green_value, -red_value, -nir_value, -novoa_spm)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with Novoa TUR estimates and selected blending bands.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Novoa_TUR
@@ -1323,13 +1322,6 @@ wisp_calc_Novoa_TUR <- function(data) {
   red_cols <- get_columns_in_range(data, 665, tol = 3)
   nir_cols <- get_columns_in_range(data, 865, tol = 3)
   
-  if (inherits(try(units::as_units("NTU"), silent = TRUE), "try-error")) {
-    units::install_unit(
-      symbol = "NTU",
-      name = "Nephelometric Turbidity Unit"
-    )
-  }
-  
   data <- data |>
     dplyr::rowwise() |>
     dplyr::mutate(
@@ -1339,6 +1331,10 @@ wisp_calc_Novoa_TUR <- function(data) {
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
+      # NTU (Nephelometric Turbidity Unit) is not a standard UDUNITS symbol.
+      # The unit is registered once, at package load time, in .onLoad()
+      # (see R/WISP.data-package.R) rather than here, so this function never
+      # modifies global package state and never calls units::install_unit().
       Novoa.TUR = units::set_units(round(purrr::map_dbl(novoa_tur, "TUR"), 1), "NTU"),
       Blended.TUR = purrr::map_chr(novoa_tur, "band_selected")
     ) |>
@@ -1347,6 +1343,8 @@ wisp_calc_Novoa_TUR <- function(data) {
   return(data)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with Jiang TSS estimates and intermediate QAA variables.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Jiang_TSS 
@@ -1429,6 +1427,8 @@ wisp_calc_Jiang_TSS <- function(data) {
   return(out)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with Gons Chlorophyll-a concentration.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Gons_CHL 
@@ -1480,6 +1480,8 @@ wisp_calc_Gons_CHL <- function(data) {
   data
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with Gons740 Chlorophyll-a concentration.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Gons740_CHL 
@@ -1531,6 +1533,8 @@ wisp_calc_Gons740_CHL <- function(data) {
   data
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with NDCI index values.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_NDCI
@@ -1569,6 +1573,8 @@ wisp_calc_NDCI <- function(data) {
   data
 }
 
+#' @param data A `tibble` containing NDCI values.
+#' @return A `tibble` with Mishra Chlorophyll-a concentration.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_Mishra_CHL
@@ -1600,6 +1606,8 @@ wisp_calc_Mishra_CHL <- function(data) {
   return(data)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with hue angle and dominant wavelength.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_dom_wave
@@ -1699,6 +1707,8 @@ wisp_calc_dom_wave <- function(data) {
   return(data)
 }
 
+#' @param data A `tibble` containing spectral reflectance columns.
+#' @return A `tibble` with OWT_class, OWT_description, OWT_score and OWT_z_dist.
 #' @noRd
 #' @keywords internal
 ### wisp_calc_OWT_class
@@ -2302,53 +2312,53 @@ wisp_calc_OWT_class <- function(data) {
 #' @description `r lifecycle::badge("stable")`
 #' This function generates an interactive visualization of all spectral signatures 
 #' contained in a dataset, based on the plotly library. It is highly flexible and 
-#' can be used to display: native data downloaded directly from WISPstation, processed
+#' can be used to display: native data downloaded directly from WISPstation, processed 
 #' data after QC, processed data after SR. The function's distinctive feature is 
 #' its dynamic tooltip system: when hovering over a spectral curve, users can 
 #' instantly visualize the corresponding acquisition date and time, together with 
 #' all associated bio-optical parameters computed for that specific measurement.
 #' @param data A `tibble` obtained by any of the functions provided by this
-#' package: `wisp_get_reflectance_data()`, or after QC and SR removal operations.
+#'   package: `wisp_get_reflectance_data()`, or after QC and SR removal operations.
 #' @param legend_TSM A `logical`. If `TRUE`, the plot legend includes the `TSM`
-#' values. Default is `TRUE`.
+#'   values. Default is `TRUE`.
 #' @param legend_Chla A `logical`. If `TRUE`, the plot legend includes the
-#' `Chla` values. Default is `TRUE`.
+#'   `Chla` values. Default is `TRUE`.
 #' @param legend_Kd A `logical`. If `TRUE`, the plot legend includes the `Kd`
-#' values. Default is `TRUE`.
+#'   values. Default is `TRUE`.
 #' @param legend_cpc A `logical`. If `TRUE`, the plot legend includes the `cpc`
-#' values. Default is `TRUE`.
+#'   values. Default is `TRUE`.
 #' @param legend_scatt A `logical`. If `TRUE`, the plot legend includes the `scattering`
-#' values. Default is `FALSE`.
+#'   values. Default is `FALSE`.
 #' @param legend_ratio A `logical`. If `TRUE`, the plot legend includes the `ratio`
-#' values. Default is `FALSE`.
+#'   values. Default is `FALSE`.
 #' @param legend_novoa_SPM A `logical`. If `TRUE`, the plot legend includes 
-#' the `Novoa_SPM`values. Default is `FALSE`.
+#'   the `Novoa_SPM` values. Default is `FALSE`.
 #' @param legend_novoa_TUR A `logical`. If `TRUE`, the plot legend includes 
-#' the `Novoa_TUR`values. Default is `FALSE`.
+#'   the `Novoa_TUR` values. Default is `FALSE`.
 #' @param legend_jiang_TSS A `logical`. If `TRUE`, the plot legend includes 
-#' the `Jiang_TSS`values. Default is `FALSE`.
+#'   the `Jiang_TSS` values. Default is `FALSE`.
 #' @param legend_gons_CHL A `logical`. If `TRUE`, the plot legend includes 
-#' the `Gons_CHL`values. Default is `FALSE`.
+#'   the `Gons_CHL` values. Default is `FALSE`.
 #' @param legend_gons740_CHL A `logical`. If `TRUE`, the plot legend includes 
-#' the `Gons740_CHL`values. Default is `FALSE`.
+#'   the `Gons740_CHL` values. Default is `FALSE`.
 #' @param legend_NDCI A `logical`. If `TRUE`, the plot legend includes 
-#' the `NDCI`values. Default is `FALSE`.
+#'   the `NDCI` values. Default is `FALSE`.
 #' @param legend_mishra_CHL A `logical`. If `TRUE`, the plot legend includes 
-#' the `Mishra_CHL`values. Default is `FALSE`.
+#'   the `Mishra_CHL` values. Default is `FALSE`.
 #' @param legend_hue_angle A `logical`. If `TRUE`, the plot legend includes 
-#' the `Hue_Angle`values. Default is `FALSE`.
+#'   the `Hue_Angle` values. Default is `FALSE`.
 #' @param legend_dom_wavelength A `logical`. If `TRUE`, the plot legend includes 
-#' the `Dominant_Wavelength`values. Default is `FALSE`.
+#'   the `Dominant_Wavelength` values. Default is `FALSE`.
 #' @param legend_OWT_class A `logical`. If `TRUE`, the plot legend includes 
-#' the `OWT_class`. Default is `FALSE`.
+#'   the `OWT_class`. Default is `FALSE`.
 #' @param legend_OWT_score A `logical`. If `TRUE`, the plot legend includes 
-#' the `OWT_score` (membership grade). Default is `FALSE`.
+#'   the `OWT_score` (membership grade). Default is `FALSE`.
 #' @param legend_OWT_z_dist A `logical`. If `TRUE`, the plot legend includes 
-#' the `OWT_z_dist` (statistical distance). Default is `FALSE`.
-#' @return An interactive plot showing the spectral signatures of the
-#' reflectance data.
-#' @author Alessandro Oggioni, phD \email{oggioni.a@@irea.cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#'   the `OWT_z_dist` (statistical distance). Default is `FALSE`.
+#' @return An interactive `plotly` object showing the spectral signatures of the
+#'   reflectance data.
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom dplyr all_of
 #' @importFrom tidyr pivot_longer
 #' @importFrom viridis viridis
@@ -2356,32 +2366,29 @@ wisp_calc_OWT_class <- function(data) {
 #' @importFrom plotly ggplotly
 #' @export
 #' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' wisp_plot_reflectance_data(
-#'   data = reflect_data_sr,
-#'   legend_TSM = TRUE,
-#'   legend_Chla = TRUE,
-#'   legend_Kd = TRUE,
-#'   legend_cpc = TRUE,
-#'   legend_scatt = FALSE,
-#'   legend_ratio = FALSE,
-#'   legend_novoa_SPM = FALSE,
-#'   legend_novoa_TUR = FALSE,
-#'   legend_jiang_TSS = FALSE,
-#'   legend_gons_CHL  = FALSE,
-#'   legend_gons740_CHL = FALSE,
-#'   legend_NDCI = FALSE,
-#'   legend_mishra_CHL = FALSE,
-#'   legend_hue_angle = FALSE, 
-#'   legend_dom_wavelength = FALSE,
-#'   legend_OWT_class = FALSE,
-#'   legend_OWT_score = FALSE,
-#'   legend_OWT_z_dist = FALSE  
-#' )
+#' if (interactive()) {
+#'   wisp_plot_reflectance_data(
+#'     data = reflect_data_sr,
+#'     legend_TSM = TRUE,
+#'     legend_Chla = TRUE,
+#'     legend_Kd = TRUE,
+#'     legend_cpc = TRUE,
+#'     legend_scatt = FALSE,
+#'     legend_ratio = FALSE,
+#'     legend_novoa_SPM = FALSE,
+#'     legend_novoa_TUR = FALSE,
+#'     legend_jiang_TSS = FALSE,
+#'     legend_gons_CHL = FALSE,
+#'     legend_gons740_CHL = FALSE,
+#'     legend_NDCI = FALSE,
+#'     legend_mishra_CHL = FALSE,
+#'     legend_hue_angle = FALSE,
+#'     legend_dom_wavelength = FALSE,
+#'     legend_OWT_class = FALSE,
+#'     legend_OWT_score = FALSE,
+#'     legend_OWT_z_dist = FALSE
+#'   )
 #' }
-#' ## End (Not run)
 #'
 ### wisp_plot_reflectance_data
 wisp_plot_reflectance_data <- function(
@@ -2515,47 +2522,44 @@ wisp_plot_reflectance_data <- function(
 #' @description `r lifecycle::badge("stable")`
 #' This function creates an interactive side-by-side visual comparison of the different 
 #' WISPstation data processing levels. Using plotly submodules, it enables the 
-#' visualization of up to three aligned plots within a single interactive window:
+#' visualization of up to three aligned plots within a single interactive window: 
 #' native data downloaded directly from WISPstation, processed data after QC, 
 #' processed data after SR. This provides a powerful tool for visually assessing 
 #' how filtering and correction algorithms modify spectral signatures, remove 
 #' artifacts, and improve data quality.
 #' @param raw_data A `tibble`. The original data obtained by `wisp_get_reflectance_data()`.
 #' @param qc_data A `tibble`. The data after `wisp_qc_reflectance_data()` operations. 
-#' Default is `NULL`.
+#'   Default is `NULL`.
 #' @param sr_data A `tibble`. The data after `wisp_sr_reflectance_data()` operations. 
-#' Default is `NULL`.
-#' @param raw_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
-#' for the raw data plot (legend). Default is `NULL`.
-#' @param qc_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
-#' for the QC data plot (legend). Default is `NULL`.
-#' @param sr_args A `list` of arguments to be passed to `wisp_plot_reflectance_data` 
-#' for the SR data plot (legend). Default is `NULL`.
-#' @return A `plotly` subplot object comparing the spectral signatures (Raw vs QC
-#' vs SR). If only `raw_data` is provided or valid, a single plot is returned.
-#' @author Alessandro Oggioni, phD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, phD \email{nicola.ghirardi@@cnr.it}
+#'   Default is `NULL`.
+#' @param raw_args A `list` of arguments to be passed to `wisp_plot_reflectance_data()` 
+#'   for the raw data plot (legend). Default is `NULL`.
+#' @param qc_args A `list` of arguments to be passed to `wisp_plot_reflectance_data()` 
+#'   for the QC data plot (legend). Default is `NULL`.
+#' @param sr_args A `list` of arguments to be passed to `wisp_plot_reflectance_data()` 
+#'   for the SR data plot (legend). Default is `NULL`.
+#' @return A `plotly` subplot object comparing the spectral signatures (Raw vs QC 
+#'   vs SR). If only `raw_data` is provided or valid, a single plot is returned.
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom plotly subplot layout
 #' @export
 #' @examples
-#' # example code
-#' \dontrun{
-#' ## Not run:
-#' custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
-#' custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
-#' custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
-#'
-#' fig_comparison <- wisp_plot_comparison(
-#'   raw_data = reflect_data,
-#'   qc_data  = reflect_data_qc,
-#'   sr_data  = reflect_data_sr,
-#'   raw_args = custom_raw,
-#'   qc_args  = custom_qc,
-#'   sr_args  = custom_sr
-#' )
-#' print(fig_comparison)
+#' if (interactive()) {
+#'   custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
+#'   custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+#'   custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+#' 
+#'   fig_comparison <- wisp_plot_comparison(
+#'     raw_data = reflect_data,
+#'     qc_data  = reflect_data_qc,
+#'     sr_data  = reflect_data_sr,
+#'     raw_args = custom_raw,
+#'     qc_args  = custom_qc,
+#'     sr_args  = custom_sr
+#'   )
+#'   print(fig_comparison)
 #' }
-#' ## End (Not run)
 #'
 ### wisp_plot_comparison
 wisp_plot_comparison <- function(
@@ -2642,37 +2646,39 @@ wisp_plot_comparison <- function(
 #' data (daily mean or median) and allows comparison of multiple parameters in 
 #' the same plot if they share the same unit of measurement.
 #' @param data A `tibble` containing water quality parameters and spectral
-#' signatures. 
+#'   signatures. 
 #' @param params A character vector specifying which parameters to plot.
-#' Default is `c("TSM", "Chla")`.
+#'   Default is `c("TSM", "Chla")`.
 #' @param datetime_col A `character`. Name of the column with datetime 
-#' values. Default is `"measurement.date"`.
+#'   values. Default is `"measurement.date"`.
 #' @param instrument_col A `character`. Name of the column with instrument 
-#' identifiers. Default is `"instrument.name"`.
+#'   identifiers. Default is `"instrument.name"`.
 #' @param aggregate A `character` specifying whether to aggregate data.
-#' Options are:
-#' \itemize{
-#'   \item \code{"none"}: Plots all available values (requires data for only one day).
-#'   \item \code{"daily_mean"}: Calculates and plots the daily average, including a 
-#'   ribbon for the Standard Deviation (SD) (requires data for multiple days).
-#'   \item \code{"daily_median"}: Calculates and plots the daily median 
-#'   (requires data for multiple days).} Default is `"none"`.
+#'   Options are:
+#'   \itemize{
+#'     \item \code{"none"}: Plots all available values (requires data for only one day).
+#'     \item \code{"daily_mean"}: Calculates and plots the daily average, including a 
+#'       ribbon for the Standard Deviation (SD) (requires data for multiple days).
+#'     \item \code{"daily_median"}: Calculates and plots the daily median 
+#'       (requires data for multiple days).
+#'   } Default is `"none"`.
 #' @param merge_plot A `logical`. If \code{TRUE}, parameters that share the same 
-#' unit of measurement will be merged into a single plot. The function will 
-#' throw an error if no common units are found among the requested \code{params}. 
-#' Default is \code{FALSE}.
+#'   unit of measurement will be merged into a single plot. The function will 
+#'   throw an error if no common units are found among the requested \code{params}. 
+#'   Default is \code{FALSE}.
 #' @param na.rm A `logical`. If `TRUE`, NA values are ignored during aggregation. 
-#' Default is `TRUE`.
+#'   Default is `TRUE`.
 #' @param colors A `character` vector of colors for each parameter. Default uses 
-#' `viridis` palette.
+#'   `viridis` palette.
 #' @param title A `character`. Optional title for the plot. Default is `NULL`.
 #' @param return_long_df A `logical`. If \code{TRUE}, the function returns the 
-#' long format dataframe used for plotting instead of the \code{plotly} object. 
-#' Default is \code{FALSE}.
+#'   long format dataframe used for plotting instead of the \code{plotly} object. 
+#'   Default is \code{FALSE}.
 #' @return An interactive `plotly` object showing the temporal trend of the 
-#' selected parameters, with optional ribbons for standard deviation.
-#' @author Alessandro Oggioni, PhD \email{alessandro.oggioni@@cnr.it}
-#' @author Nicola Ghirardi, PhD \email{nicola.ghirardi@@cnr.it}
+#'   selected parameters, with optional ribbons for standard deviation. If 
+#'   \code{return_long_df = TRUE}, returns a `tibble` in long format.
+#' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
+#' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom plotly ggplotly
 #' @importFrom dplyr group_by reframe summarise
 #' @importFrom lubridate as_datetime
@@ -2684,26 +2690,27 @@ wisp_plot_comparison <- function(
 #'   as_labeller scale_x_datetime
 #' @export
 #' @examples
-#' # Example usage
-#' \dontrun{
-#' # Standard plot with facets for each parameter
-#' fig_trend <- wisp_trend_plot(
-#'   data       = reflect_data_sr,
-#'   params     = c("TSM", "Chla"),
-#'   aggregate  = "none",
-#'   merge_plot = FALSE
-#' )
-#' print(fig_trend)
-#' 
-#' # Merged plot for parameters with common units 
-#' fig_merged <- wisp_trend_plot(
-#'   data       = reflect_data_sr,
-#'   params     = c("TSM", "Novoa_SPM"),
-#'   aggregate  = "daily_mean",
-#'   merge_plot = TRUE
-#' )
-#' print(fig_merged)
+#' if (interactive()) {
+#'   # Standard plot with facets for each parameter
+#'   fig_trend <- wisp_trend_plot(
+#'     data       = reflect_data_sr,
+#'     params     = c("TSM", "Chla"),
+#'     aggregate  = "none",
+#'     merge_plot = FALSE
+#'   )
+#'   print(fig_trend)
+#'  
+#'   # Merged plot for parameters with common units 
+#'   fig_merged <- wisp_trend_plot(
+#'     data       = reflect_data_sr,
+#'     params     = c("TSM", "Novoa_SPM"),
+#'     aggregate  = "daily_mean",
+#'     merge_plot = TRUE
+#'   )
+#'   print(fig_merged)
 #' }
+#' 
+### wisp_trend_plot
 wisp_trend_plot <- function(
     data,
     params = c("TSM", "Chla"),

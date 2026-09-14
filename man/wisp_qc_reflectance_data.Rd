@@ -21,11 +21,11 @@ wisp_qc_reflectance_data(
   calc_dom_wave = TRUE,
   calc_OWT = TRUE,
   save_csv = FALSE,
-  out_dir = "outputs"
+  out_dir = NULL
 )
 }
 \arguments{
-\item{data}{A \code{tibble}. From wisp_get_reflectance_data() function.}
+\item{data}{A \code{tibble}. From \code{wisp_get_reflectance_data()} function.}
 
 \item{maxPeak}{A \code{decimal}. Maximum magnitude of the spectral signatures.
 We recommend setting this parameter to: 0.02 for clear and oligotrophic water,
@@ -89,7 +89,7 @@ significantly from the typical range of that class. Default is \code{TRUE}.}
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
 \item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
-Default is "outputs" within the working directory.}
+Default is \code{NULL}, which saves to a temporary directory (\code{tempdir()}) if \code{save_csv = TRUE}.}
 }
 \value{
 A \code{tibble} with the spectral signatures that have passed QC operation
@@ -108,34 +108,33 @@ quality assessment metrics derived from the literature (QA and QWIP),
 providing robust spectral validation through established optical criteria.
 }
 \examples{
-# example code
-\dontrun{
-## Not run:
-reflect_data_qc <- wisp_qc_reflectance_data(
-  data = reflect_data,
-  maxPeak = 0.05,
-  maxPeak_blue = 0.02,
-  qa_threshold    = 0.5,
-  qwip_threshold  = 0.2,
-  calc_scatt = TRUE,
-  calc_SPM = TRUE,
-  calc_TUR = TRUE,
-  calc_TSS = TRUE,
-  calc_gons = TRUE,
-  calc_gons740 = TRUE,
-  calc_NDCI = TRUE,
-  calc_mishra = TRUE,
-  calc_dom_wave = TRUE,
-  calc_OWT = TRUE,
-  save_csv = FALSE,
-  out_dir = "outputs"
-)
+\donttest{
+# Requires a valid reflectance dataset retrieved from wisp_get_reflectance_data()
+if (exists("reflect_data")) {
+  reflect_data_qc <- wisp_qc_reflectance_data(
+    data = reflect_data,
+    maxPeak = 0.05,
+    maxPeak_blue = 0.02,
+    qa_threshold = 0.5,
+    qwip_threshold = 0.2,
+    calc_scatt = TRUE,
+    calc_SPM = TRUE,
+    calc_TUR = TRUE,
+    calc_TSS = TRUE,
+    calc_gons = TRUE,
+    calc_gons740 = TRUE,
+    calc_NDCI = TRUE,
+    calc_mishra = TRUE,
+    calc_dom_wave = TRUE,
+    calc_OWT = TRUE,
+    save_csv = FALSE,
+  )
 }
-## End (Not run)
+}
 
 }
 \author{
-Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

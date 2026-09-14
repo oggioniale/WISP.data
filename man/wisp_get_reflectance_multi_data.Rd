@@ -12,7 +12,7 @@ wisp_get_reflectance_multi_data(
   userid = NULL,
   pwd = NULL,
   save_csv = FALSE,
-  out_dir = "outputs"
+  out_dir = NULL
 )
 }
 \arguments{
@@ -25,7 +25,7 @@ is requested.}
 \item{time_to}{A \code{character}. It is the date and time to which the data
 is requested.}
 
-\item{station}{A \code{character}.  It is the name of the station.}
+\item{station}{A \code{character}. It is the name of the station.}
 
 \item{userid}{A \code{character}. It is the userid to access to the data service.}
 
@@ -34,12 +34,12 @@ is requested.}
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
 \item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
-Default is "outputs" within the working directory.}
+Default is \code{NULL}, which saves to a temporary directory (\code{tempdir()}) if \code{save_csv = TRUE}.}
 }
 \value{
 A \code{tibble} with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
-waterquality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla
+water quality values of TSM (Van Der Woerd & Pasterkamp, 2008), Chla
 (Gons et al., 2005), Kd (Gons et al., 1998), and cpc (Simis, 2006) as provided
 by instrument by default, all the reflectance values from 350 to 900 nm.
 }
@@ -52,17 +52,14 @@ time interval into daily blocks, performs sequential downloads, and aggregates
 all retrieved data into a single, coherent tibble.
 }
 \examples{
-# example code
 \dontrun{
-## Not run:
 reflect_data <- wisp_get_reflectance_multi_data(
   time_from = "2024-04-08T09:00",
   time_to = "2024-04-10T14:00",
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 
 # NA data on 2024-09-01
@@ -72,15 +69,13 @@ reflect_data <- wisp_get_reflectance_multi_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 }
-## End (Not run)
 
 }
 \author{
-Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

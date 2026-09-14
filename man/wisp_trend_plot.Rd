@@ -37,7 +37,8 @@ Options are:
 \item \code{"daily_mean"}: Calculates and plots the daily average, including a
 ribbon for the Standard Deviation (SD) (requires data for multiple days).
 \item \code{"daily_median"}: Calculates and plots the daily median
-(requires data for multiple days).} Default is \code{"none"}.}
+(requires data for multiple days).
+} Default is \code{"none"}.}
 
 \item{merge_plot}{A \code{logical}. If \code{TRUE}, parameters that share the same
 unit of measurement will be merged into a single plot. The function will
@@ -58,7 +59,8 @@ Default is \code{FALSE}.}
 }
 \value{
 An interactive \code{plotly} object showing the temporal trend of the
-selected parameters, with optional ribbons for standard deviation.
+selected parameters, with optional ribbons for standard deviation. If
+\code{return_long_df = TRUE}, returns a \code{tibble} in long format.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
@@ -69,29 +71,29 @@ data (daily mean or median) and allows comparison of multiple parameters in
 the same plot if they share the same unit of measurement.
 }
 \examples{
-# Example usage
-\dontrun{
-# Standard plot with facets for each parameter
-fig_trend <- wisp_trend_plot(
-  data       = reflect_data_sr,
-  params     = c("TSM", "Chla"),
-  aggregate  = "none",
-  merge_plot = FALSE
-)
-print(fig_trend)
-
-# Merged plot for parameters with common units 
-fig_merged <- wisp_trend_plot(
-  data       = reflect_data_sr,
-  params     = c("TSM", "Novoa_SPM"),
-  aggregate  = "daily_mean",
-  merge_plot = TRUE
-)
-print(fig_merged)
+if (interactive()) {
+  # Standard plot with facets for each parameter
+  fig_trend <- wisp_trend_plot(
+    data       = reflect_data_sr,
+    params     = c("TSM", "Chla"),
+    aggregate  = "none",
+    merge_plot = FALSE
+  )
+  print(fig_trend)
+ 
+  # Merged plot for parameters with common units 
+  fig_merged <- wisp_trend_plot(
+    data       = reflect_data_sr,
+    params     = c("TSM", "Novoa_SPM"),
+    aggregate  = "daily_mean",
+    merge_plot = TRUE
+  )
+  print(fig_merged)
 }
+
 }
 \author{
-Alessandro Oggioni, PhD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, PhD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

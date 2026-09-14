@@ -9,19 +9,23 @@ wisp_runApp(stations = c("WISPstation012", "WISPstation013"), ...)
 \arguments{
 \item{stations}{A \verb{character vector} of station names.}
 
-\item{...}{Other parameters passed to \code{shiny::runApp}.}
+\item{...}{Other parameters passed to \code{shiny::runApp} (e.g. \code{launch.browser},
+\code{port}, \code{host}).}
+}
+\value{
+No return value, called for side effects to launch the interactive Shiny application.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 This function runs the Shiny app for querying and visualizing data from a specific WISP station.
 }
 \examples{
-\dontrun{
-# Launch the Shiny application
-wisp_runApp(launch.browser = TRUE)
+if (interactive()) {
+  # Launch the Shiny application
+  wisp_runApp(launch.browser = TRUE)
 }
 }
 \author{
-Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 }
 \keyword{internal}

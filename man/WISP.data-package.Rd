@@ -4,7 +4,7 @@
 \name{WISP.data-package}
 \alias{WISP.data}
 \alias{WISP.data-package}
-\title{WISP.data: Tools for Managing WISPstation Hyperspectral Data}
+\title{WISP.data: Management and Analysis of WISPstation Hyperspectral Data}
 \description{
 Automate the acquisition, quality control, analysis, and visualization of spectral data collected by the 'WISPstation' fixed spectroradiometer.
 }

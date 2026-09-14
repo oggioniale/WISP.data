@@ -49,31 +49,31 @@ values. Default is \code{FALSE}.}
 values. Default is \code{FALSE}.}
 
 \item{legend_novoa_SPM}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Novoa_SPM}values. Default is \code{FALSE}.}
+the \code{Novoa_SPM} values. Default is \code{FALSE}.}
 
 \item{legend_novoa_TUR}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Novoa_TUR}values. Default is \code{FALSE}.}
+the \code{Novoa_TUR} values. Default is \code{FALSE}.}
 
 \item{legend_jiang_TSS}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Jiang_TSS}values. Default is \code{FALSE}.}
+the \code{Jiang_TSS} values. Default is \code{FALSE}.}
 
 \item{legend_gons_CHL}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Gons_CHL}values. Default is \code{FALSE}.}
+the \code{Gons_CHL} values. Default is \code{FALSE}.}
 
 \item{legend_gons740_CHL}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Gons740_CHL}values. Default is \code{FALSE}.}
+the \code{Gons740_CHL} values. Default is \code{FALSE}.}
 
 \item{legend_NDCI}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{NDCI}values. Default is \code{FALSE}.}
+the \code{NDCI} values. Default is \code{FALSE}.}
 
 \item{legend_mishra_CHL}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Mishra_CHL}values. Default is \code{FALSE}.}
+the \code{Mishra_CHL} values. Default is \code{FALSE}.}
 
 \item{legend_hue_angle}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Hue_Angle}values. Default is \code{FALSE}.}
+the \code{Hue_Angle} values. Default is \code{FALSE}.}
 
 \item{legend_dom_wavelength}{A \code{logical}. If \code{TRUE}, the plot legend includes
-the \code{Dominant_Wavelength}values. Default is \code{FALSE}.}
+the \code{Dominant_Wavelength} values. Default is \code{FALSE}.}
 
 \item{legend_OWT_class}{A \code{logical}. If \code{TRUE}, the plot legend includes
 the \code{OWT_class}. Default is \code{FALSE}.}
@@ -85,7 +85,7 @@ the \code{OWT_score} (membership grade). Default is \code{FALSE}.}
 the \code{OWT_z_dist} (statistical distance). Default is \code{FALSE}.}
 }
 \value{
-An interactive plot showing the spectral signatures of the
+An interactive \code{plotly} object showing the spectral signatures of the
 reflectance data.
 }
 \description{
@@ -99,36 +99,33 @@ instantly visualize the corresponding acquisition date and time, together with
 all associated bio-optical parameters computed for that specific measurement.
 }
 \examples{
-# example code
-\dontrun{
-## Not run:
-wisp_plot_reflectance_data(
-  data = reflect_data_sr,
-  legend_TSM = TRUE,
-  legend_Chla = TRUE,
-  legend_Kd = TRUE,
-  legend_cpc = TRUE,
-  legend_scatt = FALSE,
-  legend_ratio = FALSE,
-  legend_novoa_SPM = FALSE,
-  legend_novoa_TUR = FALSE,
-  legend_jiang_TSS = FALSE,
-  legend_gons_CHL  = FALSE,
-  legend_gons740_CHL = FALSE,
-  legend_NDCI = FALSE,
-  legend_mishra_CHL = FALSE,
-  legend_hue_angle = FALSE, 
-  legend_dom_wavelength = FALSE,
-  legend_OWT_class = FALSE,
-  legend_OWT_score = FALSE,
-  legend_OWT_z_dist = FALSE  
-)
+if (interactive()) {
+  wisp_plot_reflectance_data(
+    data = reflect_data_sr,
+    legend_TSM = TRUE,
+    legend_Chla = TRUE,
+    legend_Kd = TRUE,
+    legend_cpc = TRUE,
+    legend_scatt = FALSE,
+    legend_ratio = FALSE,
+    legend_novoa_SPM = FALSE,
+    legend_novoa_TUR = FALSE,
+    legend_jiang_TSS = FALSE,
+    legend_gons_CHL = FALSE,
+    legend_gons740_CHL = FALSE,
+    legend_NDCI = FALSE,
+    legend_mishra_CHL = FALSE,
+    legend_hue_angle = FALSE,
+    legend_dom_wavelength = FALSE,
+    legend_OWT_class = FALSE,
+    legend_OWT_score = FALSE,
+    legend_OWT_z_dist = FALSE
+  )
 }
-## End (Not run)
 
 }
 \author{
-Alessandro Oggioni, phD \email{oggioni.a@irea.cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

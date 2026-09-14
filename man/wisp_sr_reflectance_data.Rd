@@ -17,11 +17,11 @@ wisp_sr_reflectance_data(
   calc_dom_wave = TRUE,
   calc_OWT = TRUE,
   save_csv = FALSE,
-  out_dir = "outputs"
+  out_dir = NULL
 )
 }
 \arguments{
-\item{qc_data}{A \code{tibble} from wisp_qc_reflectance_data() function.}
+\item{qc_data}{A \code{tibble} from \code{wisp_qc_reflectance_data()} function.}
 
 \item{calc_scatt}{A \code{logical}. If \code{TRUE}, the function calculates the
 peak due to phytoplankton scattering (690-710 nm) and the ratio of the latter
@@ -69,7 +69,7 @@ significantly from the typical range of that class. Default is \code{TRUE}.}
 \item{save_csv}{A \code{logical}. If \code{TRUE}, the function saves the reflectance data.}
 
 \item{out_dir}{A \code{character}. The directory where the CSV file will be saved.
-Default is "outputs" within the working directory.}
+Default is \code{NULL}, which saves to a temporary directory (\code{tempdir()}) if \code{save_csv = TRUE}.}
 }
 \value{
 A \code{tibble} with the spectral signatures after the SR operation
@@ -87,30 +87,29 @@ reflectance, ensuring more accurate and physically consistent estimates
 of water constituents.
 }
 \examples{
-# example code
-\dontrun{
-## Not run:
-reflect_data_sr <- wisp_sr_reflectance_data(
-  qc_data = reflect_data_qc,
-  calc_scatt = TRUE,
-  calc_SPM = TRUE,
-  calc_TUR = TRUE,
-  calc_TSS = TRUE,
-  calc_gons  = TRUE,
-  calc_gons740 = TRUE,
-  calc_NDCI = TRUE,
-  calc_mishra = FALSE,
-  calc_dom_wave = TRUE,
-  calc_OWT = TRUE,
-  save_csv = FALSE,
-  out_dir = "outputs"
-)
+\donttest{
+# Requires a valid dataset output from wisp_qc_reflectance_data()
+if (exists("reflect_data_qc")) {
+  reflect_data_sr <- wisp_sr_reflectance_data(
+    qc_data = reflect_data_qc,
+    calc_scatt = TRUE,
+    calc_SPM = TRUE,
+    calc_TUR = TRUE,
+    calc_TSS = TRUE,
+    calc_gons = TRUE,
+    calc_gons740 = TRUE,
+    calc_NDCI = TRUE,
+    calc_mishra = FALSE,
+    calc_dom_wave = TRUE,
+    calc_OWT = TRUE,
+    save_csv = FALSE,
+  )
 }
-## End (Not run)
+}
 
 }
 \author{
-Alessandro Oggioni, phD \email{alessandro.oggioni@cnr.it}
+Alessandro Oggioni, phD \href{mailto:alessandro.oggioni@cnr.it}{alessandro.oggioni@cnr.it}
 
-Nicola Ghirardi, phD \email{nicola.ghirardi@cnr.it}
+Nicola Ghirardi, phD \href{mailto:nicola.ghirardi@cnr.it}{nicola.ghirardi@cnr.it}
 }

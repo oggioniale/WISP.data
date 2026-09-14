@@ -1,5 +1,5 @@
 Package: WISP.data
-Title: Tools for Managing WISPstation Hyperspectral Data
+Title: Management and Analysis of WISPstation Hyperspectral Data
 Version: 1.0.0
 Authors@R: c(
     person(
@@ -52,7 +52,6 @@ Imports:
     tidyselect,
     units,
     utils,
-    viridis,
-    rstudioapi
+    viridis
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0

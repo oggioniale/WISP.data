@@ -24,7 +24,7 @@ wisp_sr_reflectance_data(
   calc_dom_wave = TRUE,
   calc_OWT = TRUE,
   save_csv = FALSE,
-  out_dir = "outputs"
+  out_dir = NULL
 )
 ```
 
@@ -32,7 +32,9 @@ wisp_sr_reflectance_data(
 
 - qc_data:
 
-  A `tibble` from wisp_qc_reflectance_data() function.
+  A `tibble` from
+  [`wisp_qc_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_qc_reflectance_data.md)
+  function.
 
 - calc_scatt:
 
@@ -108,7 +110,9 @@ wisp_sr_reflectance_data(
 - out_dir:
 
   A `character`. The directory where the CSV file will be saved. Default
-  is "outputs" within the working directory.
+  is `NULL`, which saves to a temporary directory
+  ([`tempdir()`](https://rdrr.io/r/base/tempfile.html)) if
+  `save_csv = TRUE`.
 
 ## Value
 
@@ -125,24 +129,23 @@ Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 ## Examples
 
 ``` r
-# example code
-if (FALSE) { # \dontrun{
-## Not run:
-reflect_data_sr <- wisp_sr_reflectance_data(
-  qc_data = reflect_data_qc,
-  calc_scatt = TRUE,
-  calc_SPM = TRUE,
-  calc_TUR = TRUE,
-  calc_TSS = TRUE,
-  calc_gons  = TRUE,
-  calc_gons740 = TRUE,
-  calc_NDCI = TRUE,
-  calc_mishra = FALSE,
-  calc_dom_wave = TRUE,
-  calc_OWT = TRUE,
-  save_csv = FALSE,
-  out_dir = "outputs"
-)
-} # }
-## End (Not run)
+# \donttest{
+# Requires a valid dataset output from wisp_qc_reflectance_data()
+if (exists("reflect_data_qc")) {
+  reflect_data_sr <- wisp_sr_reflectance_data(
+    qc_data = reflect_data_qc,
+    calc_scatt = TRUE,
+    calc_SPM = TRUE,
+    calc_TUR = TRUE,
+    calc_TSS = TRUE,
+    calc_gons = TRUE,
+    calc_gons740 = TRUE,
+    calc_NDCI = TRUE,
+    calc_mishra = FALSE,
+    calc_dom_wave = TRUE,
+    calc_OWT = TRUE,
+    save_csv = FALSE,
+  )
+}
+# }
 ```
