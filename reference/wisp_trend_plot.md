@@ -91,35 +91,35 @@ wisp_trend_plot(
 ## Value
 
 An interactive `plotly` object showing the temporal trend of the
-selected parameters, with optional ribbons for standard deviation.
+selected parameters, with optional ribbons for standard deviation. If
+`return_long_df = TRUE`, returns a `tibble` in long format.
 
 ## Author
 
-Alessandro Oggioni, PhD <alessandro.oggioni@cnr.it>
+Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 
-Nicola Ghirardi, PhD <nicola.ghirardi@cnr.it>
+Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 
 ## Examples
 
 ``` r
-# Example usage
-if (FALSE) { # \dontrun{
-# Standard plot with facets for each parameter
-fig_trend <- wisp_trend_plot(
-  data       = reflect_data_sr,
-  params     = c("TSM", "Chla"),
-  aggregate  = "none",
-  merge_plot = FALSE
-)
-print(fig_trend)
-
-# Merged plot for parameters with common units 
-fig_merged <- wisp_trend_plot(
-  data       = reflect_data_sr,
-  params     = c("TSM", "Novoa_SPM"),
-  aggregate  = "daily_mean",
-  merge_plot = TRUE
-)
-print(fig_merged)
-} # }
+if (interactive()) {
+  # Standard plot with facets for each parameter
+  fig_trend <- wisp_trend_plot(
+    data       = reflect_data_sr,
+    params     = c("TSM", "Chla"),
+    aggregate  = "none",
+    merge_plot = FALSE
+  )
+  print(fig_trend)
+ 
+  # Merged plot for parameters with common units 
+  fig_merged <- wisp_trend_plot(
+    data       = reflect_data_sr,
+    params     = c("TSM", "Novoa_SPM"),
+    aggregate  = "daily_mean",
+    merge_plot = TRUE
+  )
+  print(fig_merged)
+}
 ```

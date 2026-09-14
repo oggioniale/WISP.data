@@ -75,7 +75,7 @@ parameters natively computed by the WISPstation, including: TSM
 <span>  userid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pwd <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,7 +99,7 @@ is requested.</p></dd>
 
 
 <dt id="arg-station">station<a class="anchor" aria-label="anchor" href="#arg-station"></a></dt>
-<dd><p>A <code>character</code>.  It is the name of the station.</p></dd>
+<dd><p>A <code>character</code>. It is the name of the station.</p></dd>
 
 
 <dt id="arg-userid">userid<a class="anchor" aria-label="anchor" href="#arg-userid"></a></dt>
@@ -116,14 +116,14 @@ is requested.</p></dd>
 
 <dt id="arg-out-dir">out_dir<a class="anchor" aria-label="anchor" href="#arg-out-dir"></a></dt>
 <dd><p>A <code>character</code>. The directory where the CSV file will be saved.
-Default is "outputs" within the working directory.</p></dd>
+Default is <code>NULL</code>, which saves to a temporary directory (<code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>) if <code>save_csv = TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>tibble</code> with measurement id, measurement date, instrument name,
 level2_quality, set of sensor (irradiance and radiances),
-waterquality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
+water quality values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 all the reflectance values from 350 to 900 nm.</p>
     </div>
     <div class="section level2">
@@ -134,9 +134,7 @@ all the reflectance values from 350 to 900 nm.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example code</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co">## Not run:</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># NA data</span></span></span>
 <span class="r-in"><span><span class="va">reflect_data</span> <span class="op">&lt;-</span> <span class="fu">wisp_get_reflectance_data</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  time_from <span class="op">=</span> <span class="st">"2024-09-01T09:00"</span>,</span></span>
@@ -144,8 +142,7 @@ all the reflectance values from 350 to 900 nm.</p>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
 <span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># with data</span></span></span>
@@ -155,8 +152,7 @@ all the reflectance values from 350 to 900 nm.</p>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
 <span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># no data for the station selected</span></span></span>
@@ -166,8 +162,7 @@ all the reflectance values from 350 to 900 nm.</p>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
 <span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The two dates are not consistent</span></span></span>
@@ -177,11 +172,9 @@ all the reflectance values from 350 to 900 nm.</p>
 <span class="r-in"><span>  station <span class="op">=</span> <span class="st">"WISPstation012"</span>,</span></span>
 <span class="r-in"><span>  userid <span class="op">=</span> <span class="va">userid</span>,</span></span>
 <span class="r-in"><span>  pwd <span class="op">=</span> <span class="va">pwd</span>,</span></span>
-<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  out_dir <span class="op">=</span> <span class="st">"outputs"</span></span></span>
+<span class="r-in"><span>  save_csv <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span><span class="co">## End (Not run)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

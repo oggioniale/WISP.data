@@ -18,7 +18,13 @@ wisp_runApp(stations = c("WISPstation012", "WISPstation013"), ...)
 - ...:
 
   Other parameters passed to
-  [`shiny::runApp`](https://rdrr.io/pkg/shiny/man/runApp.html).
+  [`shiny::runApp`](https://rdrr.io/pkg/shiny/man/runApp.html) (e.g.
+  `launch.browser`, `port`, `host`).
+
+## Value
+
+No return value, called for side effects to launch the interactive Shiny
+application.
 
 ## Author
 
@@ -27,8 +33,8 @@ Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Launch the Shiny application
-wisp_runApp(launch.browser = TRUE)
-} # }
+if (interactive()) {
+  # Launch the Shiny application
+  wisp_runApp(launch.browser = TRUE)
+}
 ```

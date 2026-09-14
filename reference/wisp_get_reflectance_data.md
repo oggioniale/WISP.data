@@ -21,7 +21,7 @@ wisp_get_reflectance_data(
   userid = NULL,
   pwd = NULL,
   save_csv = FALSE,
-  out_dir = "outputs"
+  out_dir = NULL
 )
 ```
 
@@ -59,12 +59,14 @@ wisp_get_reflectance_data(
 - out_dir:
 
   A `character`. The directory where the CSV file will be saved. Default
-  is "outputs" within the working directory.
+  is `NULL`, which saves to a temporary directory
+  ([`tempdir()`](https://rdrr.io/r/base/tempfile.html)) if
+  `save_csv = TRUE`.
 
 ## Value
 
 A `tibble` with measurement id, measurement date, instrument name,
-level2_quality, set of sensor (irradiance and radiances), waterquality
+level2_quality, set of sensor (irradiance and radiances), water quality
 values of TSM, Chla, Kd, and cpc as provided by instrument by default,
 all the reflectance values from 350 to 900 nm.
 
@@ -77,9 +79,7 @@ Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 ## Examples
 
 ``` r
-# example code
 if (FALSE) { # \dontrun{
-## Not run:
 # NA data
 reflect_data <- wisp_get_reflectance_data(
   time_from = "2024-09-01T09:00",
@@ -87,8 +87,7 @@ reflect_data <- wisp_get_reflectance_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 
 # with data
@@ -98,8 +97,7 @@ reflect_data <- wisp_get_reflectance_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 
 # no data for the station selected
@@ -109,8 +107,7 @@ reflect_data <- wisp_get_reflectance_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 
 # The two dates are not consistent
@@ -120,9 +117,7 @@ reflect_data <- wisp_get_reflectance_data(
   station = "WISPstation012",
   userid = userid,
   pwd = pwd,
-  save_csv = FALSE,
-  out_dir = "outputs"
+  save_csv = FALSE
 )
 } # }
-## End (Not run)
 ```

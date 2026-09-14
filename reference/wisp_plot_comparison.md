@@ -43,18 +43,21 @@ wisp_plot_comparison(
 
 - raw_args:
 
-  A `list` of arguments to be passed to `wisp_plot_reflectance_data` for
-  the raw data plot (legend). Default is `NULL`.
+  A `list` of arguments to be passed to
+  [`wisp_plot_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_reflectance_data.md)
+  for the raw data plot (legend). Default is `NULL`.
 
 - qc_args:
 
-  A `list` of arguments to be passed to `wisp_plot_reflectance_data` for
-  the QC data plot (legend). Default is `NULL`.
+  A `list` of arguments to be passed to
+  [`wisp_plot_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_reflectance_data.md)
+  for the QC data plot (legend). Default is `NULL`.
 
 - sr_args:
 
-  A `list` of arguments to be passed to `wisp_plot_reflectance_data` for
-  the SR data plot (legend). Default is `NULL`.
+  A `list` of arguments to be passed to
+  [`wisp_plot_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_reflectance_data.md)
+  for the SR data plot (legend). Default is `NULL`.
 
 ## Value
 
@@ -71,22 +74,19 @@ Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 ## Examples
 
 ``` r
-# example code
-if (FALSE) { # \dontrun{
-## Not run:
-custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
-custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
-custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
+if (interactive()) {
+  custom_raw <- list(legend_TSM = FALSE, legend_Chla = FALSE)
+  custom_qc  <- list(legend_TSM = TRUE, legend_Chla = TRUE, legend_Kd = FALSE)
+  custom_sr  <- list(legend_TSM = TRUE, legend_mishra_CHL = FALSE)
 
-fig_comparison <- wisp_plot_comparison(
-  raw_data = reflect_data,
-  qc_data  = reflect_data_qc,
-  sr_data  = reflect_data_sr,
-  raw_args = custom_raw,
-  qc_args  = custom_qc,
-  sr_args  = custom_sr
-)
-print(fig_comparison)
-} # }
-## End (Not run)
+  fig_comparison <- wisp_plot_comparison(
+    raw_data = reflect_data,
+    qc_data  = reflect_data_qc,
+    sr_data  = reflect_data_sr,
+    raw_args = custom_raw,
+    qc_args  = custom_qc,
+    sr_args  = custom_sr
+  )
+  print(fig_comparison)
+}
 ```
