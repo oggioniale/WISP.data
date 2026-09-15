@@ -20,5 +20,8 @@ Useful links:
 
 Authors:
 
+- Alessandro Oggioni <alessandro.oggioni@cnr.it>
+  ([ORCID](https://orcid.org/0000-0002-7997-219X)) \[funder\]
+
 - Nicola Ghirardi <nicola.ghirardi@cnr.it>
   ([ORCID](https://orcid.org/0000-0002-5006-9853))

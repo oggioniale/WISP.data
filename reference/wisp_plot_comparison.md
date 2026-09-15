@@ -13,7 +13,7 @@ and improve data quality.
 
 ``` r
 wisp_plot_comparison(
-  raw_data,
+  raw_data = NULL,
   qc_data = NULL,
   sr_data = NULL,
   raw_args = NULL,
@@ -28,6 +28,8 @@ wisp_plot_comparison(
 
   A `tibble`. The original data obtained by
   [`wisp_get_reflectance_data()`](https://github.com/oggioniale/WISP.data/reference/wisp_get_reflectance_data.md).
+  Default is `NULL`. At least one of `raw_data`, `qc_data`, or `sr_data`
+  must be provided.
 
 - qc_data:
 
@@ -61,9 +63,12 @@ wisp_plot_comparison(
 
 ## Value
 
-A `plotly` subplot object comparing the spectral signatures (Raw vs QC
-vs SR). If only `raw_data` is provided or valid, a single plot is
-returned.
+A `plotly` object comparing the spectral signatures of whichever of
+`raw_data`, `qc_data`, and `sr_data` were provided (1 to 3 panels,
+always ordered WISPstation native, then QC, then SR). The plot title
+reflects exactly which of them are shown, e.g. `"Reflectance: QC"` for a
+single dataset, or `"Reflectance comparison: WISPstation vs SR"` for
+two.
 
 ## Author
 
