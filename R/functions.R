@@ -2528,6 +2528,7 @@ wisp_plot_reflectance_data <- function(
 #' how filtering and correction algorithms modify spectral signatures, remove 
 #' artifacts, and improve data quality.
 #' @param raw_data A `tibble`. The original data obtained by `wisp_get_reflectance_data()`.
+#'   Default is `NULL`. At least one of `raw_data`, `qc_data`, or `sr_data` must be provided.
 #' @param qc_data A `tibble`. The data after `wisp_qc_reflectance_data()` operations. 
 #'   Default is `NULL`.
 #' @param sr_data A `tibble`. The data after `wisp_sr_reflectance_data()` operations. 
@@ -2538,8 +2539,11 @@ wisp_plot_reflectance_data <- function(
 #'   for the QC data plot (legend). Default is `NULL`.
 #' @param sr_args A `list` of arguments to be passed to `wisp_plot_reflectance_data()` 
 #'   for the SR data plot (legend). Default is `NULL`.
-#' @return A `plotly` subplot object comparing the spectral signatures (Raw vs QC 
-#'   vs SR). If only `raw_data` is provided or valid, a single plot is returned.
+#' @return A `plotly` object comparing the spectral signatures of whichever of
+#'   `raw_data`, `qc_data`, and `sr_data` were provided (1 to 3 panels, always
+#'   ordered WISPstation native, then QC, then SR). The plot title reflects
+#'   exactly which of them are shown, e.g. `"Reflectance: QC"` for a single
+#'   dataset, or `"Reflectance comparison: WISPstation vs SR"` for two.
 #' @author Alessandro Oggioni, phD <alessandro.oggioni@cnr.it>
 #' @author Nicola Ghirardi, phD <nicola.ghirardi@cnr.it>
 #' @importFrom plotly subplot layout
@@ -2563,7 +2567,7 @@ wisp_plot_reflectance_data <- function(
 #'
 ### wisp_plot_comparison
 wisp_plot_comparison <- function(
-    raw_data, 
+    raw_data = NULL, 
     qc_data = NULL, 
     sr_data = NULL,
     raw_args = NULL,
@@ -2583,39 +2587,43 @@ wisp_plot_comparison <- function(
     legend_OWT_class = TRUE, legend_OWT_score = TRUE, legend_OWT_z_dist = TRUE
   )
   
+  has_raw <- !is.null(raw_data) && nrow(raw_data) > 0
+  has_qc  <- !is.null(qc_data)  && nrow(qc_data)  > 0
+  has_sr  <- !is.null(sr_data)  && nrow(sr_data)  > 0
+  
+  if (!has_raw && !has_qc && !has_sr) {
+    stop("At least one of 'raw_data', 'qc_data', or 'sr_data' must be provided (non-NULL and with at least one row).")
+  }
+  
   # Assigning parameters
   r_params  <- if (is.null(raw_args)) default_raw else raw_args
   qc_params <- if (is.null(qc_args)) default_derived else qc_args
   sr_params <- if (is.null(sr_args)) default_derived else sr_args
   
-  # Generation of individual plots
-  fig1 <- do.call(wisp_plot_reflectance_data, c(list(data = raw_data), r_params))
+  # Generation of individual plots (only for the datasets actually provided)
+  fig_raw <- if (has_raw) do.call(wisp_plot_reflectance_data, c(list(data = raw_data), r_params)) else NULL
+  fig_qc  <- if (has_qc)  do.call(wisp_plot_reflectance_data, c(list(data = qc_data),  qc_params)) else NULL
+  fig_sr  <- if (has_sr)  do.call(wisp_plot_reflectance_data, c(list(data = sr_data),  sr_params)) else NULL
   
-  fig2 <- if (!is.null(qc_data) && nrow(qc_data) > 0) {
-    do.call(wisp_plot_reflectance_data, c(list(data = qc_data), qc_params))
-  } else NULL
+  # Assembly of plots, always ordered WISPstation -> QC -> SR
+  all_labels <- c("WISPstation", "QC", "SR")
+  all_figs   <- list(fig_raw, fig_qc, fig_sr)
+  present    <- !vapply(all_figs, is.null, logical(1))
   
-  fig3 <- if (!is.null(sr_data) && nrow(sr_data) > 0) {
-    do.call(wisp_plot_reflectance_data, c(list(data = sr_data), sr_params))
-  } else NULL
+  plot_list   <- all_figs[present]
+  plot_labels <- all_labels[present]
   
-  # Assembly of plots
-  plot_list <- Filter(Negate(is.null), list(fig1, fig2, fig3))
-  
-  if (length(plot_list) == 1) {
-    message("\n----\nThe only valid plot is the one referring to RAW.\n----\n")
-  }
-  
-  plot_title <- if (length(plot_list) == 3) {
-    "<b>Reflectance comparison: WISPstation vs QC vs SR<b>"
+  # Dynamic title: reflects exactly which datasets are shown
+  plot_title <- if (length(plot_list) == 1) {
+    paste0("<b>Reflectance: ", plot_labels, "<b>")
   } else {
-    "<b>Reflectance: WISPstation native<b>"
+    paste0("<b>Reflectance comparison: ", paste(plot_labels, collapse = " vs "), "<b>")
   }
   
   final_plot <- if (length(plot_list) > 1) {
     plotly::subplot(plot_list, nrows = 1, shareX = TRUE, shareY = TRUE)
   } else {
-    fig1
+    plot_list[[1]]
   }
   
   # Layout and axis titles

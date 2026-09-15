@@ -53,6 +53,34 @@
   )
 }
 
+#' Build the argument list for wisp_plot_comparison() from selected datasets
+#' @description `r lifecycle::badge("experimental")`
+#' Internal helper used by [wisp_runApp()] to translate the datasets
+#' selected by the user ("WISPstation native", "After QC", "After SR") into
+#' the `raw_data`/`qc_data`/`sr_data` arguments expected by
+#' [wisp_plot_comparison()]. Only datasets that are both selected and
+#' actually available (non-`NULL`) are included, each kept in its own named
+#' slot so that [wisp_plot_comparison()] can build a title that correctly
+#' reflects which datasets are shown (e.g. `"Reflectance: QC"` when only QC
+#' is selected, not mislabelled as WISPstation native).
+#' @param raw_data A `tibble` (or `NULL`) with the WISPstation native data.
+#' @param qc_data A `tibble` (or `NULL`) with the data after QC.
+#' @param sr_data A `tibble` (or `NULL`) with the data after SR.
+#' @param selected A `character` vector with any of `"raw"`, `"qc"`, `"sr"`:
+#' the datasets the user asked to display.
+#' @return A named `list` with zero to three elements among `raw_data`,
+#' `qc_data`, `sr_data`, ready to be passed to [wisp_plot_comparison()] via
+#' `do.call()`. Returns an empty `list()` if nothing is both selected and
+#' available.
+#' @noRd
+.wisp_build_comparison_args <- function(raw_data, qc_data, sr_data, selected) {
+  args <- list()
+  if ("raw" %in% selected && !is.null(raw_data)) args$raw_data <- raw_data
+  if ("qc"  %in% selected && !is.null(qc_data))  args$qc_data  <- qc_data
+  if ("sr"  %in% selected && !is.null(sr_data))  args$sr_data  <- sr_data
+  args
+}
+
 #' Run shiny app for get and visualize WISP data
 #' @description `r lifecycle::badge("experimental")`
 #' This function runs the Shiny app for querying and visualizing data from a specific WISP station.
@@ -76,25 +104,25 @@ wisp_runApp <- function(
     stations = c("WISPstation012", "WISPstation013"),
     ...
 ) {
-
+  
   app <- shinyApp(
-
+    
     ui = fluidPage(
       useShinyjs(),
-
+      
       titlePanel("WISP station reflectance data"),
-
+      
       sidebarLayout(
         sidebarPanel(
-
+          
           selectInput(
             "station", "Select station:",
             choices = stations, selected = stations[1]
           ),
-
+          
           dateInput("date_from", "Start date:", value = Sys.Date()),
           dateInput("date_to",   "End date:",   value = Sys.Date()),
-
+          
           fluidRow(
             column(
               6,
@@ -113,24 +141,36 @@ wisp_runApp <- function(
               )
             )
           ),
-
+          
           hr(),
-
+          
           checkboxInput("do_qc", "Apply Quality Control (QC)", TRUE),
           actionButton("qc_options_btn", "QC options"),
-
+          
           checkboxInput("do_sr", "Apply Sunglint Removal (SR)", TRUE),
           actionButton("sr_options_btn", "SR options"),
-
+          
           hr(),
-
+          
+          checkboxGroupInput(
+            "compare_datasets", "Datasets to display:",
+            choices = c(
+              "WISPstation native" = "raw",
+              "After QC"           = "qc",
+              "After SR"           = "sr"
+            ),
+            selected = c("raw", "qc", "sr")
+          ),
+          
+          hr(),
+          
           actionButton("get_data_btn", "Get Reflectance Data"),
           downloadButton("download_csv", "Download CSV"),
-
+          
           hr(),
           actionButton("logout_btn", "Change credentials")
         ),
-
+        
         mainPanel(
           plotlyOutput("plot", height = "520px"),
           hr(),
@@ -138,17 +178,17 @@ wisp_runApp <- function(
         )
       )
     ),
-
+    
     server = function(input, output, session) {
-
+      
       # -------------------------
       # Credentials
       # -------------------------
       creds <- reactiveValues(userid = NULL, pwd = NULL, logged = FALSE)
-
+      
       shinyjs::disable("get_data_btn")
       shinyjs::disable("download_csv")
-
+      
       show_login <- function() {
         showModal(
           modalDialog(
@@ -160,11 +200,11 @@ wisp_runApp <- function(
           )
         )
       }
-
+      
       observe({
         if (!creds$logged) show_login()
       })
-
+      
       observeEvent(input$login_btn, {
         req(input$userid_input, input$pwd_input)
         creds$userid <- input$userid_input
@@ -175,7 +215,7 @@ wisp_runApp <- function(
         shinyjs::enable("download_csv")
         user_message("Successfully authenticated.")
       })
-
+      
       observeEvent(input$logout_btn, {
         creds$userid <- NULL
         creds$pwd    <- NULL
@@ -184,12 +224,12 @@ wisp_runApp <- function(
         shinyjs::disable("download_csv")
         user_message("Credentials cleared. Please login again.")
       })
-
+      
       # -------------------------
       # Messages
       # -------------------------
       user_message <- reactiveVal("")
-
+      
       # -------------------------
       # QC OPTIONS (preset)
       # -------------------------
@@ -205,23 +245,27 @@ wisp_runApp <- function(
         calc_gons      = TRUE,
         calc_gons740   = TRUE,
         calc_NDCI      = TRUE,
-        calc_mishra    = TRUE
+        calc_mishra    = TRUE,
+        calc_dom_wave  = TRUE,
+        calc_OWT       = TRUE
       )
-
+      
       # -------------------------
       # SR OPTIONS (preset)
       # -------------------------
       sr_opts <- reactiveValues(
-        calc_scatt   = TRUE,
-        calc_SPM     = TRUE,
-        calc_TUR     = TRUE,
-        calc_TSS     = TRUE,
-        calc_gons    = TRUE,
-        calc_gons740 = TRUE,
-        calc_NDCI    = TRUE,
-        calc_mishra  = TRUE
+        calc_scatt    = TRUE,
+        calc_SPM      = TRUE,
+        calc_TUR      = TRUE,
+        calc_TSS      = TRUE,
+        calc_gons     = TRUE,
+        calc_gons740  = TRUE,
+        calc_NDCI     = TRUE,
+        calc_mishra   = TRUE,
+        calc_dom_wave = TRUE,
+        calc_OWT      = TRUE
       )
-
+      
       # -------------------------
       # QC OPTIONS POPUP
       # -------------------------
@@ -229,25 +273,25 @@ wisp_runApp <- function(
         showModal(
           modalDialog(
             title = "QC options",
-
+            
             sliderInput("qc_maxPeak", "maxPeak",
                         min = 0.01, max = 0.1, step = 0.005,
                         value = qc_opts$maxPeak),
-
+            
             sliderInput("qc_maxPeak_blue", "maxPeak (blue)",
                         min = 0.005, max = 0.05, step = 0.0025,
                         value = qc_opts$maxPeak_blue),
-
+            
             sliderInput("qc_qa_threshold", "QA threshold",
                         min = 0.1, max = 1, step = 0.05,
                         value = qc_opts$qa_threshold),
-
+            
             sliderInput("qc_qwip_threshold", "QWIP threshold",
                         min = 0.05, max = 0.5, step = 0.05,
                         value = qc_opts$qwip_threshold),
-
+            
             hr(),
-
+            
             checkboxInput("qc_calc_scatt", "calc_scatt", qc_opts$calc_scatt),
             checkboxInput("qc_calc_SPM", "calc_SPM", qc_opts$calc_SPM),
             checkboxInput("qc_calc_TUR", "calc_TUR", qc_opts$calc_TUR),
@@ -256,7 +300,9 @@ wisp_runApp <- function(
             checkboxInput("qc_calc_gons740", "calc_gons740", qc_opts$calc_gons740),
             checkboxInput("qc_calc_NDCI", "calc_NDCI", qc_opts$calc_NDCI),
             checkboxInput("qc_calc_mishra", "calc_mishra", qc_opts$calc_mishra),
-
+            checkboxInput("qc_calc_dom_wave", "calc_dom_wave", qc_opts$calc_dom_wave),
+            checkboxInput("qc_calc_OWT", "calc_OWT", qc_opts$calc_OWT),
+            
             footer = tagList(
               modalButton("Cancel"),
               actionButton("save_qc_opts", "Save")
@@ -264,13 +310,13 @@ wisp_runApp <- function(
           )
         )
       })
-
+      
       observeEvent(input$save_qc_opts, {
         qc_opts$maxPeak        <- input$qc_maxPeak
         qc_opts$maxPeak_blue   <- input$qc_maxPeak_blue
         qc_opts$qa_threshold   <- input$qc_qa_threshold
         qc_opts$qwip_threshold <- input$qc_qwip_threshold
-
+        
         qc_opts$calc_scatt     <- input$qc_calc_scatt
         qc_opts$calc_SPM       <- input$qc_calc_SPM
         qc_opts$calc_TUR       <- input$qc_calc_TUR
@@ -279,10 +325,12 @@ wisp_runApp <- function(
         qc_opts$calc_gons740   <- input$qc_calc_gons740
         qc_opts$calc_NDCI      <- input$qc_calc_NDCI
         qc_opts$calc_mishra    <- input$qc_calc_mishra
-
+        qc_opts$calc_dom_wave  <- input$qc_calc_dom_wave
+        qc_opts$calc_OWT       <- input$qc_calc_OWT
+        
         removeModal()
       })
-
+      
       # -------------------------
       # SR OPTIONS POPUP
       # -------------------------
@@ -290,7 +338,7 @@ wisp_runApp <- function(
         showModal(
           modalDialog(
             title = "SR options",
-
+            
             checkboxInput("sr_calc_scatt", "calc_scatt", sr_opts$calc_scatt),
             checkboxInput("sr_calc_SPM", "calc_SPM", sr_opts$calc_SPM),
             checkboxInput("sr_calc_TUR", "calc_TUR", sr_opts$calc_TUR),
@@ -299,7 +347,9 @@ wisp_runApp <- function(
             checkboxInput("sr_calc_gons740", "calc_gons740", sr_opts$calc_gons740),
             checkboxInput("sr_calc_NDCI", "calc_NDCI", sr_opts$calc_NDCI),
             checkboxInput("sr_calc_mishra", "calc_mishra", sr_opts$calc_mishra),
-
+            checkboxInput("sr_calc_dom_wave", "calc_dom_wave", sr_opts$calc_dom_wave),
+            checkboxInput("sr_calc_OWT", "calc_OWT", sr_opts$calc_OWT),
+            
             footer = tagList(
               modalButton("Cancel"),
               actionButton("save_sr_opts", "Save")
@@ -307,7 +357,7 @@ wisp_runApp <- function(
           )
         )
       })
-
+      
       observeEvent(input$save_sr_opts, {
         sr_opts$calc_scatt   <- input$sr_calc_scatt
         sr_opts$calc_SPM     <- input$sr_calc_SPM
@@ -317,27 +367,29 @@ wisp_runApp <- function(
         sr_opts$calc_gons740 <- input$sr_calc_gons740
         sr_opts$calc_NDCI    <- input$sr_calc_NDCI
         sr_opts$calc_mishra  <- input$sr_calc_mishra
-
+        sr_opts$calc_dom_wave <- input$sr_calc_dom_wave
+        sr_opts$calc_OWT      <- input$sr_calc_OWT
+        
         removeModal()
       })
-
-      final_data <- eventReactive(input$get_data_btn, {
-
+      
+      pipeline_data <- eventReactive(input$get_data_btn, {
+        
         req(creds$logged)
         user_message("")
-
+        
         if (!.wisp_valid_date_range(input$date_from, input$date_to)) {
           shinyjs::alert("End date cannot be earlier than start date.")
-          return(NULL)
+          return(list(raw = NULL, qc = NULL, sr = NULL))
         }
-
+        
         time_from <- .wisp_build_time_range(input$date_from, input$hour_from)
         time_to   <- .wisp_build_time_range(input$date_to,   input$hour_to)
-
+        
         # -------------------------
         # RAW
         # -------------------------
-        rd <- withCallingHandlers(
+        raw_data <- withCallingHandlers(
           WISP.data::wisp_get_reflectance_multi_data(
             version   = "1.0",
             time_from = time_from,
@@ -351,19 +403,24 @@ wisp_runApp <- function(
             invokeRestart("muffleMessage")
           }
         )
-
-        if (is.null(rd) || nrow(rd) == 0) return(NULL)
-
+        
+        if (is.null(raw_data) || nrow(raw_data) == 0) {
+          return(list(raw = NULL, qc = NULL, sr = NULL))
+        }
+        
+        qc_data <- NULL
+        sr_data <- NULL
+        
         # -------------------------
         # QC (ISOLATED)
         # -------------------------
         if (input$do_qc) {
-
+          
           qc <- isolate(qc_opts)
-
-          rd <- withCallingHandlers(
+          
+          qc_data <- withCallingHandlers(
             WISP.data::wisp_qc_reflectance_data(
-              data           = rd,
+              data           = raw_data,
               maxPeak        = qc$maxPeak,
               maxPeak_blue   = qc$maxPeak_blue,
               qa_threshold   = qc$qa_threshold,
@@ -375,30 +432,33 @@ wisp_runApp <- function(
               calc_gons      = qc$calc_gons,
               calc_gons740   = qc$calc_gons740,
               calc_NDCI      = qc$calc_NDCI,
-              calc_mishra    = qc$calc_mishra
+              calc_mishra    = qc$calc_mishra,
+              calc_dom_wave  = qc$calc_dom_wave,
+              calc_OWT       = qc$calc_OWT
             ),
             message = function(m) {
               user_message(paste(user_message(), m$message, sep = "\n"))
               invokeRestart("muffleMessage")
             }
           )
-
-          if (is.null(rd) || nrow(rd) == 0) {
+          
+          if (is.null(qc_data) || nrow(qc_data) == 0) {
             shinyjs::alert("QC removed all spectral signatures.")
-            return(NULL)
+            return(list(raw = raw_data, qc = NULL, sr = NULL))
           }
         }
-
+        
         # -------------------------
         # SR (ISOLATED)
         # -------------------------
         if (input$do_sr) {
-
+          
+          sr_source <- if (!is.null(qc_data)) qc_data else raw_data
           sr <- isolate(sr_opts)
-
-          rd <- withCallingHandlers(
+          
+          sr_data <- withCallingHandlers(
             WISP.data::wisp_sr_reflectance_data(
-              qc_data      = rd,
+              qc_data      = sr_source,
               calc_scatt   = sr$calc_scatt,
               calc_SPM     = sr$calc_SPM,
               calc_TUR     = sr$calc_TUR,
@@ -406,7 +466,9 @@ wisp_runApp <- function(
               calc_gons    = sr$calc_gons,
               calc_gons740 = sr$calc_gons740,
               calc_NDCI    = sr$calc_NDCI,
-              calc_mishra  = sr$calc_mishra
+              calc_mishra  = sr$calc_mishra,
+              calc_dom_wave = sr$calc_dom_wave,
+              calc_OWT      = sr$calc_OWT
             ),
             message = function(m) {
               user_message(paste(user_message(), m$message, sep = "\n"))
@@ -414,26 +476,43 @@ wisp_runApp <- function(
             }
           )
         }
-
-        rd
+        
+        list(raw = raw_data, qc = qc_data, sr = sr_data)
       })
-
+      
       # -------------------------
-      # Plot
+      # Final dataset (used for CSV download): the furthest processed
+      # dataset available (SR > QC > RAW), same semantics as before this
+      # was split into pipeline_data().
+      # -------------------------
+      final_data <- reactive({
+        pd <- pipeline_data()
+        if (!is.null(pd$sr)) pd$sr else if (!is.null(pd$qc)) pd$qc else pd$raw
+      })
+      
+      # -------------------------
+      # Plot (Raw vs QC vs SR comparison)
       # -------------------------
       output$plot <- renderPlotly({
-        fd <- final_data()
-        req(fd, nrow(fd) > 0)
-        WISP.data::wisp_plot_reflectance_data(fd)
+        pd <- pipeline_data()
+        req(pd)
+        
+        args <- .wisp_build_comparison_args(pd$raw, pd$qc, pd$sr, input$compare_datasets)
+        validate(need(
+          length(args) > 0,
+          "Select at least one dataset to display (WISPstation native, After QC, or After SR)."
+        ))
+        
+        do.call(WISP.data::wisp_plot_comparison, args)
       })
-
+      
       # -------------------------
       # Messages
       # -------------------------
       output$messages <- renderText({
         user_message()
       })
-
+      
       # -------------------------
       # Download CSV
       # -------------------------
@@ -455,12 +534,6 @@ wisp_runApp <- function(
       )
     }
   )
-
-  # Actually launch the app. Previously the function only *built* the
-  # shiny.appobj and relied on it being auto-printed at the console, which
-  # silently does nothing when wisp_runApp() is called via RStudio's
-  # "Source" button, from inside another function, or non-interactively.
-  # Calling shiny::runApp() explicitly also lets `...` (e.g. launch.browser,
-  # port, host) actually reach shiny::runApp(), as documented above.
+  
   shiny::runApp(app, ...)
 }

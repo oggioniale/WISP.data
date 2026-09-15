@@ -24,7 +24,14 @@ NULL
 #' unit with the 'units' package).
 #' @noRd
 .onLoad <- function(libname, pkgname) {
-  if (inherits(try(units::as_units("NTU"), silent = TRUE), "try-error")) {
+  # Verifica se "NTU" esiste già; in caso contrario, la registra
+  has_ntu <- tryCatch({
+    units::as_units("NTU")
+    TRUE
+  }, error = function(e) FALSE)
+  
+  if (!has_ntu) {
+    # Registra NTU come unità senza una conversione fisica diretta (unità custom adimensionale)
     units::install_unit(
       symbol = "NTU",
       name = "Nephelometric Turbidity Unit"

@@ -62,7 +62,7 @@ artifacts, and improve data quality.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">wisp_plot_comparison</span><span class="op">(</span></span>
-<span>  <span class="va">raw_data</span>,</span>
+<span>  raw_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  qc_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sr_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  raw_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -76,7 +76,8 @@ artifacts, and improve data quality.</p>
 
 
 <dl><dt id="arg-raw-data">raw_data<a class="anchor" aria-label="anchor" href="#arg-raw-data"></a></dt>
-<dd><p>A <code>tibble</code>. The original data obtained by <code><a href="wisp_get_reflectance_data.html">wisp_get_reflectance_data()</a></code>.</p></dd>
+<dd><p>A <code>tibble</code>. The original data obtained by <code><a href="wisp_get_reflectance_data.html">wisp_get_reflectance_data()</a></code>.
+Default is <code>NULL</code>. At least one of <code>raw_data</code>, <code>qc_data</code>, or <code>sr_data</code> must be provided.</p></dd>
 
 
 <dt id="arg-qc-data">qc_data<a class="anchor" aria-label="anchor" href="#arg-qc-data"></a></dt>
@@ -106,8 +107,11 @@ for the SR data plot (legend). Default is <code>NULL</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>plotly</code> subplot object comparing the spectral signatures (Raw vs QC
-vs SR). If only <code>raw_data</code> is provided or valid, a single plot is returned.</p>
+    <p>A <code>plotly</code> object comparing the spectral signatures of whichever of
+<code>raw_data</code>, <code>qc_data</code>, and <code>sr_data</code> were provided (1 to 3 panels, always
+ordered WISPstation native, then QC, then SR). The plot title reflects
+exactly which of them are shown, e.g. <code>"Reflectance: QC"</code> for a single
+dataset, or <code>"Reflectance comparison: WISPstation vs SR"</code> for two.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

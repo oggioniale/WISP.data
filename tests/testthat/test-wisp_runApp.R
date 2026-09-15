@@ -58,3 +58,46 @@ test_that(".wisp_build_download_filename uses 'raw' suffix when neither QC nor S
   )
   expect_equal(fname, "wisp_reflectance_WISPstation013_2024-09-01_2024-09-01_raw.csv")
 })
+
+test_that(".wisp_build_comparison_args includes only selected AND available datasets", {
+  args <- .wisp_build_comparison_args(
+    raw_data = "RAW", qc_data = "QC", sr_data = "SR",
+    selected = c("raw", "sr")
+  )
+  expect_named(args, c("raw_data", "sr_data"))
+  expect_equal(args$raw_data, "RAW")
+  expect_equal(args$sr_data, "SR")
+})
+
+test_that(".wisp_build_comparison_args drops selected datasets that are NULL", {
+  args <- .wisp_build_comparison_args(
+    raw_data = "RAW", qc_data = NULL, sr_data = "SR",
+    selected = c("raw", "qc", "sr")
+  )
+  expect_named(args, c("raw_data", "sr_data"))
+})
+
+test_that(".wisp_build_comparison_args preserves dataset identity when 'raw' is not selected", {
+  args <- .wisp_build_comparison_args(
+    raw_data = "RAW", qc_data = "QC", sr_data = "SR",
+    selected = "qc"
+  )
+  expect_named(args, "qc_data")
+  expect_equal(args$qc_data, "QC")
+})
+
+test_that(".wisp_build_comparison_args returns an empty list when nothing is selected", {
+  args <- .wisp_build_comparison_args(
+    raw_data = "RAW", qc_data = "QC", sr_data = "SR",
+    selected = character(0)
+  )
+  expect_equal(args, list())
+})
+
+test_that(".wisp_build_comparison_args returns an empty list when nothing is available", {
+  args <- .wisp_build_comparison_args(
+    raw_data = NULL, qc_data = NULL, sr_data = NULL,
+    selected = c("raw", "qc", "sr")
+  )
+  expect_equal(args, list())
+})

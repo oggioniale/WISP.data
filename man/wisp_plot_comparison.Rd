@@ -5,7 +5,7 @@
 \title{Comparison plot of Raw vs QC vs SR reflectance data}
 \usage{
 wisp_plot_comparison(
-  raw_data,
+  raw_data = NULL,
   qc_data = NULL,
   sr_data = NULL,
   raw_args = NULL,
@@ -14,7 +14,8 @@ wisp_plot_comparison(
 )
 }
 \arguments{
-\item{raw_data}{A \code{tibble}. The original data obtained by \code{wisp_get_reflectance_data()}.}
+\item{raw_data}{A \code{tibble}. The original data obtained by \code{wisp_get_reflectance_data()}.
+Default is \code{NULL}. At least one of \code{raw_data}, \code{qc_data}, or \code{sr_data} must be provided.}
 
 \item{qc_data}{A \code{tibble}. The data after \code{wisp_qc_reflectance_data()} operations.
 Default is \code{NULL}.}
@@ -32,8 +33,11 @@ for the QC data plot (legend). Default is \code{NULL}.}
 for the SR data plot (legend). Default is \code{NULL}.}
 }
 \value{
-A \code{plotly} subplot object comparing the spectral signatures (Raw vs QC
-vs SR). If only \code{raw_data} is provided or valid, a single plot is returned.
+A \code{plotly} object comparing the spectral signatures of whichever of
+\code{raw_data}, \code{qc_data}, and \code{sr_data} were provided (1 to 3 panels, always
+ordered WISPstation native, then QC, then SR). The plot title reflects
+exactly which of them are shown, e.g. \code{"Reflectance: QC"} for a single
+dataset, or \code{"Reflectance comparison: WISPstation vs SR"} for two.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
