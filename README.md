@@ -1,14 +1,15 @@
 **WISP.data**
 ===================
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/WISP.data)](https://CRAN.R-project.org/package=WISP.data)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16893167.svg)](https://doi.org/10.5281/zenodo.16893167)
 ![GitHub License](https://img.shields.io/github/license/oggioniale/WISP.data)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/oggioniale/WISP.data)
-![Gitea Last Commit](https://img.shields.io/github/last-commit/oggioniale/WISP.data)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/oggioniale/WISP.data)
 ![GitHub R package version](https://img.shields.io/github/r-package/v/oggioniale/WISP.data)
 [![Codecov test coverage](https://codecov.io/gh/oggioniale/WISP.data/graph/badge.svg)](https://app.codecov.io/gh/oggioniale/WISP.data)
 [![R-CMD-check](https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/oggioniale/WISP.data/actions/workflows/R-CMD-check)
-[![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 <!-- badges: end -->
 
 ## Summary
@@ -24,13 +25,13 @@ The WISPstation operates with 8 specialized channels to optimize data collection
 
 The system automatically selects the best-oriented sensor set based on the Sun's position, maintaining a relative azimuth angle of approximately 135°.
 
-A central function of `WISP.data` is the retrieval and management of Remote Sensing Reflectance (R~rs~), which the WISPstation calculates as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$) (Mobley, 1999):
+A central function of `WISP.data` is the retrieval and management of Remote Sensing Reflectance (R<sub>rs</sub>), which the WISPstation calculates as the ratio between water-leaving radiance ($L_w$) and downwelling irradiance ($E_s$) (Mobley, 1999):
 
 $$\text{Rrs}(\lambda) = \frac{L_w(\lambda)}{E_s(\lambda)} = \frac{L_u(\lambda) - \rho \cdot L_{sky}(\lambda)}{E_s(\lambda)}$$
 
 Where $\rho$ is the Fresnel reflection coefficient, $L_u$ is the total upwelling radiance and $L_{sky}$ is the sky radiance contributing to surface reflections.
 
-The package handles the complex transition from total upwelling radiance ($L_u$), which includes unwanted sky-glint and sun-glint, to the pure water-leaving signal ($L_w$) by integrating $L_{sky}$ and $E_s$ measurements into standardized atmospheric correction algorithms.
+The package handles the complex transition from total upwelling radiance ($L_u$), which includes unwanted sky-glint and sun-glint, to the pure water-leaving signal ($L_w$) by integrating $L_{sky}$ and $E_s$ measurements into standardized glint-correction algorithms.
 
 `WISP.data` provides a modular set of R functions for:
 
@@ -44,34 +45,40 @@ This makes `WISP.data` an ideal solution for operational water quality monitorin
 
 ## Statement of need
 
-The WISPstation is a fixed spectrometer that plays a crucial role in the continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it delivers specialized water quality products derived through various algorithms (Gons et al., 1997, 2005; Simis, 2005), essential for environmental observation, ecosystem assessment, and long-term trend analysis. 
+The WISPstation is a fixed spectroradiometer that plays a crucial role in the continuous monitoring of water quality; beyond providing high-frequency spectral measurements, it delivers specialized water quality products derived through various algorithms (Gons 1999, Gons et al., 2002; Simis et al., 2005), essential for environmental observation, ecosystem assessment, and long-term trend analysis.
 
 However, the effective management and scientific use of these spectral data and derived products present several significant challenges.
-Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience. 
-In addition, native spectral measurements could be affected by radiometric issues making the implementation of consistent and rigorous quality control procedures essential. 
+Data retrieval through API services is often labor-intensive and technically demanding, especially for users without advanced programming experience.
+In addition, native spectral measurements can be affected by radiometric issues making the implementation of consistent and rigorous quality control procedures essential.
 Without rigorous filtering and validation protocols, derived products can be unreliable or scientifically misleading.
-A further critical barrier lies in the interpretation of spectral signatures themselves. 
-For non-expert users, it is difficult to assess the physical and optical reliability of reflectance spectra, identify anomalous signals, or distinguish between instrument geometry artifacts and real environmental variability. 
+A further critical barrier lies in the interpretation of spectral signatures themselves.
+For non-expert users, it is difficult to assess the physical and optical reliability of reflectance spectra, identify anomalous signals, or distinguish between instrument geometry artifacts and real environmental variability.
 Moreover, the application of third-party bio-optical algorithms for the estimation of water quality parameters typically requires substantial domain knowledge, careful parameterization, and consistent preprocessing workflows, which are rarely standardized across studies.
 
 The scientific validity and operational reliability of WISPstation measurements have been demonstrated in several studies, ranging from the detection of climate-driven chlorophyll-a changes during extreme events (Free et al., 2021) to the analysis of phytoplankton spatio-temporal dynamics in Lake Trasimeno (Bresciani et al., 2020).
 Despite these successful applications, the processing of WISPstation data has been labor-intensive and time-consuming.
-Prior to the development of `WISP.data`, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameter. 
-This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring. 
+Prior to the development of `WISP.data`, researchers often had to manually inspect individual spectral signatures to identify outliers before the data could be used to estimate water quality parameters.
+This manual quality control process is prone to subjectivity and significantly limits the scalability of high-frequency monitoring.
 
-`WISP.data` addresses these challenges by delivering an integrated, transparent, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, and product generation within a single R-based framework. 
+`WISP.data` addresses these challenges by delivering an integrated, transparent, reproducible, and user-oriented software ecosystem that unifies data acquisition, quality control, and product generation within a single R-based framework.
 By lowering technical and methodological barriers, the package enables both expert and non-expert users to transform native WISPstation measurements into reliable, scientifically consistent water quality products, fostering reproducibility, comparability, and broader adoption of spectral monitoring technologies in aquatic research and operational monitoring.
 
 ## Installation
 
-You can install the development version of WISP.data directly from GitHub.  
+You can install the stable release of **WISP.data** directly from [CRAN](https://CRAN.R-project.org/package=WISP.data):
+
+```r
+install.packages("WISP.data")
+```
+
+Alternatively, you can install the development version directly from GitHub.
 The following commands will automatically install all required dependencies:
 
 ```r
 # Install remotes if not already available
 if (!require("remotes")) install.packages("remotes")
 
-# Install WISP.data and dependencies
+# Install WISP.data development version
 remotes::install_github("oggioniale/WISP.data", dependencies = TRUE)
 ```
 
@@ -98,19 +105,18 @@ The function [`WISP_runApp()`](https://oggioniale.github.io/WISP.data/reference/
 
 ## Citation
 
-To cite `{WISP.data}` please use:
+To cite {WISP.data} in publications, please use:
 
-Alessandro Oggioni & Nicola Ghirardi.
-(2026). WISP.data (v1.0.0). Zenodo.
-<https://doi.org/10.5281/zenodo.16893167>
+Alessandro Oggioni & Nicola Ghirardi (2026). WISP.data: Management and Analysis of WISPstation Hyperspectral Data. R package version 1.0.0. https://CRAN.R-project.org/package=WISP.data (DOI: 10.32614/CRAN.package.WISP.data)
 
 ``` bibtex
-@software{WIPS.data2026,
-  title = {WISP.data - Managing WISPstation Hyperspectral Data},
+@Manual{WISP.data,
+  title = {WISP.data: Management and Analysis of WISPstation Hyperspectral Data},
   author = {Alessandro Oggioni and Nicola Ghirardi},
   year = {2026},
-  doi = {https://doi.org/10.5281/zenodo.16893167},
-  note = {R package version v1.0.0},
+  note = {R package version 1.0.0},
+  url = {https://CRAN.R-project.org/package=WISP.data},
+  doi = {10.32614/CRAN.package.WISP.data}
 }
 ```
 
@@ -121,19 +127,19 @@ In this section, we showcase some of the typical outputs generated by `WISP.data
 <p align="center">
   <img src="man/figures/Figure2.png" width="100%" alt="Figure 2">
   <br>
-  <em><b>Figure 2.</b> Plot resulting from the `wisp_plot_comparison()` function showing the comparison between: A) native WISPstation Rrs, B) Rrs filtered by “QC”, C) Rrs to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).</em>
+  <em><b>Figure 2.</b> Plot resulting from the <code>wisp_plot_comparison()</code> function showing the comparison between: A) native WISPstation R<sub>rs</sub>, B) R<sub>rs</sub> filtered by “QC”, C) R<sub>rs</sub> to which “SR” has been applied (site: Trasimeno; period: 11/09/2024 – 17/09/2024).</em>
 </p>
 
 <p align="center">
   <img src="man/figures/Figure3.png" width="100%" alt="Figure 3">
   <br>
-  <em><b>Figure 3.</b> Plot resulting from the `wisp_trend_plot()` function showing the temporal trend of three exemplary parameters (from top to bottom: "Novoa_SPM", "Novoa_TUR", and "Mishra_CHL") for 25/07/2024 from 8 a.m. to 4 p.m. (site: Trasimeno).</em>
+  <em><b>Figure 3.</b> Plot resulting from the <code>wisp_trend_plot()</code> function showing the temporal trend of three exemplary parameters (from top to bottom: "Novoa_SPM", "Novoa_TUR", and "Mishra_CHL") for 25/07/2024 from 8 a.m. to 4 p.m. (site: Trasimeno).</em>
 </p>
 
 <p align="center">
   <img src="man/figures/Figure4.png" width="100%" alt="Figure 4">
   <br>
-  <em><b>Figure 4.</b> Plot resulting from the `wisp_trend_plot()` function showing the temporal trend of five exemplary parameters averaged on a daily basis: in the upper plot, a comparison between the WISPstation native algorithm (TSM) and two third-party algorithms for estimating suspended solids concentration ("Novoa_SPM" and "Jiang_TSS"); in the lower plot, the comparison between the WISPstation native chlorophyll-a algorithm (Chla) and Mishra_CHL algorithm. (site: Trasimeno; period: 01/05/2024 – 10/05/2024).</em>
+  <em><b>Figure 4.</b> Plot resulting from the <code>wisp_trend_plot()</code> function showing the temporal trend of five exemplary parameters averaged on a daily basis: in the upper plot, a comparison between the WISPstation native algorithm (TSM) and two third-party algorithms for estimating suspended solids concentration ("Novoa_SPM" and "Jiang_TSS"); in the lower plot, the comparison between the WISPstation native chlorophyll-a algorithm (Chla) and Mishra_CHL algorithm. (site: Trasimeno; period: 01/05/2024 – 10/05/2024).</em>
 </p>
 
 
@@ -147,7 +153,7 @@ In this section, we showcase some of the typical outputs generated by `WISP.data
 * Gons, H. J. (1999). Optical teledetection of chlorophyll a in turbid inland waters. *Environmental science & technology*, 33(7), 1127-1132. https://doi.org/10.1021/es9809657.
 * Gons, H. J., Rijkeboer, M., & Ruddick, K. G. (2002). A chlorophyll-retrieval algorithm for satellite imagery (Medium Resolution Imaging Spectrometer) of inland and coastal waters. *Journal of Plankton Research*, 24(9), 947-951. https://doi.org/10.1093/plankt/24.9.947.
 * Gons, H. J., Rijkeboer, M., & Ruddick, K. G. (2005). Effect of a waveband shift on chlorophyll retrieval from MERIS imagery of inland and coastal waters. *Journal of Plankton Research*, 27(1), 125-127. https://doi.org/10.1093/plankt/fbh151.
-* Hommersom, A., Kratzer, S., Laanen, M. L., Ansko, I. Ligi, M. Bresciani, M. & Peters, S. W. M. (2012). Intercomparison in the field between the new WISP-3 and other radiometers (TriOS Ramses, ASD FieldSpec, and TACCS). *Journal of Applied Remote Sensing*, 6(1), 063615. https://doi.org/10.1117/1.JRS.6.063615.
+* Hommersom, A., Kratzer, S., Laanen, M. L., Ansko, I., Ligi, M. Bresciani, M. & Peters, S. W. M. (2012). Intercomparison in the field between the new WISP-3 and other radiometers (TriOS Ramses, ASD FieldSpec, and TACCS). *Journal of Applied Remote Sensing*, 6(1), 063615. https://doi.org/10.1117/1.JRS.6.063615.
 * Jiang, D., Matsushita, B., & Yang, W. (2020). A simple and effective method for removing residual reflected skylight in above-water remote sensing reflectance measurements. *ISPRS Journal of Photogrammetry and Remote Sensing*, 165, 16-27. https://doi.org/10.1016/j.isprsjprs.2020.05.003.
 * Jiang, D., Matsushita, B., Pahlevan, N., Gurlin, D., Lehmann, M. K., Fichot, C. G., ... & O'Donnell, D. (2021). Remotely estimating total suspended solids concentration in clear to extremely turbid waters using a novel semi-analytical method. *Remote Sensing of Environment*, 258, 112386. https://doi.org/10.1016/j.rse.2021.112386.
 * Lee, Z., Carder, K. L., & Arnone, R. A. (2002). Deriving inherent optical properties from water color: a multiband quasi-analytical algorithm for optically deep waters. *Applied optics*, 41(27), 5755-5772. https://doi.org/10.1364/AO.41.005755.
