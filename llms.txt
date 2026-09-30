@@ -46,7 +46,7 @@ contributing to surface reflections.
 The package handles the complex transition from total upwelling radiance
 ($`L_u`$), which includes unwanted sky-glint and sun-glint, to the pure
 water-leaving signal ($`L_w`$) by integrating $`L_{sky}`$ and $`E_s`$
-measurements into standardized atmospheric correction algorithms.
+measurements into standardized glint-correction algorithms.
 
 `WISP.data` provides a modular set of R functions for:
 
@@ -62,30 +62,30 @@ large-scale environmental data pipelines.
 
 ## Statement of need
 
-The WISPstation is a fixed spectrometer that plays a crucial role in the
-continuous monitoring of water quality; beyond providing high-frequency
-spectral measurements, it delivers specialized water quality products
-derived through various algorithms (Gons et al., 1997, 2005; Simis,
-2005), essential for environmental observation, ecosystem assessment,
-and long-term trend analysis.
+The WISPstation is a fixed spectroradiometer that plays a crucial role
+in the continuous monitoring of water quality; beyond providing
+high-frequency spectral measurements, it delivers specialized water
+quality products derived through various algorithms (Gons 1999, Gons et
+al., 2002; Simis et al., 2005), essential for environmental observation,
+ecosystem assessment, and long-term trend analysis.
 
 However, the effective management and scientific use of these spectral
 data and derived products present several significant challenges. Data
 retrieval through API services is often labor-intensive and technically
 demanding, especially for users without advanced programming experience.
-In addition, native spectral measurements could be affected by
-radiometric issues making the implementation of consistent and rigorous
-quality control procedures essential. Without rigorous filtering and
-validation protocols, derived products can be unreliable or
-scientifically misleading. A further critical barrier lies in the
-interpretation of spectral signatures themselves. For non-expert users,
-it is difficult to assess the physical and optical reliability of
-reflectance spectra, identify anomalous signals, or distinguish between
-instrument geometry artifacts and real environmental variability.
-Moreover, the application of third-party bio-optical algorithms for the
-estimation of water quality parameters typically requires substantial
-domain knowledge, careful parameterization, and consistent preprocessing
-workflows, which are rarely standardized across studies.
+In addition, native spectral measurements can be affected by radiometric
+issues making the implementation of consistent and rigorous quality
+control procedures essential. Without rigorous filtering and validation
+protocols, derived products can be unreliable or scientifically
+misleading. A further critical barrier lies in the interpretation of
+spectral signatures themselves. For non-expert users, it is difficult to
+assess the physical and optical reliability of reflectance spectra,
+identify anomalous signals, or distinguish between instrument geometry
+artifacts and real environmental variability. Moreover, the application
+of third-party bio-optical algorithms for the estimation of water
+quality parameters typically requires substantial domain knowledge,
+careful parameterization, and consistent preprocessing workflows, which
+are rarely standardized across studies.
 
 The scientific validity and operational reliability of WISPstation
 measurements have been demonstrated in several studies, ranging from the
@@ -96,9 +96,9 @@ successful applications, the processing of WISPstation data has been
 labor-intensive and time-consuming. Prior to the development of
 `WISP.data`, researchers often had to manually inspect individual
 spectral signatures to identify outliers before the data could be used
-to estimate water quality parameter. This manual quality control process
-is prone to subjectivity and significantly limits the scalability of
-high-frequency monitoring.
+to estimate water quality parameters. This manual quality control
+process is prone to subjectivity and significantly limits the
+scalability of high-frequency monitoring.
 
 `WISP.data` addresses these challenges by delivering an integrated,
 transparent, reproducible, and user-oriented software ecosystem that
@@ -112,9 +112,16 @@ in aquatic research and operational monitoring.
 
 ## Installation
 
-You can install the development version of WISP.data directly from
-GitHub.  
-The following commands will automatically install all required
+You can install the stable release of **WISP.data** directly from
+[CRAN](https://CRAN.R-project.org/package=WISP.data):
+
+``` r
+
+install.packages("WISP.data")
+```
+
+Alternatively, you can install the development version directly from
+GitHub. The following commands will automatically install all required
 dependencies:
 
 ``` r
@@ -122,7 +129,7 @@ dependencies:
 # Install remotes if not already available
 if (!require("remotes")) install.packages("remotes")
 
-# Install WISP.data and dependencies
+# Install WISP.data development version
 remotes::install_github("oggioniale/WISP.data", dependencies = TRUE)
 ```
 
@@ -152,18 +159,21 @@ can be executed to launch this app.
 
 ## Citation
 
-To cite [WISP.data](https://github.com/oggioniale/WISP.data) please use:
+To cite {WISP.data} in publications, please use:
 
-Alessandro Oggioni & Nicola Ghirardi. (2026). WISP.data (v1.0.0).
-Zenodo. <https://doi.org/10.5281/zenodo.16893167>
+Alessandro Oggioni & Nicola Ghirardi (2026). WISP.data: Management and
+Analysis of WISPstation Hyperspectral Data. R package version 1.0.0.
+<https://CRAN.R-project.org/package=WISP.data> (DOI:
+10.32614/CRAN.package.WISP.data)
 
 ``` bibtex
-@software{WIPS.data2026,
-  title = {WISP.data - Managing WISPstation Hyperspectral Data},
+@Manual{WISP.data,
+  title = {WISP.data: Management and Analysis of WISPstation Hyperspectral Data},
   author = {Alessandro Oggioni and Nicola Ghirardi},
   year = {2026},
-  doi = {https://doi.org/10.5281/zenodo.16893167},
-  note = {R package version v1.0.0},
+  note = {R package version 1.0.0},
+  url = {https://CRAN.R-project.org/package=WISP.data},
+  doi = {10.32614/CRAN.package.WISP.data}
 }
 ```
 
@@ -175,9 +185,9 @@ In this section, we showcase some of the typical outputs generated by
 ![Figure 2](reference/figures/Figure2.png)  
 ***Figure 2.** Plot resulting from the
 [`wisp_plot_comparison()`](https://github.com/oggioniale/WISP.data/reference/wisp_plot_comparison.md)
-function showing the comparison between: A) native WISPstation Rrs, B)
-Rrs filtered by “QC”, C) Rrs to which “SR” has been applied (site:
-Trasimeno; period: 11/09/2024 – 17/09/2024).*
+function showing the comparison between: A) native WISPstation R_(rs),
+B) R_(rs) filtered by “QC”, C) R_(rs) to which “SR” has been applied
+(site: Trasimeno; period: 11/09/2024 – 17/09/2024).*
 
 ![Figure 3](reference/figures/Figure3.png)  
 ***Figure 3.** Plot resulting from the
@@ -235,7 +245,7 @@ Trasimeno; period: 01/05/2024 – 10/05/2024).*
   waveband shift on chlorophyll retrieval from MERIS imagery of inland
   and coastal waters. *Journal of Plankton Research*, 27(1), 125-127.
   <https://doi.org/10.1093/plankt/fbh151>.
-- Hommersom, A., Kratzer, S., Laanen, M. L., Ansko, I. Ligi, M.
+- Hommersom, A., Kratzer, S., Laanen, M. L., Ansko, I., Ligi, M.
   Bresciani, M. & Peters, S. W. M. (2012). Intercomparison in the field
   between the new WISP-3 and other radiometers (TriOS Ramses, ASD
   FieldSpec, and TACCS). *Journal of Applied Remote Sensing*,
