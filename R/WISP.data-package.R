@@ -32,7 +32,7 @@ NULL
   if (!has_ntu) {
     units::install_unit(
       symbol = "NTU",
-      name = "Nephelometric Turbidity Unit"
+      name = "Nephelometric_Turbidity_Unit"
     )
   }
 }
